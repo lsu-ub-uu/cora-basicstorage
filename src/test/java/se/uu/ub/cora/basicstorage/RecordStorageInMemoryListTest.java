@@ -20,6 +20,7 @@
 package se.uu.ub.cora.basicstorage;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotSame;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -73,7 +74,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithCollectedStorageTermReadWithEmptyFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		StorageReadResult readResult = recordStorage.readList("place", emptyFilter);
@@ -85,8 +86,22 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
+	public void testIndependentDataListWithCollectedStorageTermReadWithEmptyFilter() {
+		createPlaceInStorageWithUppsalaStorageTerm("createNewWhenCopyingThisTopLevelGroup");
+		createPlaceInStorageWithStockholmStorageTerm();
+
+		Collection<DataGroup> readList = recordStorage.readList("place",
+				emptyFilter).listOfDataGroups;
+		Collection<DataGroup> readList2 = recordStorage.readList("place",
+				emptyFilter).listOfDataGroups;
+		DataGroup first = readList.iterator().next();
+		DataGroup secondRead = readList2.iterator().next();
+		assertNotSame(first, secondRead);
+	}
+
+	@Test
 	public void testListWithCollectedStorageTermReadWithNonMatchingFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -103,7 +118,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithCollectedStorageTermReadWithNonExisitingKeyFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -117,7 +132,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithNoCollectedStorageTermReadWithFilter() {
-		createPlaceInStorageWithCollectedData(emptyCollectedData);
+		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
 
 		DataGroup filter = DataCreator.createEmptyFilter();
 		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
@@ -130,7 +145,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -146,8 +161,25 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
+	public void testIndependentDataListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
+		createPlaceInStorageWithUppsalaStorageTerm("createNewWhenCopyingThisTopLevelGroup");
+		createPlaceInStorageWithStockholmStorageTerm();
+
+		DataGroup filter = DataCreator.createEmptyFilter();
+		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
+				"Uppsala");
+		filter.addChild(part);
+
+		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
+		Collection<DataGroup> readList2 = recordStorage.readList("place", filter).listOfDataGroups;
+		DataGroup first = readList.iterator().next();
+		DataGroup secondRead = readList2.iterator().next();
+		assertNotSame(first, secondRead);
+	}
+
+	@Test
 	public void testListAfterUpdateWithNoCollectedStorageTermReadWithFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		updateUppsalaPlaceInStorageWithCollectedData(emptyCollectedData);
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -166,7 +198,7 @@ public class RecordStorageInMemoryListTest {
 				"Uppsala");
 		filter.addChild(part);
 
-		createPlaceInStorageWithCollectedData(emptyCollectedData);
+		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
 		assertEquals(readList.size(), 0);
 
@@ -177,7 +209,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterDeleteWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -195,7 +227,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithCollectedStorageTermReadWithMatchingUppsalaFilterFromTwoRecords() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 		createPlaceInStorageWithUppsalaStorageAndStockholmTerm();
 
@@ -217,7 +249,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testUpdateMultipleStorageTermsNoConcurrentException() {
-		createPlaceInStorageWithUppsalaStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 		createPlaceInStorageWithUppsalaStorageAndStockholmTerm();
 		updatePlaceInStorageWithUppsalaStorageTerm();
@@ -232,9 +264,9 @@ public class RecordStorageInMemoryListTest {
 		assertEquals(readList.size(), 2);
 	}
 
-	private void createPlaceInStorageWithUppsalaStorageTerm() {
+	private void createPlaceInStorageWithUppsalaStorageTerm(String nameInData) {
 		DataGroup collectedData = createCollectedDataWithUppsalaStorageTerm();
-		createPlaceInStorageWithCollectedData(collectedData);
+		createPlaceInStorageWithCollectedData(collectedData, nameInData);
 	}
 
 	private void updatePlaceInStorageWithUppsalaStorageTerm() {
@@ -260,9 +292,9 @@ public class RecordStorageInMemoryListTest {
 		return collectedData;
 	}
 
-	private void createPlaceInStorageWithCollectedData(DataGroup collectedData) {
+	private void createPlaceInStorageWithCollectedData(DataGroup collectedData, String nameInData) {
 		DataGroup dataGroup = DataCreator
-				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"place", "place:0001");
 		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
 				dataDivider);
@@ -346,7 +378,7 @@ public class RecordStorageInMemoryListTest {
 	public void testReadAbstractRecordList() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords();
+		createImageRecords("nameInData");
 		createGenericBinaryRecord();
 
 		String recordType = "binary";
@@ -358,10 +390,59 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
+	public void testIndependentDataReadAbstractRecordList() {
+		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
+
+		createImageRecords("createNewWhenCopyingThisTopLevelGroup");
+		createGenericBinaryRecord("createNewWhenCopyingThisTopLevelGroup");
+
+		// two and three have createNewWhenCopyingThisTopLevelGroup as nameInData
+		Collection<DataGroup> readList = recordStorage.readAbstractList("binary",
+				emptyFilter).listOfDataGroups;
+		Collection<DataGroup> readList2 = recordStorage.readAbstractList("binary",
+				emptyFilter).listOfDataGroups;
+		Iterator<DataGroup> firstIterator = readList.iterator();
+		firstIterator.next();
+		DataGroup first2 = firstIterator.next();
+		Iterator<DataGroup> secondIterator = readList2.iterator();
+		secondIterator.next();
+		DataGroup secondRead2 = secondIterator.next();
+		assertNotSame(first2, secondRead2);
+	}
+
+	@Test
 	public void testAbstractListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords();
+		createImageRecords("nameInData");
+		createGenericBinaryRecord("createNewWhenCopyingThisTopLevelGroup");
+
+		DataGroup filter = DataCreator.createEmptyFilter();
+		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "id",
+				"image:0001");
+		filter.addChild(part);
+
+		// three have createNewWhenCopyingThisTopLevelGroup as nameInData
+		Collection<DataGroup> readList = recordStorage.readAbstractList("binary",
+				emptyFilter).listOfDataGroups;
+		Collection<DataGroup> readList2 = recordStorage.readAbstractList("binary",
+				emptyFilter).listOfDataGroups;
+		Iterator<DataGroup> firstIterator = readList.iterator();
+		firstIterator.next();
+		firstIterator.next();
+		DataGroup first3 = firstIterator.next();
+		Iterator<DataGroup> secondIterator = readList2.iterator();
+		secondIterator.next();
+		secondIterator.next();
+		DataGroup secondRead3 = secondIterator.next();
+		assertNotSame(first3, secondRead3);
+	}
+
+	@Test
+	public void testIndependentDataAbstractListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
+		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
+
+		createImageRecords("nameInData");
 		createGenericBinaryRecord();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -378,9 +459,9 @@ public class RecordStorageInMemoryListTest {
 				.getFirstAtomicValueWithNameInData("id"), "image:0001");
 	}
 
-	private void createImageRecords() {
+	private void createImageRecords(String nameInData) {
 		DataGroup dataGroup = DataCreator
-				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"image", "image:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 
@@ -425,11 +506,20 @@ public class RecordStorageInMemoryListTest {
 				DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
 	}
 
+	private void createGenericBinaryRecord(String nameInData) {
+		DataGroup dataGroup = DataCreator
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
+						"genericBinary", "genericBinary:0001");
+		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
+		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup,
+				DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
+	}
+
 	@Test
 	public void testReadAbstractRecordListOneImplementingChildHasNoRecords() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords();
+		createImageRecords("nameInData");
 		// create no records of genericBinary
 
 		String recordType = "binary";

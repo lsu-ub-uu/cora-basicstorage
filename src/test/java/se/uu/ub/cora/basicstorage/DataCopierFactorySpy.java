@@ -25,9 +25,11 @@ import se.uu.ub.cora.data.copier.DataCopierFactory;
 public class DataCopierFactorySpy implements DataCopierFactory {
 
 	public DataCopier factoredCopier;
+	public int numberOfFactoredCopiers = 0;
 
 	@Override
 	public DataCopier factorForDataElement(DataElement dataElement) {
+		numberOfFactoredCopiers++;
 		factoredCopier = new DataCopierSpy(dataElement);
 		return factoredCopier;
 	}

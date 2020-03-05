@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017 Uppsala University Library
+ * Copyright 2015, 2017, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,6 +22,7 @@ package se.uu.ub.cora.basicstorage;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -272,8 +273,8 @@ public class RecordStorageInMemoryTest {
 
 	private void createImageRecords() {
 		DataGroup dataGroup = DataCreator
-				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
-						"image", "image:0001");
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
+						"createNewWhenCopyingThisTopLevelGroup", "image", "image:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("image", "image:0001", dataGroup, emptyLinkList, emptyLinkList,
 				dataDivider);
@@ -288,8 +289,9 @@ public class RecordStorageInMemoryTest {
 
 	private void createGenericBinaryRecord() {
 		DataGroup dataGroup = DataCreator
-				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
-						"genericBinary", "genericBinary:0001");
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
+						"createNewWhenCopyingThisTopLevelGroup", "genericBinary",
+						"genericBinary:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup, emptyLinkList,
 				emptyLinkList, dataDivider);
@@ -327,6 +329,40 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
+	}
+
+	@Test
+	public void testReadDataFromStorageShouldBeIndependentOfStoredData() {
+		DataGroup dataGroup = DataCreator
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
+						"createNewWhenCopyingThisTopLevelGroup", "place", "place:0001");
+		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
+		recordStorage.create("type", "place:0001", dataGroup, emptyLinkList, emptyLinkList,
+				dataDivider);
+
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 3);
+		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 4);
+		DataGroup dataGroupOut2 = recordStorage.read("type", "place:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 5);
+
+		assertNotSame(dataGroupOut, dataGroupOut2);
+	}
+
+	@Test
+	public void testReadDataFromStorageShouldBeIndependentOfStoredDataAbstractType() {
+		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
+
+		createImageRecords();
+		createGenericBinaryRecord();
+
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
+		DataGroup image = recordStorage.read("binary", "image:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
+		DataGroup image2 = recordStorage.read("binary", "image:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
+
+		assertNotSame(image, image2);
 	}
 
 	@Test

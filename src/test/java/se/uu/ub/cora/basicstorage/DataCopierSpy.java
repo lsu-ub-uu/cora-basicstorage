@@ -31,6 +31,13 @@ public class DataCopierSpy implements DataCopier {
 
 	@Override
 	public DataElement copy() {
+		if ("createNewWhenCopyingThisTopLevelGroup"
+				.contentEquals(originalDataElement.getNameInData())) {
+			DataGroupSpy copiedDataGroup = new DataGroupSpy(originalDataElement.getNameInData());
+
+			return copiedDataGroup;
+
+		}
 		return originalDataElement;
 		// return new DataGroupSpy(originalDataElement.getNameInData());
 	}

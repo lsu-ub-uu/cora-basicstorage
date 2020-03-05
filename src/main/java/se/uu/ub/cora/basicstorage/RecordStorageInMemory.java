@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -271,7 +271,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			Map<String, DividerGroup> typeDividerRecords) {
 		Map<String, DataGroup> typeRecords = new HashMap<>(typeDividerRecords.size());
 		for (Entry<String, DividerGroup> entry : typeDividerRecords.entrySet()) {
-			typeRecords.put(entry.getKey(), entry.getValue().dataGroup);
+			DataGroup copyOfRecord = createIndependentCopy(entry.getValue().dataGroup);
+			typeRecords.put(entry.getKey(), copyOfRecord);
 		}
 		return typeRecords;
 	}
@@ -448,9 +449,10 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	public DataGroup read(String recordType, String recordId) {
 		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, recordType);
 		if (recordTypeIsAbstract(recordTypeDataGroup)) {
-			return readRecordFromImplementingRecordTypes(recordType, recordId);
+			return createIndependentCopy(
+					readRecordFromImplementingRecordTypes(recordType, recordId));
 		}
-		return returnRecordIfExisting(recordType, recordId);
+		return createIndependentCopy(returnRecordIfExisting(recordType, recordId));
 	}
 
 	private DataGroup readRecordFromImplementingRecordTypes(String recordType, String recordId) {
