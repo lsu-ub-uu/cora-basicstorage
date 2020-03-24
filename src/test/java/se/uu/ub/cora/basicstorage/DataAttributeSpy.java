@@ -4,20 +4,22 @@ import se.uu.ub.cora.data.DataAttribute;
 
 public class DataAttributeSpy implements DataAttribute {
 
+	private String id;
+	private String value;
+
 	public DataAttributeSpy(String id, String value) {
-		// TODO Auto-generated constructor stub
+		this.id = id;
+		this.value = value;
 	}
 
 	@Override
 	public String getNameInData() {
-		// TODO Auto-generated method stub
-		return null;
+		return id;
 	}
 
 	@Override
 	public String getValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return value;
 	}
 
 }
