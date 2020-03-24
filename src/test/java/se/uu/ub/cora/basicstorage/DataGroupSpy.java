@@ -179,9 +179,13 @@ public class DataGroupSpy implements DataGroup {
 	}
 
 	@Override
+	public boolean hasAttributes() {
+		return !attributes.isEmpty();
+	}
+
+	@Override
 	public boolean hasChildren() {
-		// TODO Auto-generated method stub
-		return false;
+		return !children.isEmpty();
 	}
 
 	@Override
