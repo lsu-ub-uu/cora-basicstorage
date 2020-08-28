@@ -40,7 +40,7 @@
 		<storage.version>3.6.0</storage.version>
 		<searchstorage.version>3.4.0</searchstorage.version>
 		<apptokenstorage.version>2.1.0</apptokenstorage.version>
-		<gatekeeper.version>3.4.0</gatekeeper.version>
+		<gatekeeper.version>3.5-SNAPSHOT</gatekeeper.version>
 		<json.version>2.1.0</json.version>
 	</properties>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -47,9 +47,9 @@ import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
-import se.uu.ub.cora.gatekeeper.user.UserStorageProvider;
+import se.uu.ub.cora.gatekeeper.user.GuestUserStorageProvider;
 
-public class OnDiskUserStorageProviderTest {
+public class OnDiskGuestUserStorageProviderTest {
 	private String basePath = "/tmp/recordStorageOnDiskTemp/";
 	private Map<String, String> initInfo;
 	private DataGroupFactory dataGroupFactory;
@@ -59,7 +59,7 @@ public class OnDiskUserStorageProviderTest {
 	private JsonToDataConverterFactory jsonToDataConverterFactory;
 
 	@BeforeMethod
-	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
+	public void setUp() throws IOException {
 		setUpFactoriesAndProviders();
 
 		File dir = new File(basePath);
@@ -114,25 +114,29 @@ public class OnDiskUserStorageProviderTest {
 
 	@Test
 	public void testPreferenceLevel() {
-		UserStorageProvider userStorageProvider = new OnDiskUserStorageProvider();
+		GuestUserStorageProvider userStorageProvider = new OnDiskGuestUserStorageProvider();
 		userStorageProvider.startUsingInitInfo(initInfo);
 		assertEquals(userStorageProvider.getOrderToSelectImplementionsBy(), 0);
 	}
 
 	@Test
 	public void testInit() throws Exception {
-		UserStorageProvider userStorageProvider = new OnDiskUserStorageProvider();
-		userStorageProvider.startUsingInitInfo(initInfo);
-		UserStorageImp userStorage = (UserStorageImp) userStorageProvider.getUserStorage();
+		GuestUserStorageProvider userGuestStorageProvider = new OnDiskGuestUserStorageProvider();
+		userGuestStorageProvider.startUsingInitInfo(initInfo);
+		UserStorageImp userStorage = (UserStorageImp) userGuestStorageProvider
+				.getGuestUserStorage();
 		assertSame(userStorage.getInitInfo(), initInfo);
+
 	}
 
 	@Test
 	public void testOnlyOneInstanceOfUserStorageIsReturned() throws Exception {
-		UserStorageProvider userStorageProvider = new OnDiskUserStorageProvider();
-		userStorageProvider.startUsingInitInfo(initInfo);
-		UserStorageImp userStorage = (UserStorageImp) userStorageProvider.getUserStorage();
-		UserStorageImp userStorage2 = (UserStorageImp) userStorageProvider.getUserStorage();
+		GuestUserStorageProvider userGuestStorageProvider = new OnDiskGuestUserStorageProvider();
+		userGuestStorageProvider.startUsingInitInfo(initInfo);
+		UserStorageImp userStorage = (UserStorageImp) userGuestStorageProvider
+				.getGuestUserStorage();
+		UserStorageImp userStorage2 = (UserStorageImp) userGuestStorageProvider
+				.getGuestUserStorage();
 		assertSame(userStorage, userStorage2);
 	}
 }
