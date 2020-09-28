@@ -28,7 +28,7 @@
 	</parent>
 
 	<artifactId>basicstorage</artifactId>
-	<version>3.13-SNAPSHOT</version>
+	<version>3.14-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Basic storage</name>
@@ -86,7 +86,7 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>apptokenstorage</artifactId>
 			<version>${apptokenstorage.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
