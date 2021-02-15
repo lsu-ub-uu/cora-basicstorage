@@ -22,7 +22,6 @@ package se.uu.ub.cora.basicstorage.id;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicstorage.id.TimeStampIdGenerator;
 import se.uu.ub.cora.storage.RecordIdGenerator;
 
 public class TimeStampIdGeneratorTest {
