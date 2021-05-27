@@ -20,7 +20,9 @@
 package se.uu.ub.cora.basicstorage;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
+import static org.testng.Assert.assertSame;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -36,11 +38,10 @@ import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
-import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemoryListTest {
-	private RecordStorage recordStorage;
+	private RecordStorageInMemory recordStorage;
 	private DataGroup emptyLinkList = DataCreator.createEmptyLinkList();
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
@@ -64,12 +65,12 @@ public class RecordStorageInMemoryListTest {
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testListWithFilterButNoDataForTheType() {
-		DataGroup filter = setUpFilterWithPlaceNameUppsala("Uppsala");
+		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
 
 		recordStorage.readList("place", filter);
 	}
 
-	private DataGroup setUpFilterWithPlaceNameUppsala(String placeName) {
+	private DataGroup setUpFilterWithPlaceName(String placeName) {
 		DataGroup filter = DataCreator.createEmptyFilter();
 		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
 				placeName);
@@ -198,7 +199,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		DataGroup filter = setUpFilterWithPlaceNameUppsala();
+		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
 
 		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
@@ -610,17 +611,58 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsNoRecordsEmptyFilter() {
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		DataGroup filter = DataCreator.createEmptyFilter();
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("someRecordType", filter);
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("NOExistingRecords",
+				filter);
 		assertEquals(totalNumberOfRecords, 0);
+
+		assertFalse(termsHolder.findRecordsForFilterWasCalled);
 	}
 
 	@Test
 	public void testGetTotalNumberOfRecordsNoRecordsWithFilter() {
-		DataGroup filter = setUpFilterWithPlaceNameUppsala("Uppsala");
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+
+		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
+
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("NOExistingRecords",
+				filter);
+		assertEquals(totalNumberOfRecords, 0);
+		assertFalse(termsHolder.findRecordsForFilterWasCalled);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsWithRecordsEmptyFilter() {
+		createPlaceInStorageWithStockholmStorageTerm();
+
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", DataCreator.createEmptyFilter());
+		assertEquals(totalNumberOfRecords, 1);
+
+		assertFalse(termsHolder.findRecordsForFilterWasCalled);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsWithRecordsWithFilter() {
+		createPlaceInStorageWithStockholmStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
+
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
 
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", filter);
-		assertEquals(totalNumberOfRecords, 0);
+		assertEquals(totalNumberOfRecords, 1);
+
+		assertEquals(termsHolder.type, "place");
+		assertSame(termsHolder.filter, filter);
 	}
+
+	private CollectedTermsHolderSpy setUpCollectedTermsHolderSpy() {
+		CollectedTermsHolderSpy termsHolder = new CollectedTermsHolderSpy();
+		recordStorage.setCollectedTermsHolder(termsHolder);
+		return termsHolder;
+	}
+
 }

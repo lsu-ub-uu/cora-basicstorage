@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
 
-class CollectedTermsInMemoryStorage implements CollectedTermsStorage {
+class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
 
 	@Override
@@ -110,7 +110,8 @@ class CollectedTermsInMemoryStorage implements CollectedTermsStorage {
 		listOfStorageTermData.add(StorageTermData.withValueAndDataDivider(termValue, dataDivider));
 	}
 
-	void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
+	@Override
+	public void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
 			StorageTermData storageTermData) {
 		List<StorageTermData> listOfStorageTermData = ensureStorageListExistsForTermForTypeAndKeyAndId(
 				recordType, storageKey, recordId);
@@ -192,7 +193,8 @@ class CollectedTermsInMemoryStorage implements CollectedTermsStorage {
 		}
 	}
 
-	Map<String, DataGroup> structureCollectedTermsForDisk() {
+	@Override
+	public Map<String, DataGroup> structureCollectedTermsForDisk() {
 		return new CollectedDataOrganiser().structureCollectedDataForDisk(terms);
 	}
 

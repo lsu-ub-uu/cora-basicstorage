@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2021 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,15 +19,22 @@
 package se.uu.ub.cora.basicstorage;
 
 import java.util.List;
+import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 
-public interface CollectedTermsStorage {
+public interface CollectedTermsHolder {
 
-	void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms, String dataDivider);
+	void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
+			String dataDivider);
 
 	List<String> findRecordIdsForFilter(String type, DataGroup filter);
 
 	void removePreviousCollectedStorageTerms(String recordType, String recordId);
+
+	void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
+			StorageTermData storageTermData);
+
+	Map<String, DataGroup> structureCollectedTermsForDisk();
 
 }
