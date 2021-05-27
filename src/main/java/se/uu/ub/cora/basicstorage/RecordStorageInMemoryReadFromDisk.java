@@ -37,4 +37,10 @@ public final class RecordStorageInMemoryReadFromDisk extends RecordStorageOnDisk
 	protected void writeDataToDisk(String recordType, String dataDivider) {
 		// do not write to disk
 	}
+
+	@Override
+	public void deleteByTypeAndId(String recordType, String recordId) {
+		// TODO Auto-generated method stub
+		
+	}
 }

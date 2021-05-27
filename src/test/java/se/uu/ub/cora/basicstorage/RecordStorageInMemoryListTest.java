@@ -64,12 +64,17 @@ public class RecordStorageInMemoryListTest {
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testListWithFilterButNoDataForTheType() {
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		DataGroup filter = setUpFilterWithPlaceNameUppsala("Uppsala");
 
 		recordStorage.readList("place", filter);
+	}
+
+	private DataGroup setUpFilterWithPlaceNameUppsala(String placeName) {
+		DataGroup filter = DataCreator.createEmptyFilter();
+		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
+				placeName);
+		filter.addChild(part);
+		return filter;
 	}
 
 	@Test
@@ -193,10 +198,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		DataGroup filter = setUpFilterWithPlaceNameUppsala();
 
 		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
@@ -604,5 +606,21 @@ public class RecordStorageInMemoryListTest {
 		Collection<DataGroup> recordList = recordStorage.readAbstractList(recordType,
 				emptyFilter).listOfDataGroups;
 		assertEquals(recordList.size(), 2);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsNoRecordsEmptyFilter() {
+		DataGroup filter = DataCreator.createEmptyFilter();
+
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("someRecordType", filter);
+		assertEquals(totalNumberOfRecords, 0);
+	}
+
+	@Test
+	public void testGetTotalNumberOfRecordsNoRecordsWithFilter() {
+		DataGroup filter = setUpFilterWithPlaceNameUppsala("Uppsala");
+
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", filter);
+		assertEquals(totalNumberOfRecords, 0);
 	}
 }

@@ -46,7 +46,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private DataGroup emptyFilter = DataGroupProvider.getDataGroupUsingNameInData("filter");
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
-	protected CollectedTermsInMemoryStorage collectedTermsHolder = new CollectedTermsInMemoryStorage();
+	protected CollectedTermsStorage collectedTermsHolder = new CollectedTermsInMemoryStorage();
 	protected Map<String, Map<String, DividerGroup>> linkLists = new HashMap<>();
 	protected Map<String, Map<String, Map<String, Map<String, List<DataGroup>>>>> incomingLinks = new HashMap<>();
 
@@ -383,7 +383,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				|| recordExistsForAbstractRecordTypeAndRecordId(recordType, recordId);
 	}
 
-	@Override
 	public boolean recordsExistForRecordType(String type) {
 		return records.get(type) != null;
 	}
@@ -690,6 +689,12 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	@Override
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
 		return read("collectIndexTerm", collectIndexTermId);
+	}
+
+	@Override
+	public long getTotalNumberOfRecords(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -37,7 +37,7 @@
 		<logger.version>2.2.0</logger.version>
 		<coradata.version>3.8.0</coradata.version>
 		<basicdata.version>1.12.0</basicdata.version>
-		<storage.version>3.8.0</storage.version>
+		<storage.version>3.9-SNAPSHOT</storage.version>
 		<searchstorage.version>3.6.0</searchstorage.version>
 		<apptokenstorage.version>2.2.0</apptokenstorage.version>
 		<gatekeeper.version>3.6.0</gatekeeper.version>
