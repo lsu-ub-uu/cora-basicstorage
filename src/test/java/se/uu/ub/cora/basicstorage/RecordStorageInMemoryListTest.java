@@ -25,7 +25,9 @@ import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -638,7 +640,8 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", DataCreator.createEmptyFilter());
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place",
+				DataCreator.createEmptyFilter());
 		assertEquals(totalNumberOfRecords, 1);
 
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -663,6 +666,12 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = new CollectedTermsHolderSpy();
 		recordStorage.setCollectedTermsHolder(termsHolder);
 		return termsHolder;
+	}
+
+	@Test
+	public void test() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -711,6 +711,17 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	void setCollectedTermsHolder(CollectedTermsHolder termsHolder) {
 		collectedTermsHolder = termsHolder;
 
+	}
+
+	@Override
+	public long getTotalNumberOfAbstractRecords(String abstractType, List<String> implementingTypes,
+			DataGroup filter) {
+		// int size = 0;
+		// for (String type : implementingTypes) {
+		// size += records.get(type).size();
+		// }
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }
