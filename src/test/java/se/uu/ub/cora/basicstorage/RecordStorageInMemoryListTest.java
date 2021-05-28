@@ -673,6 +673,18 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
+	public void testGetTotalNumberOfAbstractRecordsNoRecordsEmptyFilter() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
+		recordStorage = new RecordStorageInMemory(records);
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
+
+		long totalNumberOfAbstractRecords = recordStorage
+				.getTotalNumberOfAbstractRecords("authority", implementingTypes, emptyFilter);
+		assertEquals(totalNumberOfAbstractRecords, 0);
+	}
+
+	@Test
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsEmptyFilter() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
@@ -687,7 +699,7 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
-	public void testGetTotalNumberOfAbstractRecordsWithRecordsNonExistingImplementingTypesEmptyFilter() {
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithPartlyExistingImplementingTypesEmptyFilter() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
 		addOrganisations(records);
