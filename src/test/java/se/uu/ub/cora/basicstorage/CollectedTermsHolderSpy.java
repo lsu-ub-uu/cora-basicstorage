@@ -30,6 +30,7 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	public DataGroup filter;
 	public List<String> returnedIds;
 	public boolean findRecordsForFilterWasCalled = false;
+	public List<String> returnIdsForTypes = new ArrayList<>();
 
 	@Override
 	public void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
@@ -44,7 +45,9 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 		this.type = type;
 		this.filter = filter;
 		returnedIds = new ArrayList<>();
-		returnedIds.add("place:0002");
+		if (returnIdsForTypes.isEmpty() || returnIdsForTypes.contains(type)) {
+			returnedIds.add("place:0002");
+		}
 		return returnedIds;
 	}
 

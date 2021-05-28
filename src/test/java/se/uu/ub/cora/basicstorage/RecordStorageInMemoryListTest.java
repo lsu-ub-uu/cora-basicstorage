@@ -71,15 +71,14 @@ public class RecordStorageInMemoryListTest {
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testListWithFilterButNoDataForTheType() {
-		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
 		recordStorage.readList("place", filter);
 	}
 
-	private DataGroup setUpFilterWithPlaceName(String placeName) {
+	private DataGroup setUpFilterWithKeyAndValue(String key, String value) {
 		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				placeName);
+		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", key, value);
 		filter.addChild(part);
 		return filter;
 	}
@@ -205,7 +204,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
 		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
@@ -631,7 +630,7 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfRecordsNoRecordsWithFilter() {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
-		DataGroup filter = setUpFilterWithPlaceName("Uppsala");
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("NOExistingRecords",
 				filter);
@@ -657,7 +656,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Stockholm");
 
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", filter);
 		assertEquals(totalNumberOfRecords, 1);
@@ -686,16 +685,21 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsEmptyFilter() {
-		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
-
-		addPersons(records);
-		addOrganisations(records);
+		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords();
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
 		long totalNumberOfAbstractRecords = recordStorage
 				.getTotalNumberOfAbstractRecords("authority", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 5);
+	}
+
+	private Map<String, Map<String, DividerGroup>> setUpAuthorityRecords() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
+		addPersons(records);
+		addOrganisations(records);
+		return records;
 	}
 
 	@Test
@@ -718,9 +722,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
-		// Ersätt med metod som skapar filter för authority? Inte ett krav i just detta test, men
-		// förvirrar kanske annars
-		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("NOExistingRecords"));
 
 		long totalNumberOfAbstractRecords = recordStorage
@@ -731,19 +733,21 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilter() {
-		createPlaceInStorageWithStockholmStorageTerm();
-		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
+		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords();
+		recordStorage = new RecordStorageInMemory(records);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+		termsHolder.returnIdsForTypes.add("organisation");
+
+		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
 
 		// Vi använder ju inte abstractType i RecordStorageInMemory
 		// Kan vi låtsas om att place har en abstract type (den kanske har det?) och använda i
 		// princip samma filter-test i spy-en som för getAllNumberOfRecords? Eller är det FULT???
-		List<String> implementingTypes = new ArrayList<>(Arrays.asList("place"));
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
 		long totalNumberOfAbstractRecords = recordStorage
-				.getTotalNumberOfAbstractRecords("someAbstractType", implementingTypes, filter);
+				.getTotalNumberOfAbstractRecords("authority", implementingTypes, filter);
 		assertTrue(termsHolder.findRecordsForFilterWasCalled);
 		assertEquals(totalNumberOfAbstractRecords, 1);
 	}
