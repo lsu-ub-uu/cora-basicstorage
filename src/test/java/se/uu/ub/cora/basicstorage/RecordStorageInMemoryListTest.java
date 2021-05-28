@@ -23,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -672,7 +673,7 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
-	public void test() {
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsEmptyFilter() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
 		addPersons(records);
@@ -684,6 +685,81 @@ public class RecordStorageInMemoryListTest {
 				.getTotalNumberOfAbstractRecords("authority", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 5);
 	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsNonExistingImplementingTypesEmptyFilter() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
+		addOrganisations(records);
+		recordStorage = new RecordStorageInMemory(records);
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
+
+		long totalNumberOfAbstractRecords = recordStorage
+				.getTotalNumberOfAbstractRecords("authority", implementingTypes, emptyFilter);
+		assertEquals(totalNumberOfAbstractRecords, 2);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsNoRecordsWithFilter() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
+		recordStorage = new RecordStorageInMemory(records);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+
+		// Ersätt med metod som skapar filter för authority? Inte ett krav i just detta test, men
+		// förvirrar kanske annars
+		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("NOExistingRecords"));
+
+		long totalNumberOfAbstractRecords = recordStorage
+				.getTotalNumberOfAbstractRecords("authority", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 0);
+		assertFalse(termsHolder.findRecordsForFilterWasCalled);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilter() {
+		createPlaceInStorageWithStockholmStorageTerm();
+		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
+
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+
+		// Vi använder ju inte abstractType i RecordStorageInMemory
+		// Kan vi låtsas om att place har en abstract type (den kanske har det?) och använda i
+		// princip samma filter-test i spy-en som för getAllNumberOfRecords? Eller är det FULT???
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("place"));
+
+		long totalNumberOfAbstractRecords = recordStorage
+				.getTotalNumberOfAbstractRecords("someAbstractType", implementingTypes, filter);
+		assertTrue(termsHolder.findRecordsForFilterWasCalled);
+		assertEquals(totalNumberOfAbstractRecords, 1);
+	}
+
+	// @Test
+	// public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilter() {
+	// Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String,
+	// DividerGroup>>();
+	//
+	// addPersons(records);
+	// addOrganisations(records);
+	//
+	// recordStorage = new RecordStorageInMemory(records);
+	// CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+	//
+	// // Ersätt filter
+	// // Kan vi låtsas om att place har en abstract type (den kanske har det?) och använda i
+	// // princip samma filter-test i spy-en som för getAllNumberOfRecords? Eller är det FULT???
+	// DataGroup filter = setUpFilterWithPlaceName("Stockholm");
+	// List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation"));
+	//
+	// long totalNumberOfAbstractRecords = recordStorage
+	// .getTotalNumberOfAbstractRecords("authority", implementingTypes, filter);
+	// assertTrue(termsHolder.findRecordsForFilterWasCalled);
+	//
+	// // assertEquals(totalNumberOfAbstractRecords, 2);
+	// }
+	//
 
 	private void addPersons(Map<String, Map<String, DividerGroup>> records) {
 
