@@ -718,9 +718,14 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			DataGroup filter) {
 		int size = 0;
 		for (String type : implementingTypes) {
-			if (recordsExistForRecordType(type)) {
-				size += getTotalNumberOfRecordsForExistingType(type, filter);
-			}
+			size = possiblyAddNumbersForType(type, size, filter);
+		}
+		return size;
+	}
+
+	private int possiblyAddNumbersForType(String type, int size, DataGroup filter) {
+		if (recordsExistForRecordType(type)) {
+			size += getTotalNumberOfRecordsForExistingType(type, filter);
 		}
 		return size;
 	}
