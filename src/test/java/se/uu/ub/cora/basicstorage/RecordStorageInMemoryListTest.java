@@ -24,9 +24,12 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
@@ -672,6 +675,41 @@ public class RecordStorageInMemoryListTest {
 	public void test() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
+		addPersons(records);
+		addOrganisations(records);
+		recordStorage = new RecordStorageInMemory(records);
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
+
+		long totalNumberOfAbstractRecords = recordStorage
+				.getTotalNumberOfAbstractRecords("authority", implementingTypes, emptyFilter);
+		assertEquals(totalNumberOfAbstractRecords, 5);
+	}
+
+	private void addPersons(Map<String, Map<String, DividerGroup>> records) {
+
+		Map<String, DividerGroup> dividerForType = new HashMap<>();
+		for (int i = 0; i < 3; i++) {
+			dividerForType.put("person:" + i,
+					createDividerGroupWithDataDividerAndNameInData("test", "person"));
+		}
+
+		records.put("person", dividerForType);
+	}
+
+	private void addOrganisations(Map<String, Map<String, DividerGroup>> records) {
+
+		Map<String, DividerGroup> dividerForType = new HashMap<>();
+		for (int i = 0; i < 2; i++) {
+			dividerForType.put("organisation:" + i, createDividerGroupWithDataDividerAndNameInData(
+					"someSystemDivider", "organisation"));
+		}
+
+		records.put("organisation", dividerForType);
+	}
+
+	private DividerGroup createDividerGroupWithDataDividerAndNameInData(String dataDivider,
+			String nameInData) {
+		return DividerGroup.withDataDividerAndDataGroup(dataDivider, new DataGroupSpy(nameInData));
 	}
 
 }

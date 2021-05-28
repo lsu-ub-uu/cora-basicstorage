@@ -1,6 +1,7 @@
 package se.uu.ub.cora.basicstorage;
 
 import java.util.Collection;
+import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -73,6 +74,13 @@ public class RecordStorageSpy implements RecordStorage {
 
 	@Override
 	public long getTotalNumberOfRecords(String type, DataGroup filter) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getTotalNumberOfAbstractRecords(String abstractType, List<String> implementingTypes,
+			DataGroup filter) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
