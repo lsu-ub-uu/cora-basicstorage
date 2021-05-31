@@ -619,7 +619,7 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		DataGroup filter = DataCreator.createEmptyFilter();
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("NOExistingRecords",
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("NOExistingRecords",
 				filter);
 		assertEquals(totalNumberOfRecords, 0);
 
@@ -632,7 +632,7 @@ public class RecordStorageInMemoryListTest {
 
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("NOExistingRecords",
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("NOExistingRecords",
 				filter);
 		assertEquals(totalNumberOfRecords, 0);
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -643,7 +643,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithStockholmStorageTerm();
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place",
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("place",
 				DataCreator.createEmptyFilter());
 		assertEquals(totalNumberOfRecords, 1);
 
@@ -658,7 +658,7 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Stockholm");
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecords("place", filter);
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("place", filter);
 		assertEquals(totalNumberOfRecords, 1);
 
 		assertEquals(termsHolder.type, "place");
@@ -678,7 +678,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 0);
 	}
@@ -689,7 +689,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 5);
 	}
@@ -710,7 +710,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("place"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 0);
 	}
@@ -723,7 +723,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 2);
 	}
@@ -738,7 +738,7 @@ public class RecordStorageInMemoryListTest {
 		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("NOExistingRecords"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
 		assertEquals(totalNumberOfAbstractRecords, 0);
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -756,7 +756,7 @@ public class RecordStorageInMemoryListTest {
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
-		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfAbstractRecords(
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
 				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
 		assertTrue(termsHolder.findRecordsForFilterWasCalled);
 		assertEquals(totalNumberOfAbstractRecords, 1);

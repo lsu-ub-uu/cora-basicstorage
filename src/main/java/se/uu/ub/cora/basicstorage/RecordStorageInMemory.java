@@ -692,7 +692,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public long getTotalNumberOfRecords(String type, DataGroup filter) {
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
 		if (recordsExistForRecordType(type)) {
 			return getTotalNumberOfRecordsForExistingType(type, filter);
 		}
@@ -714,11 +714,11 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public long getTotalNumberOfAbstractRecords(String abstractType, List<String> implementingTypes,
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType, List<String> implementingTypes,
 			DataGroup filter) {
 		long size = 0;
 		for (String type : implementingTypes) {
-			size += getTotalNumberOfRecords(type, filter);
+			size += getTotalNumberOfRecordsForType(type, filter);
 		}
 		return size;
 	}
