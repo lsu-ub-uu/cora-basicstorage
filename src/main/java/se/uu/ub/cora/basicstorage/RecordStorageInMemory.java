@@ -714,8 +714,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public long getTotalNumberOfRecordsForAbstractType(String abstractType, List<String> implementingTypes,
-			DataGroup filter) {
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+		 	List<String> implementingTypes, DataGroup filter) {
 		long size = 0;
 		for (String type : implementingTypes) {
 			size += getTotalNumberOfRecordsForType(type, filter);
