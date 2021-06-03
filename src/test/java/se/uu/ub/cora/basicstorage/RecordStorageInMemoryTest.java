@@ -384,12 +384,6 @@ public class RecordStorageInMemoryTest {
 
 	@Test
 	public void testCreateDataInStorageShouldBeIndependent() {
-		// DataGroup typeRecordType = DataCreator
-		// .createRecordTypeWithIdAndUserSuppliedIdAndAbstract("type", "true",
-		// "false");
-		// recordStorage.create("recordType", "type", typeRecordType,
-		// emptyLinkList, "cora");
-
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("type", "place:0001", dataGroup, emptyLinkList, emptyLinkList,
@@ -399,10 +393,6 @@ public class RecordStorageInMemoryTest {
 
 		DataCopierSpy copier = (DataCopierSpy) dataCopierFactory.factoredCopier;
 		assertSame(copier.originalDataElement, dataGroup);
-		// DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
-		// DataAtomic child = (DataAtomic) dataGroupOut.getChildren().get(1);
-		//
-		// assertEquals(child.getValue(), "childValue");
 	}
 
 	@Test(expectedExceptions = RecordConflictException.class)
@@ -844,4 +834,5 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.read("abstractRecordType", "someType:0001");
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -46,7 +46,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private DataGroup emptyFilter = DataGroupProvider.getDataGroupUsingNameInData("filter");
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
-	protected CollectedTermsInMemoryStorage collectedTermsHolder = new CollectedTermsInMemoryStorage();
+	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
 	protected Map<String, Map<String, DividerGroup>> linkLists = new HashMap<>();
 	protected Map<String, Map<String, Map<String, Map<String, List<DataGroup>>>>> incomingLinks = new HashMap<>();
 
@@ -222,7 +222,10 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			Map<String, DividerGroup> typeDividerRecords) {
 		StorageReadResult readResult = new StorageReadResult();
 		Collection<DataGroup> readFromList = readFromList(type, filter, typeDividerRecords);
-		readResult.listOfDataGroups = new ArrayList<>(readFromList);
+
+		List<DataGroup> subList = getSubList(filter, readFromList);
+
+		readResult.listOfDataGroups = subList;
 		readResult.totalNumberOfMatches = readFromList.size();
 		return readResult;
 	}
@@ -254,6 +257,37 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			foundRecords.add(read(type, foundRecordId));
 		}
 		return foundRecords;
+	}
+
+	private List<DataGroup> getSubList(DataGroup filter, Collection<DataGroup> readFromList) {
+		ArrayList<DataGroup> arrayList = new ArrayList<>(readFromList);
+		Integer calculateFromNum = calculateFromNum(filter);
+		Integer calculateToNum = calculateToNum(filter, arrayList.size());
+		return arrayList.subList(calculateFromNum, calculateToNum);
+	}
+
+	private Integer calculateFromNum(DataGroup filter) {
+		if (filter.containsChildWithNameInData("fromNo")) {
+			return getAtomicValueAsInteger(filter, "fromNo") - 1;
+		}
+		return 0;
+	}
+
+	private Integer getAtomicValueAsInteger(DataGroup filter, String nameInData) {
+		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
+		return Integer.valueOf(atomicValue);
+	}
+
+	private Integer calculateToNum(DataGroup filter, int listSize) {
+		if (filter.containsChildWithNameInData("toNo")) {
+			return getToNumFromFilterOrListSize(filter, listSize);
+		}
+		return listSize;
+	}
+
+	private Integer getToNumFromFilterOrListSize(DataGroup filter, int listSize) {
+		Integer atomicValueAsInteger = getAtomicValueAsInteger(filter, "toNo");
+		return (atomicValueAsInteger < listSize) ? atomicValueAsInteger : listSize;
 	}
 
 	private void throwErrorIfNoRecordOfType(String type,
@@ -383,7 +417,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				|| recordExistsForAbstractRecordTypeAndRecordId(recordType, recordId);
 	}
 
-	@Override
 	public boolean recordsExistForRecordType(String type) {
 		return records.get(type) != null;
 	}
@@ -690,6 +723,38 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	@Override
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
 		return read("collectIndexTerm", collectIndexTermId);
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+		if (recordsExistForRecordType(type)) {
+			return getTotalNumberOfRecordsForExistingType(type, filter);
+		}
+		return 0;
+
+	}
+
+	private long getTotalNumberOfRecordsForExistingType(String type, DataGroup filter) {
+		if (filterIsEmpty(filter)) {
+			return records.get(type).size();
+		}
+
+		return collectedTermsHolder.findRecordIdsForFilter(type, filter).size();
+	}
+
+	void setCollectedTermsHolder(CollectedTermsHolder termsHolder) {
+		collectedTermsHolder = termsHolder;
+
+	}
+
+	@Override
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
+		long size = 0;
+		for (String type : implementingTypes) {
+			size += getTotalNumberOfRecordsForType(type, filter);
+		}
+		return size;
 	}
 
 }

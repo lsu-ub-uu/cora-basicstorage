@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Uppsala University Library
+ * Copyright 2017, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -27,10 +27,11 @@ import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
 
-class CollectedTermsInMemoryStorage {
+class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
 
-	void removePreviousCollectedStorageTerms(String recordType, String recordId) {
+	@Override
+	public void removePreviousCollectedStorageTerms(String recordType, String recordId) {
 		if (termsExistForRecordType(recordType)) {
 			Map<String, Map<String, List<StorageTermData>>> termsForRecordType = terms
 					.get(recordType);
@@ -79,7 +80,8 @@ class CollectedTermsInMemoryStorage {
 		return recordIdEntry.getKey().equals(recordId);
 	}
 
-	void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
+	@Override
+	public void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
 			String dataDivider) {
 		removePreviousCollectedStorageTerms(recordType, recordId);
 		if (collectedTerms.containsChildWithNameInData("storage")) {
@@ -108,7 +110,8 @@ class CollectedTermsInMemoryStorage {
 		listOfStorageTermData.add(StorageTermData.withValueAndDataDivider(termValue, dataDivider));
 	}
 
-	void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
+	@Override
+	public void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
 			StorageTermData storageTermData) {
 		List<StorageTermData> listOfStorageTermData = ensureStorageListExistsForTermForTypeAndKeyAndId(
 				recordType, storageKey, recordId);
@@ -146,7 +149,8 @@ class CollectedTermsInMemoryStorage {
 		}
 	}
 
-	List<String> findRecordIdsForFilter(String type, DataGroup filter) {
+	@Override
+	public List<String> findRecordIdsForFilter(String type, DataGroup filter) {
 		DataGroup filterPart = filter.getFirstGroupWithNameInData("part");
 		if (terms.containsKey(type)) {
 			return findRecordIdsMatchingFilterPart(type, filterPart);
@@ -189,7 +193,8 @@ class CollectedTermsInMemoryStorage {
 		}
 	}
 
-	Map<String, DataGroup> structureCollectedTermsForDisk() {
+	@Override
+	public Map<String, DataGroup> structureCollectedTermsForDisk() {
 		return new CollectedDataOrganiser().structureCollectedDataForDisk(terms);
 	}
 
