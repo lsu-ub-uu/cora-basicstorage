@@ -19,6 +19,7 @@
 package se.uu.ub.cora.basicstorage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	public DataGroup filter;
 	public List<String> returnedIds;
 	public boolean findRecordsForFilterWasCalled = false;
-	public List<String> returnIdsForTypes = new ArrayList<>();
+	public Map<String, List<String>> returnIdsForTypes = new HashMap<>();
 
 	@Override
 	public void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
@@ -45,8 +46,8 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 		this.type = type;
 		this.filter = filter;
 		returnedIds = new ArrayList<>();
-		if (returnIdsForTypes.isEmpty() || returnIdsForTypes.contains(type)) {
-			returnedIds.add("place:0002");
+		if (returnIdsForTypes.isEmpty() || returnIdsForTypes.containsKey(type)) {
+			returnedIds.addAll(returnIdsForTypes.get(type));
 		}
 		return returnedIds;
 	}

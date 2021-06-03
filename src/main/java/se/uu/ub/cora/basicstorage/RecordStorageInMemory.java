@@ -222,7 +222,10 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			Map<String, DividerGroup> typeDividerRecords) {
 		StorageReadResult readResult = new StorageReadResult();
 		Collection<DataGroup> readFromList = readFromList(type, filter, typeDividerRecords);
-		readResult.listOfDataGroups = new ArrayList<>(readFromList);
+
+		List<DataGroup> subList = getSubList(filter, readFromList);
+
+		readResult.listOfDataGroups = subList;
 		readResult.totalNumberOfMatches = readFromList.size();
 		return readResult;
 	}
@@ -254,6 +257,37 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			foundRecords.add(read(type, foundRecordId));
 		}
 		return foundRecords;
+	}
+
+	private List<DataGroup> getSubList(DataGroup filter, Collection<DataGroup> readFromList) {
+		ArrayList<DataGroup> arrayList = new ArrayList<>(readFromList);
+		Integer calculateFromNum = calculateFromNum(filter);
+		Integer calculateToNum = calculateToNum(filter, arrayList.size());
+		return arrayList.subList(calculateFromNum, calculateToNum);
+	}
+
+	private Integer calculateFromNum(DataGroup filter) {
+		if (filter.containsChildWithNameInData("fromNo")) {
+			return getAtomicValueAsInteger(filter, "fromNo") - 1;
+		}
+		return 0;
+	}
+
+	private Integer getAtomicValueAsInteger(DataGroup filter, String nameInData) {
+		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
+		return Integer.valueOf(atomicValue);
+	}
+
+	private Integer calculateToNum(DataGroup filter, int listSize) {
+		if (filter.containsChildWithNameInData("toNo")) {
+			return getToNumFromFilterOrListSize(filter, listSize);
+		}
+		return listSize;
+	}
+
+	private Integer getToNumFromFilterOrListSize(DataGroup filter, int listSize) {
+		Integer atomicValueAsInteger = getAtomicValueAsInteger(filter, "toNo");
+		return (atomicValueAsInteger < listSize) ? atomicValueAsInteger : listSize;
 	}
 
 	private void throwErrorIfNoRecordOfType(String type,
@@ -715,7 +749,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
-		 	List<String> implementingTypes, DataGroup filter) {
+			List<String> implementingTypes, DataGroup filter) {
 		long size = 0;
 		for (String type : implementingTypes) {
 			size += getTotalNumberOfRecordsForType(type, filter);

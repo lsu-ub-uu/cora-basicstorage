@@ -619,8 +619,8 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		DataGroup filter = DataCreator.createEmptyFilter();
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("NOExistingRecords",
-				filter);
+		long totalNumberOfRecords = recordStorage
+				.getTotalNumberOfRecordsForType("NOExistingRecords", filter);
 		assertEquals(totalNumberOfRecords, 0);
 
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -632,36 +632,43 @@ public class RecordStorageInMemoryListTest {
 
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("NOExistingRecords",
-				filter);
+		long totalNumberOfRecords = recordStorage
+				.getTotalNumberOfRecordsForType("NOExistingRecords", filter);
 		assertEquals(totalNumberOfRecords, 0);
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
 	}
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsEmptyFilter() {
-		createPlaceInStorageWithStockholmStorageTerm();
+		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords();
+		recordStorage = new RecordStorageInMemory(records);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("place",
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("organisation",
 				DataCreator.createEmptyFilter());
-		assertEquals(totalNumberOfRecords, 1);
+		assertEquals(totalNumberOfRecords, 2);
 
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
 	}
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilter() {
-		createPlaceInStorageWithStockholmStorageTerm();
-		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
+		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords();
+		recordStorage = new RecordStorageInMemory(records);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Stockholm");
 
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("place", filter);
+		termsHolder.returnIdsForTypes.put("person", Arrays.asList("person:001"));
+
+		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+
+		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("person", filter);
 		assertEquals(totalNumberOfRecords, 1);
 
-		assertEquals(termsHolder.type, "place");
+		assertTrue(termsHolder.findRecordsForFilterWasCalled);
+		assertEquals(totalNumberOfRecords, 1);
+
+		assertEquals(termsHolder.type, "person");
 		assertSame(termsHolder.filter, filter);
 	}
 
@@ -698,7 +705,7 @@ public class RecordStorageInMemoryListTest {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
 		addPersons(records);
-		addOrganisations(records);
+		addOrganisations(records, 2);
 		return records;
 	}
 
@@ -706,7 +713,7 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithNoExistingImplementingTypesEmptyFilter() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
-		addOrganisations(records);
+		addOrganisations(records, 2);
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("place"));
 
@@ -719,7 +726,7 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithPartlyExistingImplementingTypesEmptyFilter() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
 
-		addOrganisations(records);
+		addOrganisations(records, 2);
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
@@ -750,7 +757,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		termsHolder.returnIdsForTypes.add("organisation");
+		termsHolder.returnIdsForTypes.put("organisation", Arrays.asList("organisation:001"));
 
 		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
 
@@ -763,28 +770,249 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private void addPersons(Map<String, Map<String, DividerGroup>> records) {
-		Map<String, DividerGroup> dividerForType = new HashMap<>();
-		for (int i = 0; i < 3; i++) {
-			dividerForType.put("person:" + i,
-					createDividerGroupWithDataDividerAndNameInData("test", "person"));
-		}
-
-		records.put("person", dividerForType);
+		addRecords(records, "person", 3, "test");
 	}
 
-	private void addOrganisations(Map<String, Map<String, DividerGroup>> records) {
+	private void addOrganisations(Map<String, Map<String, DividerGroup>> records,
+			int numOfRecords) {
+		addRecords(records, "organisation", numOfRecords, "someSystemDivider");
+	}
+
+	private void addRecords(Map<String, Map<String, DividerGroup>> records, String type,
+			int NumOfRecords, String dataDivider) {
 		Map<String, DividerGroup> dividerForType = new HashMap<>();
-		for (int i = 0; i < 2; i++) {
-			dividerForType.put("organisation:" + i, createDividerGroupWithDataDividerAndNameInData(
-					"someSystemDivider", "organisation"));
+		for (int i = 0; i < NumOfRecords; i++) {
+			dividerForType.put(type + ":" + i,
+					createDividerGroupWithDataDividerAndNameInData(dataDivider, type, i));
 		}
 
-		records.put("organisation", dividerForType);
+		records.put(type, dividerForType);
 	}
 
 	private DividerGroup createDividerGroupWithDataDividerAndNameInData(String dataDivider,
-			String nameInData) {
-		return DividerGroup.withDataDividerAndDataGroup(dataDivider, new DataGroupSpy(nameInData));
+			String nameInData, int index) {
+		DataGroupSpy dataGroup = new DataGroupSpy(nameInData);
+		dataGroup.addChild(new DataAtomicSpy("idForTest", "id" + index));
+		return DividerGroup.withDataDividerAndDataGroup(dataDivider, dataGroup);
+	}
+
+	/**************************************************/
+	@Test
+	public void testReadListNoFromOrTo() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	private void createRecordStorageWithOrganisationRecords() {
+		Map<String, Map<String, DividerGroup>> records = addOrganisationsToRecords();
+		recordStorage = new RecordStorageInMemory(records);
+	}
+
+	@Test
+	public void testReadListFromButNoTo() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("4", "");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 11);
+	}
+
+	@Test
+	public void testReadListNoFromButTo() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "7");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 7);
+	}
+
+	@Test
+	public void testReadListFromAndTo() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("2", "9");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 8);
+	}
+
+	@Test
+	public void testReadListFromAndToMinAndMaxNumber() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "14");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	@Test
+	public void testReadListFromAndToFirstRecord() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 1);
+	}
+
+	@Test
+	public void testReadListFromAndToLastRecord() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 1);
+	}
+
+	@Test
+	public void testReadListToGreaterThanNumberOfRecords() {
+		createRecordStorageWithOrganisationRecords();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "18");
+
+		StorageReadResult readList = recordStorage.readList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	private DataGroup setUpFilterForOrganisationWithFromTo(String fromNo, String toNo) {
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		addIdsToReturnFromTermsHolder(termsHolder, 14, "organisation");
+
+		DataGroup filter = setUpFilterWithKeyAndValue("organisationDomain", "uu");
+		if (!fromNo.isEmpty()) {
+			filter.addChild(new DataAtomicSpy("fromNo", fromNo));
+		}
+		if (!toNo.isEmpty()) {
+			filter.addChild(new DataAtomicSpy("toNo", toNo));
+		}
+		return filter;
+	}
+
+	private Map<String, Map<String, DividerGroup>> addOrganisationsToRecords() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
+
+		addOrganisations(records, 28);
+
+		addOrganisationRecordTypeToRecords(records);
+		return records;
+	}
+
+	private void addOrganisationRecordTypeToRecords(
+			Map<String, Map<String, DividerGroup>> records) {
+		HashMap<String, DividerGroup> dividerForType = new HashMap<>();
+		dividerForType.put("organisation",
+				DividerGroup.withDataDividerAndDataGroup("test", new DataGroupSpy("organisation")));
+		records.put("recordType", dividerForType);
+	}
+
+	private void addIdsToReturnFromTermsHolder(CollectedTermsHolderSpy termsHolder, int numToReturn,
+			String type) {
+		List<String> idsToReturn = new ArrayList<>();
+		for (int i = 0; i < numToReturn; i++) {
+			idsToReturn.add(type + ":" + i);
+		}
+		termsHolder.returnIdsForTypes.put(type, idsToReturn);
+	}
+
+	@Test
+	public void testReadAbstractListNoFromOrTo() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	@Test
+	public void testReadAbstractListFromButNoTo() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("4", "");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 11);
+	}
+
+	@Test
+	public void testReadAbstractListNoFromButTo() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "7");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 7);
+	}
+
+	@Test
+	public void testReadAbstractListFromAndTo() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("2", "9");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 8);
+	}
+
+	@Test
+	public void testReadAbstractListFromAndToMinAndMaxNumber() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "14");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	@Test
+	public void testReadAbstractListFromAndToFirstRecord() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 1);
+	}
+
+	@Test
+	public void testReadAbstractListFromAndToLastRecord() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 1);
+	}
+
+	@Test
+	public void testReadAbstractListToGreaterThanNumberOfRecords() {
+		createRecordStorageWithOrganisationRecordsAbstract();
+		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "18");
+
+		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
+
+		assertEquals(readList.listOfDataGroups.size(), 14);
+	}
+
+	private void createRecordStorageWithOrganisationRecordsAbstract() {
+		Map<String, Map<String, DividerGroup>> records = addOrganisationsToRecords();
+		addRecordTypeRecordTypeToRecords(records);
+		recordStorage = new RecordStorageInMemory(records);
+	}
+
+	private void addRecordTypeRecordTypeToRecords(Map<String, Map<String, DividerGroup>> records) {
+		Map<String, DividerGroup> recordTypes = records.get("recordType");
+		recordTypes.put("recordType",
+				DividerGroup.withDataDividerAndDataGroup("test", new DataGroupSpy("recordType")));
 	}
 
 }
