@@ -640,7 +640,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsEmptyFilter() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForType("organisation",
@@ -652,7 +652,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilter() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
@@ -669,16 +669,18 @@ public class RecordStorageInMemoryListTest {
 		assertSame(termsHolder.filter, filter);
 	}
 
-	private void setUpStorageWithAuthorityRecords() {
-		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords();
+	private void setUpStorageWithAuthorityRecords(int numOfPersons, int numOfOrgs) {
+		Map<String, Map<String, DividerGroup>> records = setUpAuthorityRecords(numOfPersons,
+				numOfOrgs);
 		recordStorage = new RecordStorageInMemory(records);
 	}
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilterWithNoFromButTo() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
-		CollectedTermsHolderSpy termsHolder = setUpRecordsToReturnFromTermsHolder(16);
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 		filter.addChild(new DataAtomicSpy("toNo", "10"));
 
@@ -689,9 +691,11 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilterWithFromNoTo() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
-		CollectedTermsHolderSpy termsHolder = setUpRecordsToReturnFromTermsHolder(16);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
+
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 		filter.addChild(new DataAtomicSpy("fromNo", "10"));
 
@@ -706,8 +710,9 @@ public class RecordStorageInMemoryListTest {
 		addRecords(records, "person", 23, "test");
 
 		recordStorage = new RecordStorageInMemory(records);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 
-		CollectedTermsHolderSpy termsHolder = setUpRecordsToReturnFromTermsHolder(16);
 		DataGroup filter = DataCreator.createEmptyFilter();
 		filter.addChild(new DataAtomicSpy("fromNo", "8"));
 		filter.addChild(new DataAtomicSpy("toNo", "15"));
@@ -719,9 +724,10 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilterWithFromAndToWhenToLargerThanSize() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
-		CollectedTermsHolderSpy termsHolder = setUpRecordsToReturnFromTermsHolder(16);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 		filter.addChild(new DataAtomicSpy("fromNo", "8"));
@@ -733,9 +739,10 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfRecordsWithRecordsWithFilterWithFromWhenFromLargerThanSize() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
-		CollectedTermsHolderSpy termsHolder = setUpRecordsToReturnFromTermsHolder(16);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 		filter.addChild(new DataAtomicSpy("fromNo", "18"));
 
@@ -753,15 +760,14 @@ public class RecordStorageInMemoryListTest {
 		assertSame(termsHolder.filter, filter);
 	}
 
-	private CollectedTermsHolderSpy setUpRecordsToReturnFromTermsHolder(int numOfRecordsToReturn) {
-		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+	private void setUpRecordsToReturnFromTermsHolder(CollectedTermsHolderSpy termsHolder,
+			String type, int numOfRecordsToReturn) {
 
 		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < numOfRecordsToReturn; i++) {
-			ids.add("person:00" + i);
+			ids.add(type + ":00" + i);
 		}
-		termsHolder.returnIdsForTypes.put("person", ids);
-		return termsHolder;
+		termsHolder.returnIdsForTypes.put(type, ids);
 	}
 
 	private CollectedTermsHolderSpy setUpCollectedTermsHolderSpy() {
@@ -784,7 +790,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsEmptyFilter() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
 		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
@@ -792,10 +798,11 @@ public class RecordStorageInMemoryListTest {
 		assertEquals(totalNumberOfAbstractRecords, 5);
 	}
 
-	private Map<String, Map<String, DividerGroup>> setUpAuthorityRecords() {
+	private Map<String, Map<String, DividerGroup>> setUpAuthorityRecords(int numOfPersons,
+			int numOfOrgs) {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<String, Map<String, DividerGroup>>();
-		addPersons(records);
-		addOrganisations(records, 2);
+		addRecords(records, "person", numOfPersons, "test");
+		addRecords(records, "organisation", numOfOrgs, "someSystemDivider");
 		return records;
 	}
 
@@ -843,7 +850,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilter() {
-		setUpStorageWithAuthorityRecords();
+		setUpStorageWithAuthorityRecords(3, 2);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		termsHolder.returnIdsForTypes.put("organisation", Arrays.asList("organisation:001"));
@@ -856,10 +863,6 @@ public class RecordStorageInMemoryListTest {
 				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
 		assertTrue(termsHolder.findRecordsForFilterWasCalled);
 		assertEquals(totalNumberOfAbstractRecords, 1);
-	}
-
-	private void addPersons(Map<String, Map<String, DividerGroup>> records) {
-		addRecords(records, "person", 3, "test");
 	}
 
 	private void addOrganisations(Map<String, Map<String, DividerGroup>> records,
@@ -885,7 +888,83 @@ public class RecordStorageInMemoryListTest {
 		return DividerGroup.withDataDividerAndDataGroup(dataDivider, dataGroup);
 	}
 
-	/**************************************************/
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithNoFromButTo() {
+		setUpStorageCommonForAbstract();
+
+		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+		filter.addChild(new DataAtomicSpy("toNo", "11"));
+
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
+
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
+				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 11);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromNoTo() {
+		setUpStorageCommonForAbstract();
+
+		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+		filter.addChild(new DataAtomicSpy("fromNo", "10"));
+
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
+
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
+				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 9);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromAndToNOPart() {
+		setUpStorageCommonForAbstract();
+
+		DataGroup filter = DataCreator.createEmptyFilter();
+		filter.addChild(new DataAtomicSpy("fromNo", "6"));
+		filter.addChild(new DataAtomicSpy("toNo", "13"));
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
+
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
+				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 8);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromAndToWhenToLargerThanSize() {
+		setUpStorageCommonForAbstract();
+
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
+		filter.addChild(new DataAtomicSpy("fromNo", "8"));
+		filter.addChild(new DataAtomicSpy("toNo", "35"));
+
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
+				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 11);
+	}
+
+	private void setUpStorageCommonForAbstract() {
+		setUpStorageWithAuthorityRecords(14, 12);
+		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 10);
+		setUpRecordsToReturnFromTermsHolder(termsHolder, "organisation", 8);
+	}
+
+	@Test
+	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromWhenFromLargerThanSize() {
+		setUpStorageCommonForAbstract();
+
+		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
+		filter.addChild(new DataAtomicSpy("fromNo", "20"));
+
+		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
+		long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
+				"authorityNOTUsedInThisImplementation", implementingTypes, filter);
+		assertEquals(totalNumberOfAbstractRecords, 0);
+
+	}
+
 	@Test
 	public void testReadListNoFromOrTo() {
 		createRecordStorageWithOrganisationRecords();
