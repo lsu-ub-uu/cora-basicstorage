@@ -761,7 +761,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private long getToNoOrNumOfMatchingRecords(DataGroup filter, long numOfRecordsMatchingFilter) {
 		if (noToNumInFilter(filter)) {
-			return Long.valueOf(numOfRecordsMatchingFilter);
+			return numOfRecordsMatchingFilter;
 		}
 		Long toNo = Long.valueOf(filter.getFirstAtomicValueWithNameInData("toNo"));
 		return toNo > numOfRecordsMatchingFilter ? numOfRecordsMatchingFilter : toNo;
