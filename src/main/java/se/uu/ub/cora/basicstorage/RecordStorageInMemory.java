@@ -232,7 +232,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private Collection<DataGroup> readFromList(String type, DataGroup filter,
 			Map<String, DividerGroup> typeDividerRecords) {
-		if (filterIsEmpty(filter)) {
+		if (filterContainsNoPart(filter)) {
 			return readListWithoutFilter(typeDividerRecords);
 		}
 		return readListWithFilter(type, filter);
@@ -267,7 +267,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	private Integer calculateFromNum(DataGroup filter) {
-		if (filter.containsChildWithNameInData("fromNo")) {
+		if (fromExistsInFilter(filter)) {
 			return getAtomicValueAsInteger(filter, "fromNo") - 1;
 		}
 		return 0;
@@ -297,7 +297,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 		}
 	}
 
-	private boolean filterIsEmpty(DataGroup filter) {
+	private boolean filterContainsNoPart(DataGroup filter) {
 		return !filter.containsChildWithNameInData("part");
 	}
 
@@ -735,11 +735,50 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	private long getTotalNumberOfRecordsForExistingType(String type, DataGroup filter) {
-		if (filterIsEmpty(filter)) {
+		long numberOfMatchingRecords = getNumberOfRecords(type, filter);
+		if (noLimitInformationInFilter(filter)) {
+			return numberOfMatchingRecords;
+		}
+		return getTotalNumberUsingLimitInFilter(numberOfMatchingRecords, filter);
+	}
+
+	private long getNumberOfRecords(String type, DataGroup filter) {
+		if (filterContainsNoPart(filter)) {
 			return records.get(type).size();
 		}
-
 		return collectedTermsHolder.findRecordIdsForFilter(type, filter).size();
+	}
+
+	private boolean noLimitInformationInFilter(DataGroup filter) {
+		return !filter.containsChildWithNameInData("toNo")
+				&& !filter.containsChildWithNameInData("fromNo");
+	}
+
+	private long getTotalNumberUsingLimitInFilter(long numberOfRecords, DataGroup filter) {
+		long toNo = getToNoOrNumOfMatchingRecords(filter, numberOfRecords);
+		return fromExistsInFilter(filter) ? getTotalNumberUsingFrom(filter, toNo) : toNo;
+	}
+
+	private long getToNoOrNumOfMatchingRecords(DataGroup filter, long numOfRecordsMatchingFilter) {
+		if (noToNumInFilter(filter)) {
+			return Long.valueOf(numOfRecordsMatchingFilter);
+		}
+		Long toNo = Long.valueOf(filter.getFirstAtomicValueWithNameInData("toNo"));
+		return toNo > numOfRecordsMatchingFilter ? numOfRecordsMatchingFilter : toNo;
+	}
+
+	private boolean noToNumInFilter(DataGroup filter) {
+		return !filter.containsChildWithNameInData("toNo");
+	}
+
+	private boolean fromExistsInFilter(DataGroup filter) {
+		return filter.containsChildWithNameInData("fromNo");
+	}
+
+	private long getTotalNumberUsingFrom(DataGroup filter, Long toNo) {
+		String fromNoString = filter.getFirstAtomicValueWithNameInData("fromNo");
+		Long fromNo = Long.valueOf(fromNoString);
+		return fromNo > toNo ? 0 : toNo - fromNo + 1;
 	}
 
 	void setCollectedTermsHolder(CollectedTermsHolder termsHolder) {
