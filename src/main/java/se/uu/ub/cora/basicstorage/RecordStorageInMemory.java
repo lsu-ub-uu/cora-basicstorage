@@ -41,6 +41,7 @@ import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemory implements RecordStorage, MetadataStorage, SearchStorage {
+	private static final String FROM_NO = "fromNo";
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
 
@@ -268,7 +269,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private Integer calculateFromNum(DataGroup filter) {
 		if (fromExistsInFilter(filter)) {
-			return getAtomicValueAsInteger(filter, "fromNo") - 1;
+			return getAtomicValueAsInteger(filter, FROM_NO) - 1;
 		}
 		return 0;
 	}
@@ -751,7 +752,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private boolean noLimitInformationInFilter(DataGroup filter) {
 		return !filter.containsChildWithNameInData("toNo")
-				&& !filter.containsChildWithNameInData("fromNo");
+				&& !filter.containsChildWithNameInData(FROM_NO);
 	}
 
 	private long getTotalNumberUsingLimitInFilter(long numberOfRecords, DataGroup filter) {
@@ -772,11 +773,11 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	private boolean fromExistsInFilter(DataGroup filter) {
-		return filter.containsChildWithNameInData("fromNo");
+		return filter.containsChildWithNameInData(FROM_NO);
 	}
 
 	private long getTotalNumberUsingFrom(DataGroup filter, Long toNo) {
-		String fromNoString = filter.getFirstAtomicValueWithNameInData("fromNo");
+		String fromNoString = filter.getFirstAtomicValueWithNameInData(FROM_NO);
 		Long fromNo = Long.valueOf(fromNoString);
 		return fromNo > toNo ? 0 : toNo - fromNo + 1;
 	}
