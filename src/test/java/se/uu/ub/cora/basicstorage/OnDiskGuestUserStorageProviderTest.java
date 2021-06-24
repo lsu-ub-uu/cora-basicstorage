@@ -34,14 +34,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicdata.converter.DataToJsonConverterFactoryImp;
-import se.uu.ub.cora.basicdata.converter.JsonToDataConverterFactoryImp;
+import se.uu.ub.cora.basicdata.converter.datatojson.BasicDataToJsonConverterFactoryCreator;
+import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.testdata.TestDataAppTokenStorage;
 import se.uu.ub.cora.data.DataAtomicFactory;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
-import se.uu.ub.cora.data.converter.DataToJsonConverterFactory;
 import se.uu.ub.cora.data.converter.DataToJsonConverterProvider;
 import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
@@ -55,7 +54,6 @@ public class OnDiskGuestUserStorageProviderTest {
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
 	private DataCopierFactory dataCopierFactory;
-	private DataToJsonConverterFactory dataToJsonConverterFactory;
 	private JsonToDataConverterFactory jsonToDataConverterFactory;
 
 	@BeforeMethod
@@ -78,8 +76,10 @@ public class OnDiskGuestUserStorageProviderTest {
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
-		dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
-		DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		// dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
+		// DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		BasicDataToJsonConverterFactoryCreator factoryCreator = new BasicDataToJsonConverterFactoryCreator();
+		DataToJsonConverterProvider.setDataToJsonConverterFactoryCreator(factoryCreator);
 		jsonToDataConverterFactory = new JsonToDataConverterFactoryImp();
 		JsonToDataConverterProvider.setJsonToDataConverterFactory(jsonToDataConverterFactory);
 	}

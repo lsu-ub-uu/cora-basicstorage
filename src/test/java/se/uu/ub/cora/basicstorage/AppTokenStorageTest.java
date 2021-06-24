@@ -38,8 +38,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicdata.converter.DataToJsonConverterFactoryImp;
-import se.uu.ub.cora.basicdata.converter.JsonToDataConverterFactoryImp;
+import se.uu.ub.cora.basicdata.converter.datatojson.BasicDataToJsonConverterFactoryCreator;
+import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.basicstorage.testdata.TestDataAppTokenStorage;
 import se.uu.ub.cora.data.DataAtomicFactory;
@@ -89,10 +89,12 @@ public class AppTokenStorageTest {
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 		dataAtomicFactory = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
-		dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
-		DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
 		jsonToDataConverterFactory = new JsonToDataConverterFactoryImp();
 		JsonToDataConverterProvider.setJsonToDataConverterFactory(jsonToDataConverterFactory);
+		BasicDataToJsonConverterFactoryCreator factoryCreator = new BasicDataToJsonConverterFactoryCreator();
+		DataToJsonConverterProvider.setDataToJsonConverterFactoryCreator(factoryCreator);
+		// dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
+		// DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
 	}
 
 	private void deleteFiles(String path) throws IOException {

@@ -35,8 +35,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicdata.converter.DataToJsonConverterFactoryImp;
-import se.uu.ub.cora.basicdata.converter.JsonToDataConverterFactoryImp;
+import se.uu.ub.cora.basicdata.converter.datatojson.BasicDataToJsonConverterFactoryCreator;
+import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.testdata.TestDataAppTokenStorage;
 import se.uu.ub.cora.data.DataAtomicFactory;
 import se.uu.ub.cora.data.DataAtomicProvider;
@@ -81,9 +81,11 @@ public class UserStorageTest {
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
-		dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
+		// dataToJsonConverterFactory = new DataToJsonConverterFactoryImp();
 		// dataToJsonConverterFactory = new DataToJsonConverterFactorySpy();
-		DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		// DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		BasicDataToJsonConverterFactoryCreator factoryCreator = new BasicDataToJsonConverterFactoryCreator();
+		DataToJsonConverterProvider.setDataToJsonConverterFactoryCreator(factoryCreator);
 		// jsonToDataConverterFactory = new JsonToDataConverterFactorySpy();
 		jsonToDataConverterFactory = new JsonToDataConverterFactoryImp();
 		JsonToDataConverterProvider.setJsonToDataConverterFactory(jsonToDataConverterFactory);
