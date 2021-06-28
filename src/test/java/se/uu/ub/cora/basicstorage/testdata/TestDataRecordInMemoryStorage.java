@@ -19,7 +19,7 @@
 
 package se.uu.ub.cora.basicstorage.testdata;
 
-import se.uu.ub.cora.basicdata.converter.JsonToDataConverterFactoryImp;
+import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
 import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;

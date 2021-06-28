@@ -34,13 +34,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.apptokenstorage.AppTokenStorage;
+import se.uu.ub.cora.basicdata.converter.datatojson.BasicDataToJsonConverterFactoryCreator;
 import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.basicstorage.testdata.TestDataAppTokenStorage;
 import se.uu.ub.cora.data.DataAtomicFactory;
 import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
-import se.uu.ub.cora.data.converter.DataToJsonConverterFactory;
 import se.uu.ub.cora.data.converter.DataToJsonConverterProvider;
 import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
@@ -57,7 +57,7 @@ public class OnDiskAppTokenStorageProviderTest {
 	private DataGroupFactory dataGroupFactory;
 	private DataCopierFactory dataCopierFactory;
 	private DataAtomicFactory dataAtomicFactory;
-	private DataToJsonConverterFactory dataToJsonConverterFactory;
+	// private DataToJsonConverterFactory dataToJsonConverterFactory;
 	private JsonToDataConverterFactory jsonToDataConverterFactory;
 
 	@BeforeMethod
@@ -77,8 +77,11 @@ public class OnDiskAppTokenStorageProviderTest {
 		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
-		dataToJsonConverterFactory = new DataToJsonConverterFactorySpy();
-		DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		// dataToJsonConverterFactory = new DataToJsonConverterFactorySpy();
+		// DataToJsonConverterProvider.setDataToJsonConverterFactory(dataToJsonConverterFactory);
+		BasicDataToJsonConverterFactoryCreator factoryCreator = new BasicDataToJsonConverterFactoryCreator();
+		DataToJsonConverterProvider.setDataToJsonConverterFactoryCreator(factoryCreator);
+
 		dataAtomicFactory = new DataAtomicFactorySpy();
 		DataAtomicProvider.setDataAtomicFactory(dataAtomicFactory);
 		jsonToDataConverterFactory = new JsonToDataConverterFactorySpy();
