@@ -448,7 +448,6 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 	}
 
 	private DataToJsonConverter createDataGroupToJsonConvert(DataGroup dataGroup) {
-		// return DataToJsonConverterProvider.getConverterUsingDataPart(dataGroup);
 		DataToJsonConverterFactory converterFactory = DataToJsonConverterProvider
 				.createImplementingFactory();
 		return converterFactory.factorUsingConvertible(dataGroup);
