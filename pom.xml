@@ -35,13 +35,13 @@
 
 	<properties>
 		<logger.version>2.2.0</logger.version>
-		<coradata.version>5.0-SNAPSHOT</coradata.version>
-		<basicdata.version>3.0-SNAPSHOT</basicdata.version>
-		<storage.version>4.0.0</storage.version>
+		<coradata.version>5.0.0</coradata.version>
+		<basicdata.version>3.1.0</basicdata.version>
+		<storage.version>4.1.0</storage.version>
 		<searchstorage.version>3.6.0</searchstorage.version>
 		<apptokenstorage.version>2.2.0</apptokenstorage.version>
 		<gatekeeper.version>3.6.0</gatekeeper.version>
-		<json.version>2.3.0</json.version>
+		<json.version>2.4.0</json.version>
 	</properties>
 
 	<scm>
