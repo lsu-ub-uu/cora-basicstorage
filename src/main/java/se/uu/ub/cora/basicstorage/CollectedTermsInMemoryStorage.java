@@ -132,6 +132,7 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 		if (!terms.containsKey(recordType)) {
 			terms.put(recordType, new HashMap<>());
 		}
+		// terms.computeIfAbsent(recordType, var -> terms.put(recordType, new HashMap<>()));
 	}
 
 	private void ensureStorageListExistsForTermKey(String storageKey,

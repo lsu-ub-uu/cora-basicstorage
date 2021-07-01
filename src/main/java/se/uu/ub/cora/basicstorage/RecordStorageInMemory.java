@@ -88,8 +88,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	private final void createHolderForRecordTypeInStorage(String recordType) {
-		records.put(recordType, new HashMap<String, DividerGroup>());
-		linkLists.put(recordType, new HashMap<String, DividerGroup>());
+		records.put(recordType, new HashMap<>());
+		linkLists.put(recordType, new HashMap<>());
 	}
 
 	private void checkNoConflictOnRecordId(String recordType, String recordId) {
