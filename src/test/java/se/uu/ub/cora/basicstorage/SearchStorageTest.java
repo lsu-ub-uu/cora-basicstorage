@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.searchstorage.SearchStorage;
 
 public class SearchStorageTest {
@@ -33,7 +34,8 @@ public class SearchStorageTest {
 
 	@BeforeMethod
 	public void BeforeMethod() {
-
+		DataCopierFactorySpy dataCopierFactory = new DataCopierFactorySpy();
+		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 		RecordStorageInMemory recordStorageInMemory = TestDataRecordInMemoryStorage
 				.createRecordStorageInMemoryWithTestData();
 		searchStorage = recordStorageInMemory;
