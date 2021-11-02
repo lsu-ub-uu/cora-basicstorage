@@ -94,8 +94,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private void checkNoConflictOnRecordId(String recordType, String recordId) {
 		if (recordIdExistsForRecordType(recordType, recordId)) {
-			throw new RecordConflictException(
-					"Record with recordId: " + recordId + " already exists");
+			throw RecordConflictException
+					.withMessage("Record with recordId: " + recordId + " already exists");
 		}
 	}
 
