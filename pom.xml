@@ -68,7 +68,8 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>basicdata</artifactId>
 			<version>${basicdata.version}</version>
-			<scope>test</scope>
+<!-- 			<scope>test</scope> -->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
