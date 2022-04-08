@@ -24,7 +24,7 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>1.4.4</version>
+		<version>2.0.0</version>
 	</parent>
 
 	<artifactId>basicstorage</artifactId>
@@ -34,14 +34,14 @@
 	<name>Basic storage</name>
 
 	<properties>
-		<logger.version>2.4.0</logger.version>
-		<coradata.version>6.1.0</coradata.version>
-		<basicdata.version>3.6.0</basicdata.version>
-		<storage.version>6.0.0</storage.version>
-		<searchstorage.version>3.11.0</searchstorage.version>
-		<apptokenstorage.version>2.4.0</apptokenstorage.version>
-		<gatekeeper.version>3.11.0</gatekeeper.version>
-		<json.version>3.2.0</json.version>
+		<logger.version>2.5.0</logger.version>
+		<coradata.version>6.2.0</coradata.version>
+		<basicdata.version>3.7.0</basicdata.version>
+		<storage.version>6.1.0</storage.version>
+		<searchstorage.version>3.12.0</searchstorage.version>
+		<apptokenstorage.version>2.5.0</apptokenstorage.version>
+		<gatekeeper.version>3.12.0</gatekeeper.version>
+		<json.version>3.3.0</json.version>
 	</properties>
 
 	<scm>
