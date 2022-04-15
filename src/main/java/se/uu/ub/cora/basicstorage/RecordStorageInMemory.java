@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.copier.DataCopier;
@@ -138,7 +138,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	private void storeLinksInIncomingLinks(DataGroup incomingLinkList) {
-		for (DataElement linkElement : incomingLinkList.getChildren()) {
+		for (DataChild linkElement : incomingLinkList.getChildren()) {
 			storeLinkInIncomingLinks((DataGroup) linkElement);
 		}
 	}
@@ -617,7 +617,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private void removeOldLinksStoredAsIncomingLinks(String recordType, String recordId) {
 		DataGroup oldLinkList = readLinkList(recordType, recordId);
-		for (DataElement linkElement : oldLinkList.getChildren()) {
+		for (DataChild linkElement : oldLinkList.getChildren()) {
 			removeOldLinkStoredAsIncomingLink((DataGroup) linkElement);
 		}
 	}

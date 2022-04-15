@@ -44,10 +44,9 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
-import se.uu.ub.cora.data.DataPart;
 import se.uu.ub.cora.data.converter.DataToJsonConverter;
 import se.uu.ub.cora.data.converter.DataToJsonConverterFactory;
 import se.uu.ub.cora.data.converter.DataToJsonConverterProvider;
@@ -127,7 +126,7 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 	private final void readFileAndParseFileByPath(Path path) throws IOException {
 		String fileNameTypePart = getTypeFromPath(path);
 		String dataDivider = getDataDividerFromPath(path);
-		List<DataElement> recordsFromFile = extractChildrenFromFileByPath(path);
+		List<DataChild> recordsFromFile = extractChildrenFromFileByPath(path);
 
 		if (fileContainsLinkLists(fileNameTypePart)) {
 			parseAndStoreDataLinksInMemory(dataDivider, recordsFromFile);
@@ -149,7 +148,7 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		return fileName2.substring(fileName2.lastIndexOf('_') + 1, fileName2.indexOf('.'));
 	}
 
-	private final List<DataElement> extractChildrenFromFileByPath(Path path) throws IOException {
+	private final List<DataChild> extractChildrenFromFileByPath(Path path) throws IOException {
 		String json = readJsonFileByPath(path);
 		DataGroup recordList = convertJsonStringToDataGroup(json);
 		return recordList.getChildren();
@@ -185,8 +184,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		JsonValue jsonValue = jsonParser.parseString(jsonRecord);
 		JsonToDataConverter jsonToDataConverter = JsonToDataConverterProvider
 				.getConverterUsingJsonObject(jsonValue);
-		DataPart dataPart = jsonToDataConverter.toInstance();
-		return (DataGroup) dataPart;
+		DataGroup dataGroup = (DataGroup) jsonToDataConverter.toInstance();
+		return dataGroup;
 	}
 
 	private final boolean fileContainsLinkLists(String fileNameTypePart) {
@@ -194,8 +193,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 	}
 
 	private final void parseAndStoreDataLinksInMemory(String dataDivider,
-			List<DataElement> recordTypes) {
-		for (DataElement typesElement : recordTypes) {
+			List<DataChild> recordTypes) {
+		for (DataChild typesElement : recordTypes) {
 			parseAndStoreRecordTypeDataLinksInMemory(dataDivider, (DataGroup) typesElement);
 		}
 	}
@@ -205,8 +204,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		String recordTypeName = recordType.getNameInData();
 		ensureStorageExistsForRecordType(recordTypeName);
 
-		List<DataElement> records = recordType.getChildren();
-		for (DataElement recordElement : records) {
+		List<DataChild> records = recordType.getChildren();
+		for (DataChild recordElement : records) {
 			parseAndStoreRecordDataLinksInMemory(dataDivider, recordTypeName,
 					(DataGroup) recordElement);
 		}
@@ -220,9 +219,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		storeLinks(recordTypeName, recordId, collectedDataLinks, dataDivider);
 	}
 
-	private final void parseAndStoreCollectedStorageTermsInMemory(
-			List<DataElement> recordsFromFile) {
-		for (DataElement storageTerm : recordsFromFile) {
+	private final void parseAndStoreCollectedStorageTermsInMemory(List<DataChild> recordsFromFile) {
+		for (DataChild storageTerm : recordsFromFile) {
 			parseAndStoreCollectedStorageTermInMemory((DataGroup) storageTerm);
 		}
 	}
@@ -242,10 +240,10 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 	}
 
 	private final void parseAndStoreRecordsInMemory(String fileNameTypePart, String dataDivider,
-			List<DataElement> recordTypes) {
+			List<DataChild> recordTypes) {
 		ensureStorageExistsForRecordType(fileNameTypePart);
 
-		for (DataElement dataElement : recordTypes) {
+		for (DataChild dataElement : recordTypes) {
 			parseAndStoreRecordInMemory(fileNameTypePart, dataDivider, (DataGroup) dataElement);
 		}
 	}

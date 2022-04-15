@@ -35,8 +35,8 @@
 
 	<properties>
 		<logger.version>2.5.0</logger.version>
-		<coradata.version>6.2.0</coradata.version>
-		<basicdata.version>3.7.0</basicdata.version>
+		<coradata.version>7.0-SNAPSHOT</coradata.version>
+		<basicdata.version>4.0-SNAPSHOT</basicdata.version>
 		<storage.version>6.1.0</storage.version>
 		<searchstorage.version>3.12.0</searchstorage.version>
 		<apptokenstorage.version>2.5.0</apptokenstorage.version>
