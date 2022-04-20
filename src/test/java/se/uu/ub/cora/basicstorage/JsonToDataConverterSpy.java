@@ -18,14 +18,14 @@
  */
 package se.uu.ub.cora.basicstorage;
 
-import se.uu.ub.cora.data.DataPart;
+import se.uu.ub.cora.data.Convertible;
 import se.uu.ub.cora.data.converter.JsonToDataConverter;
 
 public class JsonToDataConverterSpy implements JsonToDataConverter {
-	public DataPart createdInstance;
+	public Convertible createdInstance;
 
 	@Override
-	public DataPart toInstance() {
+	public Convertible toInstance() {
 		createdInstance = new DataGroupSpy("someNameInData");
 		return createdInstance;
 	}

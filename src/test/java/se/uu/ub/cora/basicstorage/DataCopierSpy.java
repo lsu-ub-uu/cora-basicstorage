@@ -18,19 +18,19 @@
  */
 package se.uu.ub.cora.basicstorage;
 
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.copier.DataCopier;
 
 public class DataCopierSpy implements DataCopier {
 
-	public DataElement originalDataElement;
+	public DataChild originalDataElement;
 
-	public DataCopierSpy(DataElement dataElement) {
+	public DataCopierSpy(DataChild dataElement) {
 		this.originalDataElement = dataElement;
 	}
 
 	@Override
-	public DataElement copy() {
+	public DataChild copy() {
 		if ("createNewWhenCopyingThisTopLevelGroup"
 				.contentEquals(originalDataElement.getNameInData())) {
 			DataGroupSpy copiedDataGroup = new DataGroupSpy(originalDataElement.getNameInData());

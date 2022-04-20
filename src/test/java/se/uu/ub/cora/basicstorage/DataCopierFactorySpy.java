@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.basicstorage;
 
-import se.uu.ub.cora.data.DataElement;
+import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 
@@ -28,7 +28,7 @@ public class DataCopierFactorySpy implements DataCopierFactory {
 	public int numberOfFactoredCopiers = 0;
 
 	@Override
-	public DataCopier factorForDataElement(DataElement dataElement) {
+	public DataCopier factorForDataElement(DataChild dataElement) {
 		numberOfFactoredCopiers++;
 		factoredCopier = new DataCopierSpy(dataElement);
 		return factoredCopier;
