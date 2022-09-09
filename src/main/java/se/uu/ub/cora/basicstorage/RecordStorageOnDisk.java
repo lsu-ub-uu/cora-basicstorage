@@ -47,6 +47,7 @@ import java.util.zip.GZIPOutputStream;
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.converter.DataToJsonConverter;
 import se.uu.ub.cora.data.converter.DataToJsonConverterFactory;
 import se.uu.ub.cora.data.converter.DataToJsonConverterProvider;
@@ -259,8 +260,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 
 	@Override
 	public synchronized void create(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
-		super.create(recordType, recordId, record, collectedTerms, linkList, dataDivider);
+			List<StorageTerm> storageTerms, DataGroup linkList, String dataDivider) {
+		super.create(recordType, recordId, record, storageTerms, linkList, dataDivider);
 		writeDataToDisk(recordType, dataDivider);
 	}
 
@@ -547,9 +548,9 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 
 	@Override
 	public synchronized void update(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, DataGroup linkList, String dataDivider) {
 		String previousDataDivider = records.get(recordType).get(recordId).dataDivider;
-		super.update(recordType, recordId, record, collectedTerms, linkList, dataDivider);
+		super.update(recordType, recordId, record, storageTerms, linkList, dataDivider);
 		writeDataToDisk(recordType, previousDataDivider);
 	}
 

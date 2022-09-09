@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
@@ -81,28 +82,18 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	}
 
 	@Override
-	public void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
-			String dataDivider) {
+	public void storeCollectedTerms(String recordType, String recordId,
+			List<StorageTerm> storageTerms, String dataDivider) {
 		removePreviousCollectedStorageTerms(recordType, recordId);
-		if (collectedTerms.containsChildWithNameInData("storage")) {
-			storeCollectedStorageTerms(recordType, recordId, collectedTerms, dataDivider);
-		}
-	}
-
-	private void storeCollectedStorageTerms(String recordType, String recordId,
-			DataGroup collectedTerms, String dataDivider) {
-		DataGroup collectStorageTerm = collectedTerms.getFirstGroupWithNameInData("storage");
-		for (DataGroup collectedDataTerm : collectStorageTerm
-				.getAllGroupsWithNameInData("collectedDataTerm")) {
-			storeCollectedStorageTerm(recordType, recordId, dataDivider, collectedDataTerm);
+		for (StorageTerm storageTerm : storageTerms) {
+			storeCollectedStorageTerm(recordType, recordId, dataDivider, storageTerm);
 		}
 	}
 
 	private void storeCollectedStorageTerm(String recordType, String recordId, String dataDivider,
-			DataGroup collectedDataTerm) {
-		DataGroup extraData = collectedDataTerm.getFirstGroupWithNameInData("extraData");
-		String storageKey = extraData.getFirstAtomicValueWithNameInData("storageKey");
-		String termValue = collectedDataTerm.getFirstAtomicValueWithNameInData("collectTermValue");
+			StorageTerm storageTerm) {
+		String storageKey = storageTerm.storageKey();
+		String termValue = storageTerm.value();
 
 		List<StorageTermData> listOfStorageTermData = ensureStorageListExistsForTermForTypeAndKeyAndId(
 				recordType, storageKey, recordId);

@@ -28,16 +28,16 @@
 	</parent>
 
 	<artifactId>basicstorage</artifactId>
-	<version>6.2-SNAPSHOT</version>
+	<version>7.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Basic storage</name>
 
 	<properties>
 		<logger.version>2.5.0</logger.version>
-		<coradata.version>7.1.0</coradata.version>
+		<coradata.version>7.2-SNAPSHOT</coradata.version>
 		<basicdata.version>4.1.0</basicdata.version>
-		<storage.version>6.4.0</storage.version>
+		<storage.version>7.0-SNAPSHOT</storage.version>
 		<searchstorage.version>3.14.0</searchstorage.version>
 		<apptokenstorage.version>2.5.0</apptokenstorage.version>
 		<gatekeeper.version>3.14.0</gatekeeper.version>

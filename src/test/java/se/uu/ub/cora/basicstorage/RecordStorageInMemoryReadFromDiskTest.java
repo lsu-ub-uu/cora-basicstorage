@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -39,6 +41,7 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 
@@ -52,7 +55,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
 	private DataCopierFactory dataCopierFactory;
-	DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
+	List<StorageTerm> storageTerms = Collections.emptyList();
 
 	@BeforeMethod
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -91,11 +94,11 @@ public class RecordStorageInMemoryReadFromDiskTest {
 
 		DataGroup placeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "true", "false");
-		recordStorage.create("recordType", "place", placeRecordType, emptyCollectedData,
-				emptyLinkList, "cora");
+		recordStorage.create("recordType", "place", placeRecordType, storageTerms, emptyLinkList,
+				"cora");
 		DataGroup recordTypeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
-		recordStorage.create("recordType", "recordType", recordTypeRecordType, emptyCollectedData,
+		recordStorage.create("recordType", "recordType", recordTypeRecordType, storageTerms,
 				emptyLinkList, "cora");
 	}
 
@@ -112,8 +115,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 	public void testInitNoFilesOnDisk() throws IOException {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		recordStorage.create("place", "place:0001", dataGroup, emptyCollectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 		DataGroup readDataGroup = recordStorage.read("place", "place:0001");
 
 		Map<String, DividerGroup> map = recordStorage.records.get("place");
@@ -139,8 +141,8 @@ public class RecordStorageInMemoryReadFromDiskTest {
 		DataGroup linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		recordStorage.create("place", "place:0001", dataGroup, emptyCollectedData,
-				linkListWithTwoLinks, "cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, linkListWithTwoLinks,
+				"cora");
 		DataGroup readDataGroup = recordStorage.read("place", "place:0001");
 
 		Map<String, DividerGroup> map = recordStorage.records.get("place");
@@ -176,12 +178,10 @@ public class RecordStorageInMemoryReadFromDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		recordStorage.create("place", "place:0001", dataGroup, emptyCollectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		dataGroup.addChild(new DataAtomicSpy("someNameInData", "someValue"));
-		recordStorage.update("place", "place:0001", dataGroup, emptyCollectedData, emptyLinkList,
-				"cora");
+		recordStorage.update("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		Path placePath = Paths.get(basePath, "place.json");
 		assertFalse(Files.exists(placePath));

@@ -19,12 +19,16 @@
 
 package se.uu.ub.cora.basicstorage.testdata;
 
+import java.util.Collections;
+import java.util.List;
+
 import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
 import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.converter.JsonToDataConverter;
 import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.json.parser.JsonParser;
@@ -33,7 +37,7 @@ import se.uu.ub.cora.json.parser.org.OrgJsonParser;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class TestDataRecordInMemoryStorage {
-	private static DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
+	private static List<StorageTerm> storageTerms = Collections.emptyList();
 
 	public static RecordStorageInMemory createRecordStorageInMemoryWithTestData() {
 		RecordStorageInMemory recordsInMemory = new RecordStorageInMemory();
@@ -65,24 +69,24 @@ public class TestDataRecordInMemoryStorage {
 		addRecordTypeCollectPermissionTerm(recordsInMemory);
 
 		DataGroup dummy = new DataGroupSpy("dummy");
-		recordsInMemory.create("metadataCollectionVariable", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataCollectionVariable", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataCollectionVariableChild", "dummy1", dummy,
-				emptyCollectedData, new DataGroupSpy("dummy"), "cora");
-		recordsInMemory.create("metadataItemCollection", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataCollectionVariableChild", "dummy1", dummy, storageTerms,
+				new DataGroupSpy("dummy"), "cora");
+		recordsInMemory.create("metadataItemCollection", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataCollectionItem", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataCollectionItem", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataTextVariable", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataTextVariable", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataNumberVariable", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataNumberVariable", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataRecordLink", "dummy1", dummy, emptyCollectedData,
+		recordsInMemory.create("metadataRecordLink", "dummy1", dummy, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataRecordRelation", "dummyRecordRelation", dummy,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
-		recordsInMemory.create("metadataResourceLink", "dummyResourceLink", dummy,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create("metadataRecordRelation", "dummyRecordRelation", dummy, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create("metadataResourceLink", "dummyResourceLink", dummy, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
 		return recordsInMemory;
 	}
 
@@ -92,7 +96,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = new DataGroupSpy("authority");
 		dataGroup.addChild(recordInfo);
 
-		recordsInMemory.create("place", "place:0001", dataGroup, emptyCollectedData,
+		recordsInMemory.create("place", "place:0001", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -111,8 +115,8 @@ public class TestDataRecordInMemoryStorage {
 		// "place", "place:0001"));
 
 		DataGroup collectedLinksList = createLinkList();
-		recordsInMemory.create("place", "place:0002", dataGroup,
-				DataCreator.createEmptyCollectedData(), collectedLinksList, "cora");
+		recordsInMemory.create("place", "place:0002", dataGroup, Collections.emptyList(),
+				collectedLinksList, "cora");
 	}
 
 	private static void addLinkedRecordTypeAndLinkedRecordIdToRecordLink(
@@ -154,7 +158,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(metadata,
 				"place");
 		dataGroup.addChild(recordInfo);
-		recordsInMemory.create(metadata, "place", dataGroup, DataCreator.createEmptyCollectedData(),
+		recordsInMemory.create(metadata, "place", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -166,7 +170,7 @@ public class TestDataRecordInMemoryStorage {
 				"placeView");
 		dataGroup.addChild(recordInfo);
 
-		recordsInMemory.create(presentation, "placeView", dataGroup, emptyCollectedData,
+		recordsInMemory.create(presentation, "placeView", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -177,7 +181,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(text,
 				"placeText");
 		dataGroup.addChild(recordInfo);
-		recordsInMemory.create(text, "placeText", dataGroup, emptyCollectedData,
+		recordsInMemory.create(text, "placeText", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -190,7 +194,7 @@ public class TestDataRecordInMemoryStorage {
 		dataGroup.addChild(recordInfo);
 
 		dataGroup.addChild(new DataAtomicSpy("abstract", "false"));
-		recordsInMemory.create(recordType, "metadata", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "metadata", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -198,7 +202,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
-		recordsInMemory.create(recordType, "recordType", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "recordType", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -207,8 +211,8 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndAbstract(
 				"recordTypeAutoGeneratedId", "false", "false");
-		recordsInMemory.create(recordType, "recordTypeAutoGeneratedId", dataGroup,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create(recordType, "recordTypeAutoGeneratedId", dataGroup, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
 
 	}
 
@@ -216,7 +220,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("binary", "true", "true");
-		recordsInMemory.create(recordType, "binary", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "binary", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -224,7 +228,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("image", "true", "binary");
-		recordsInMemory.create(recordType, "image", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "image", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -232,7 +236,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"genericBinary", "true", "binary");
-		recordsInMemory.create(recordType, "genericBinary", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "genericBinary", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -240,7 +244,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"genericCollectionItem", "true", "metadataCollectionItem");
-		recordsInMemory.create(recordType, "genericCollectionItem", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "genericCollectionItem", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -251,7 +255,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(recordType,
 				"someItem");
 		dataGroup.addChild(recordInfo);
-		recordsInMemory.create(recordType, "someItem", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "someItem", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -261,7 +265,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "false", "false");
 
-		recordsInMemory.create(recordType, "place", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "place", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -271,7 +275,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndAbstract(
 				"abstractAuthority", "false", "true");
 
-		recordsInMemory.create(recordType, "abstractAuthority", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "abstractAuthority", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -282,8 +286,8 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"childToAbstractAuthority", "false", "abstractAuthority");
 
-		recordsInMemory.create(recordType, "childToAbstractAuthority", dataGroup,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create(recordType, "childToAbstractAuthority", dataGroup, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
 	private static void addChildToChildToRecordTypeOfAbstractAuthority(
@@ -293,8 +297,8 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"grandChildToAbstractAuthority", "false", "childToAbstractAuthority");
 
-		recordsInMemory.create(recordType, "grandChildToAbstractAuthority", dataGroup,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create(recordType, "grandChildToAbstractAuthority", dataGroup, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
 	private static void addRecordTypeSearchTerm(RecordStorageInMemory recordsInMemory) {
@@ -303,7 +307,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("searchTerm", "false", "false");
 
-		recordsInMemory.create(recordType, "searchTerm", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "searchTerm", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -314,14 +318,14 @@ public class TestDataRecordInMemoryStorage {
 				"titleSearchTerm");
 		dataGroup.addChild(recordInfo);
 
-		recordsInMemory.create("searchTerm", "titleSearchTerm", dataGroup, emptyCollectedData,
+		recordsInMemory.create("searchTerm", "titleSearchTerm", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
 	private static void addSomeSearchTerm(RecordStorageInMemory recordsInMemory) {
 		String searchTermJson = "{\"name\":\"searchTerm\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"someSearchTerm\"},{\"name\":\"type\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"recordType\"},{\"name\":\"linkedRecordId\",\"value\":\"searchTerm\"}]},{\"name\":\"createdBy\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"user\"},{\"name\":\"linkedRecordId\",\"value\":\"141414\"}]},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},{\"name\":\"searchTermType\",\"value\":\"linkedData\"},{\"name\":\"searchFieldRef\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"metadata\"},{\"name\":\"linkedRecordId\",\"value\":\"refTextVar\"}]},{\"name\":\"indexType\",\"value\":\"indexTypeString\"}]}";
 		DataGroup searchTerm = convertJsonStringToDataGroup(searchTermJson);
-		recordsInMemory.create("searchTerm", "someSearchTerm", searchTerm, emptyCollectedData,
+		recordsInMemory.create("searchTerm", "someSearchTerm", searchTerm, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemOne");
 	}
 
@@ -339,7 +343,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("collectTerm", "true", "true");
-		recordsInMemory.create(recordType, "collectTerm", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "collectTerm", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -347,7 +351,7 @@ public class TestDataRecordInMemoryStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"collectIndexTermId", "true", "collectTerm");
-		recordsInMemory.create(recordType, "collectIndexTerm", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "collectIndexTerm", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -358,15 +362,15 @@ public class TestDataRecordInMemoryStorage {
 				"collectIndexTerm", "collectIndexTermId");
 		dataGroup.addChild(recordInfo);
 
-		recordsInMemory.create("collectIndexTerm", "collectIndexTermId", dataGroup,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+		recordsInMemory.create("collectIndexTerm", "collectIndexTermId", dataGroup, storageTerms,
+				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
 	private static void addRecordTypeCollectPermissionTerm(RecordStorageInMemory recordsInMemory) {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"collectPermissionTermId", "true", "collectTerm");
-		recordsInMemory.create(recordType, "collectPermissionTerm", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "collectPermissionTerm", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -389,7 +393,7 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndAbstract(id,
 				"false", abstractValue);
 
-		recordsInMemory.create(recordType, id, dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, id, dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 }

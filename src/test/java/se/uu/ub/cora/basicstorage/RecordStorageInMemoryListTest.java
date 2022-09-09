@@ -28,6 +28,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,7 @@ import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
@@ -50,7 +52,7 @@ public class RecordStorageInMemoryListTest {
 	private RecordStorageInMemory recordStorage;
 	private DataGroup emptyLinkList = DataCreator.createEmptyLinkList();
 	DataGroup emptyFilter = new DataGroupSpy("filter");
-	private DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
+	private List<StorageTerm> storageTerms = Collections.emptyList();
 	private String dataDivider = "cora";
 	private DataGroupFactory dataGroupFactory;
 	private DataCopierFactory dataCopierFactory;
@@ -65,8 +67,8 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory();
 		DataGroup recordTypeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "true", "false");
-		recordStorage.create("recordType", "place", recordTypeRecordType,
-				DataCreator.createEmptyCollectedData(), emptyLinkList, "cora");
+		recordStorage.create("recordType", "place", recordTypeRecordType, storageTerms,
+				emptyLinkList, "cora");
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
@@ -143,7 +145,7 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithNoCollectedStorageTermReadWithFilter() {
-		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
+		createPlaceInStorageWithCollectedData(storageTerms, "nameInData");
 
 		DataGroup filter = DataCreator.createEmptyFilter();
 		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
@@ -191,7 +193,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testListAfterUpdateWithNoCollectedStorageTermReadWithFilter() {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
-		updateUppsalaPlaceInStorageWithCollectedData(emptyCollectedData);
+		updateUppsalaPlaceInStorageWithCollectedData(storageTerms);
 
 		DataGroup filter = DataCreator.createEmptyFilter();
 		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
@@ -206,7 +208,7 @@ public class RecordStorageInMemoryListTest {
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
 		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
 
-		createPlaceInStorageWithCollectedData(emptyCollectedData, "nameInData");
+		createPlaceInStorageWithCollectedData(storageTerms, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
 		assertEquals(readList.size(), 0);
 
@@ -510,8 +512,8 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"genericBinary", "genericBinary:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup,
-				DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
+		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup, storageTerms,
+				emptyLinkList, dataDivider);
 	}
 
 	private void createGenericBinaryRecord(String nameInData) {
@@ -519,8 +521,8 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"genericBinary", "genericBinary:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup,
-				DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
+		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup, storageTerms,
+				emptyLinkList, dataDivider);
 	}
 
 	@Test
@@ -565,7 +567,7 @@ public class RecordStorageInMemoryListTest {
 						"childToAbstractAuthority", "childToAbstractAuthority:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("childToAbstractAuthority", "childToAbstractAuthority:0001", dataGroup,
-				DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
+				storageTerms, emptyLinkList, dataDivider);
 	}
 
 	private void createGrandChildOfAbstractAuthorityRecord() {
@@ -574,7 +576,7 @@ public class RecordStorageInMemoryListTest {
 						"grandChildToAbstractAuthority", "grandChildToAbstractAuthority:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("grandChildToAbstractAuthority", "grandChildToAbstractAuthority:0001",
-				dataGroup, DataCreator.createEmptyCollectedData(), emptyLinkList, dataDivider);
+				dataGroup, storageTerms, emptyLinkList, dataDivider);
 	}
 
 	@Test

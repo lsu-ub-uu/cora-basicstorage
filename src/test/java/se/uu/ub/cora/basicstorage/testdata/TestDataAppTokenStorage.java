@@ -19,12 +19,17 @@
 
 package se.uu.ub.cora.basicstorage.testdata;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
 import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.converter.JsonToDataConverter;
 import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.json.parser.JsonParser;
@@ -32,7 +37,7 @@ import se.uu.ub.cora.json.parser.JsonValue;
 import se.uu.ub.cora.json.parser.org.OrgJsonParser;
 
 public class TestDataAppTokenStorage {
-	private static DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
+	private static List<StorageTerm> storageTerms = Collections.emptyList();
 
 	public static RecordStorageInMemory createRecordStorageInMemoryWithTestData(String basePath) {
 		RecordStorageOnDisk recordsOnDisk = RecordStorageOnDisk
@@ -47,57 +52,58 @@ public class TestDataAppTokenStorage {
 		addRecordTypeImage(recordsOnDisk);
 		String dummyUserJson1 = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"dummy1\"},{\"name\":\"type\",\"value\":\"systemOneUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"dummy@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"active\"},{\"name\":\"userAppTokenGroup\",\"children\":[{\"name\":\"appTokenLink\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"appToken\"},{\"name\":\"linkedRecordId\",\"value\":\"appToken1\"}]},{\"name\":\"note\",\"value\":\"My phone\"}],\"repeatId\":\"1\"}]}";
 		DataGroup dummyUser1 = convertJsonStringToDataGroup(dummyUserJson1);
-		recordsOnDisk.create("systemOneUser", "dummy1", dummyUser1, emptyCollectedData,
+		recordsOnDisk.create("systemOneUser", "dummy1", dummyUser1, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemOne");
 
 		String appTokenJson1 = "{\"name\":\"appToken\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"appToken1\"},{\"name\":\"type\",\"value\":\"appToken\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},{\"name\":\"token\",\"value\":\"someSecretString\"}]}";
 		DataGroup appToken1 = convertJsonStringToDataGroup(appTokenJson1);
-		recordsOnDisk.create("appToken", "appToken1", appToken1, emptyCollectedData,
+		recordsOnDisk.create("appToken", "appToken1", appToken1, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 
 		String dummyUserJson2 = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"dummy2\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"dummy@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"active\"},{\"name\":\"userAppTokenGroup\",\"children\":[{\"name\":\"appTokenLink\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"appToken\"},{\"name\":\"linkedRecordId\",\"value\":\"appToken2\"}]},{\"name\":\"note\",\"value\":\"My phone\"}],\"repeatId\":\"1\"}]}";
 		DataGroup dummyUser2 = convertJsonStringToDataGroup(dummyUserJson2);
-		recordsOnDisk.create("systemTwoUser", "dummy2", dummyUser2, emptyCollectedData,
+		recordsOnDisk.create("systemTwoUser", "dummy2", dummyUser2, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemOne");
 
 		String appTokenJson2 = "{\"name\":\"appToken\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"appToken2\"},{\"name\":\"type\",\"value\":\"appToken\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},{\"name\":\"token\",\"value\":\"someOtherSecretString\"}]}";
 		DataGroup appToken2 = convertJsonStringToDataGroup(appTokenJson2);
-		recordsOnDisk.create("appToken", "appToken2", appToken2, emptyCollectedData,
+		recordsOnDisk.create("appToken", "appToken2", appToken2, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 
 		String inactiveUserJson = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"inactiveUser\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"dummy@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"},{\"name\":\"userAppTokenGroup\",\"children\":[{\"name\":\"appTokenLink\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"appToken\"},{\"name\":\"linkedRecordId\",\"value\":\"appTokenJson\"}]},{\"name\":\"note\",\"value\":\"My phone\"}],\"repeatId\":\"1\"}]}";
 		DataGroup inactiveUser = convertJsonStringToDataGroup(inactiveUserJson);
-		recordsOnDisk.create("systemTwoUser", "inactiveUser", inactiveUser, emptyCollectedData,
+		recordsOnDisk.create("systemTwoUser", "inactiveUser", inactiveUser, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 
 		String appTokenJson3 = "{\"name\":\"appToken\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"appTokenJson\"},{\"name\":\"type\",\"value\":\"appToken\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},{\"name\":\"token\",\"value\":\"someOtherSecretString\"}]}";
 		DataGroup appTokenJson = convertJsonStringToDataGroup(appTokenJson3);
-		recordsOnDisk.create("appToken", "appTokenJson", appTokenJson, emptyCollectedData,
+		recordsOnDisk.create("appToken", "appTokenJson", appTokenJson, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 
 		String noAppTokenUserJson = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"noAppTokenUser\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"noAppTokenUser@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"}]}";
 		DataGroup noAppTokenUser = convertJsonStringToDataGroup(noAppTokenUserJson);
-		DataGroup collectedData = createCollectedDataForUserIdWithValue("noAppTokenUser@ub.uu.se");
-		recordsOnDisk.create("systemTwoUser", "noAppTokenUser", noAppTokenUser, collectedData,
+		List<StorageTerm> storageTerms = createCollectedStorageTermsForUserIdWithValue(
+				"noAppTokenUser@ub.uu.se");
+		recordsOnDisk.create("systemTwoUser", "noAppTokenUser", noAppTokenUser, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 
 		String sameUserJson = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"sameUser1\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"noAppTokenUser@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"}]}";
 		DataGroup sameUser1 = convertJsonStringToDataGroup(sameUserJson);
-		DataGroup collectedDataSameUser1 = createCollectedDataForUserIdWithValue(
+		List<StorageTerm> storageTermsSameUser1 = createCollectedStorageTermsForUserIdWithValue(
 				"sameUser@ub.uu.se");
-		recordsOnDisk.create("systemTwoUser", "sameUser1", sameUser1, collectedDataSameUser1,
+		recordsOnDisk.create("systemTwoUser", "sameUser1", sameUser1, storageTermsSameUser1,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 
 		String sameUserJson2 = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"sameUser2\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"noAppTokenUser@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"}]}";
 		DataGroup sameUser2 = convertJsonStringToDataGroup(sameUserJson2);
-		DataGroup collectedDataSameUser2 = createCollectedDataForUserIdWithValue(
+		List<StorageTerm> storageTermsSameUser2 = createCollectedStorageTermsForUserIdWithValue(
 				"sameUser@ub.uu.se");
-		recordsOnDisk.create("systemTwoUser", "sameUser2", sameUser2, collectedDataSameUser2,
+		recordsOnDisk.create("systemTwoUser", "sameUser2", sameUser2, storageTermsSameUser2,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 
 		String guestUserJson = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"12345\"},{\"name\":\"type\",\"value\":\"systemOneUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"dummy@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"}]}";
 		DataGroup guestUser = convertJsonStringToDataGroup(guestUserJson);
-		recordsOnDisk.create("systemOneUser", "12345", guestUser, emptyCollectedData,
+		recordsOnDisk.create("systemOneUser", "12345", guestUser, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 
 		return recordsOnDisk;
@@ -106,23 +112,17 @@ public class TestDataAppTokenStorage {
 	public static void createUserOnDisk(RecordStorageOnDisk recordsOnDisk) {
 		String noAppTokenUserJson = "{\"name\":\"user\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"createdLater\"},{\"name\":\"type\",\"value\":\"systemTwoUser\"},{\"name\":\"createdBy\",\"value\":\"131313\"},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"systemOne\"}]}]},{\"name\":\"userId\",\"value\":\"noAppTokenUser@ub.uu.se\"},{\"name\":\"userFirstname\",\"value\":\"Dummy\"},{\"name\":\"userLastname\",\"value\":\"Dumsson\"},{\"name\":\"userRole\",\"children\":[{\"name\":\"userRole\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"permissionRole\"},{\"name\":\"linkedRecordId\",\"value\":\"nothing\"}]},{\"name\":\"userRoleRulePart\",\"children\":[{\"name\":\"permissionRulePart\",\"children\":[{\"name\":\"permissionRulePartValue\",\"value\":\"system.\",\"repeatId\":\"0\"}],\"attributes\":{\"type\":\"organisation\"}}]}],\"repeatId\":\"0\"},{\"name\":\"activeStatus\",\"value\":\"inactive\"}]}";
 		DataGroup noAppTokenUser = convertJsonStringToDataGroup(noAppTokenUserJson);
-		DataGroup collectedData = createCollectedDataForUserIdWithValue("createdLater@ub.uu.se");
-		recordsOnDisk.create("systemTwoUser", "createdLater", noAppTokenUser, collectedData,
+		List<StorageTerm> storageTerms = createCollectedStorageTermsForUserIdWithValue(
+				"createdLater@ub.uu.se");
+		recordsOnDisk.create("systemTwoUser", "createdLater", noAppTokenUser, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "systemTwo");
 	}
 
-	private static DataGroup createCollectedDataForUserIdWithValue(String termValue) {
-		// collectedData
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
-
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"userIdStorageTerm", termValue, "userId");
-		collectStorageTerm.addChild(collectedDataTerm);
-		return collectedData;
+	private static List<StorageTerm> createCollectedStorageTermsForUserIdWithValue(
+			String termValue) {
+		List<StorageTerm> storageTerms = new ArrayList<>();
+		storageTerms.add(new StorageTerm("userIdStorageTerm", termValue, "userId"));
+		return storageTerms;
 	}
 
 	private static DataGroup convertJsonStringToDataGroup(String jsonRecord) {
@@ -144,7 +144,7 @@ public class TestDataAppTokenStorage {
 		dataGroup.addChild(recordInfo);
 
 		dataGroup.addChild(new DataAtomicSpy("abstract", "false"));
-		recordsInMemory.create(recordType, "metadata", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "metadata", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -152,7 +152,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
-		recordsOnDisk.create(recordType, "recordType", dataGroup, emptyCollectedData,
+		recordsOnDisk.create(recordType, "recordType", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -160,7 +160,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("image", "true", "binary");
-		recordsInMemory.create(recordType, "image", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "image", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -168,7 +168,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("user",
 				"true", "true");
-		recordsInMemory.create(recordType, "user", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "user", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -176,7 +176,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"systemOneUser", "true", "user");
-		recordsInMemory.create(recordType, "systemOneUser", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "systemOneUser", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -184,7 +184,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
 				"systemTwoUser", "true", "user");
-		recordsInMemory.create(recordType, "systemTwoUser", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "systemTwoUser", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 	}
 
@@ -192,7 +192,7 @@ public class TestDataAppTokenStorage {
 		String recordType = "recordType";
 		DataGroup dataGroup = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("appToken", "false", "false");
-		recordsInMemory.create(recordType, "appToken", dataGroup, emptyCollectedData,
+		recordsInMemory.create(recordType, "appToken", dataGroup, storageTerms,
 				new DataGroupSpy("collectedLinksList"), "cora");
 
 	}

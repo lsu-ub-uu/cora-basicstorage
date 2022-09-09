@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
@@ -16,7 +17,7 @@ public class RecordStorageSpy implements RecordStorage {
 	}
 
 	@Override
-	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void create(String type, String id, DataGroup dataRecord, List<StorageTerm> storageTerms,
 			DataGroup linkList, String dataDivider) {
 		// TODO Auto-generated method stub
 
@@ -35,7 +36,7 @@ public class RecordStorageSpy implements RecordStorage {
 	}
 
 	@Override
-	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
+	public void update(String type, String id, DataGroup dataRecord, List<StorageTerm> storageTerms,
 			DataGroup linkList, String dataDivider) {
 		// TODO Auto-generated method stub
 
@@ -79,8 +80,8 @@ public class RecordStorageSpy implements RecordStorage {
 	}
 
 	@Override
-	public long getTotalNumberOfRecordsForAbstractType(String abstractType, List<String> implementingTypes,
-			DataGroup filter) {
+	public long getTotalNumberOfRecordsForAbstractType(String abstractType,
+			List<String> implementingTypes, DataGroup filter) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

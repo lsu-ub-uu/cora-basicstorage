@@ -22,7 +22,9 @@ package se.uu.ub.cora.basicstorage;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,6 +34,7 @@ import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collectterms.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
@@ -42,7 +45,7 @@ public class MetadataStorageInMemoryTest {
 	private RecordStorageInMemory recordStorageInMemory;
 	private DataGroupFactory dataGroupFactory;
 	private DataCopierFactory dataCopierFactory;
-	DataGroup emptyCollectedData = DataCreator.createEmptyCollectedData();
+	List<StorageTerm> storageTerms = Collections.emptyList();
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -110,7 +113,7 @@ public class MetadataStorageInMemoryTest {
 		DataGroup collectIndexTerm = DataCreator
 				.createRecordInfoWithRecordTypeAndRecordId("collectIndexTerm", "someIndexTerm");
 		recordStorageInMemory.create("collectIndexTerm", "someIndexTerm", collectIndexTerm,
-				emptyCollectedData, new DataGroupSpy("collectedLinksList"), "cora");
+				storageTerms, new DataGroupSpy("collectedLinksList"), "cora");
 
 		Collection<DataGroup> collectTerms = metadataStorage.getCollectTerms();
 		assertEquals(collectTerms.size(), 2);
@@ -121,7 +124,7 @@ public class MetadataStorageInMemoryTest {
 		DataGroup collectPermissionTerm = DataCreator.createRecordInfoWithRecordTypeAndRecordId(
 				"collectPermissionTerm", "somePermissionTerm");
 		recordStorageInMemory.create("collectPermissionTerm", "somePermissionTerm",
-				collectPermissionTerm, emptyCollectedData, new DataGroupSpy("collectedLinksList"),
+				collectPermissionTerm, storageTerms, new DataGroupSpy("collectedLinksList"),
 				"cora");
 
 		Collection<DataGroup> collectTerms = metadataStorage.getCollectTerms();
