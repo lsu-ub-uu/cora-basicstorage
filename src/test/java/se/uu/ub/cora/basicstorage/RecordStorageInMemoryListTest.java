@@ -275,50 +275,44 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private void createPlaceInStorageWithUppsalaStorageTerm(String nameInData) {
-		DataGroup collectedData = createCollectedDataWithUppsalaStorageTerm();
-		createPlaceInStorageWithCollectedData(collectedData, nameInData);
+		List<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
+		createPlaceInStorageWithCollectedData(storageTerms, nameInData);
 	}
 
 	private void updatePlaceInStorageWithUppsalaStorageTerm() {
-		DataGroup collectedData = createCollectedDataWithUppsalaStorageTerm();
-		updateUppsalaPlaceInStorageWithCollectedData(collectedData);
+		List<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
+		updateUppsalaPlaceInStorageWithCollectedData(storageTerms);
 	}
 
 	private void updatePlaceInStorageWithStockholmStorageTerm() {
-		DataGroup collectedData = createCollectedDataWithStockholmStorageTerm();
-		updateStockholmPlaceInStorageWithCollectedData(collectedData);
+		List<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
+		updateStockholmPlaceInStorageWithCollectedData(storageTerms);
 	}
 
-	private DataGroup createCollectedDataWithUppsalaStorageTerm() {
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
-
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-		return collectedData;
+	private List<StorageTerm> createCollectedDataWithUppsalaStorageTerm() {
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName");
+		List<StorageTerm> storageTerms = List.of(storageTerm1);
+		return storageTerms;
 	}
 
-	private void createPlaceInStorageWithCollectedData(DataGroup collectedData, String nameInData) {
+	private void createPlaceInStorageWithCollectedData(List<StorageTerm> storageTerms,
+			String nameInData) {
 		DataGroup dataGroup = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"place", "place:0001");
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
-	private void updateUppsalaPlaceInStorageWithCollectedData(DataGroup collectedData) {
+	private void updateUppsalaPlaceInStorageWithCollectedData(List<StorageTerm> storageTerms) {
 		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
-		recordStorage.update("place", "place:0001", dataGroupOut, collectedData, emptyLinkList,
+		recordStorage.update("place", "place:0001", dataGroupOut, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
-	private void updateStockholmPlaceInStorageWithCollectedData(DataGroup collectedData) {
+	private void updateStockholmPlaceInStorageWithCollectedData(List<StorageTerm> storageTerm) {
 		DataGroup dataGroupOut = recordStorage.read("place", "place:0002");
-		recordStorage.update("place", "place:0002", dataGroupOut, collectedData, emptyLinkList,
+		recordStorage.update("place", "place:0002", dataGroupOut, storageTerm, emptyLinkList,
 				dataDivider);
 	}
 
@@ -327,23 +321,14 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"place", "place:0002");
 
-		DataGroup collectedData = createCollectedDataWithStockholmStorageTerm();
-
-		recordStorage.create("place", "place:0002", dataGroup, collectedData, emptyLinkList,
+		List<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
+		recordStorage.create("place", "place:0002", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
-	private DataGroup createCollectedDataWithStockholmStorageTerm() {
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0002");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
-
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Stockholm", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-		return collectedData;
+	private List<StorageTerm> createCollectedDataWithStockholmStorageTerm() {
+		StorageTerm storageTerm = new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName");
+		return List.of(storageTerm);
 	}
 
 	private void createPlaceInStorageWithUppsalaStorageAndStockholmTerm() {
@@ -351,21 +336,12 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"place", "place:0003");
 
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0003");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName");
+		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "Stockholm",
+				"placeName");
+		List<StorageTerm> storageTerms1 = List.of(storageTerm1, storageTerm2);
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Stockholm", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm2);
-
-		recordStorage.create("place", "place:0003", dataGroup, collectedData, emptyLinkList,
+		recordStorage.create("place", "place:0003", dataGroup, storageTerms1, emptyLinkList,
 				dataDivider);
 	}
 
@@ -388,7 +364,8 @@ public class RecordStorageInMemoryListTest {
 	public void testReadAbstractRecordList() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords("nameInData");
+		createImageRecord("nameInData", "image:0001");
+		createImageRecord("nameInData", "image:0002");
 		createGenericBinaryRecord();
 
 		String recordType = "binary";
@@ -403,7 +380,8 @@ public class RecordStorageInMemoryListTest {
 	public void testIndependentDataReadAbstractRecordList() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords("createNewWhenCopyingThisTopLevelGroup");
+		createImageRecord("createNewWhenCopyingThisTopLevelGroup", "image:0001");
+		createImageRecord("createNewWhenCopyingThisTopLevelGroup", "image:0002");
 		createGenericBinaryRecord("createNewWhenCopyingThisTopLevelGroup");
 
 		// two and three have createNewWhenCopyingThisTopLevelGroup as nameInData
@@ -424,7 +402,8 @@ public class RecordStorageInMemoryListTest {
 	public void testAbstractListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords("nameInData");
+		createImageRecord("nameInData", "image:0001");
+		createImageRecord("nameInData", "image:0002");
 		createGenericBinaryRecord("createNewWhenCopyingThisTopLevelGroup");
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -452,7 +431,8 @@ public class RecordStorageInMemoryListTest {
 	public void testIndependentDataAbstractListWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords("nameInData");
+		createImageRecord("nameInData", "image:0001");
+		createImageRecord("nameInData", "image:0002");
 		createGenericBinaryRecord();
 
 		DataGroup filter = DataCreator.createEmptyFilter();
@@ -469,41 +449,16 @@ public class RecordStorageInMemoryListTest {
 				.getFirstAtomicValueWithNameInData("id"), "image:0001");
 	}
 
-	private void createImageRecords(String nameInData) {
+	private void createImageRecord(String nameInData, String imageValue) {
+
 		DataGroup dataGroup = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
-						"image", "image:0001");
+						"image", imageValue);
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
+		List<StorageTerm> storageTerms1 = List
+				.of(new StorageTerm("idStorageTerm", imageValue, "id"));
 
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("image",
-				"image:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
-
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"idStorageTerm", "image:0001", "id");
-		collectStorageTerm.addChild(collectedDataTerm);
-
-		recordStorage.create("image", "image:0001", dataGroup, collectedData, emptyLinkList,
-				dataDivider);
-
-		DataGroup dataGroup2 = DataCreator
-				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
-						"image", "image:0002");
-		dataGroup2.addChild(new DataAtomicSpy("childId", "childValue"));
-
-		DataGroup collectedData2 = DataCreator.createCollectedDataWithTypeAndId("image",
-				"image:0002");
-		DataGroup collectStorageTerm2 = new DataGroupSpy("storage");
-		collectedData2.addChild(collectStorageTerm2);
-
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"IdStorageTerm", "image:0002", "id");
-		collectStorageTerm2.addChild(collectedDataTerm2);
-
-		recordStorage.create("image", "image:0002", dataGroup2, collectedData2, emptyLinkList,
+		recordStorage.create("image", imageValue, dataGroup, storageTerms1, emptyLinkList,
 				dataDivider);
 	}
 
@@ -529,7 +484,8 @@ public class RecordStorageInMemoryListTest {
 	public void testReadAbstractRecordListOneImplementingChildHasNoRecords() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
-		createImageRecords("nameInData");
+		createImageRecord("nameInData", "image:0001");
+		createImageRecord("nameInData", "image:0002");
 		// create no records of genericBinary
 
 		String recordType = "binary";

@@ -1098,16 +1098,17 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
 		List<StorageTerm> storageTerms = new ArrayList<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
-		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
+		// DataGroup dataGroup2 = createDataGroupWithRecordInfo();
+		DataGroup dataGroup2 = DataCreator
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
+						"place", "place:0002");
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"cora");
@@ -1263,22 +1264,12 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		// DataGroup dataGroup = createDataGroupWithRecordInfo();
-		// DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-		// "place:0001");
-		// DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		// collectedData.addChild(collectStorageTerm);
-		//
-		// DataGroup collectedDataTerm = DataCreator
-		// .createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-		// "placeNameStorageTerm", "Uppsala", "placeName");
-		// collectStorageTerm.addChild(collectedDataTerm);
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms = new ArrayList<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 		DataGroup collectedData2 = DataCreator.createCollectedDataWithTypeAndId("place",
@@ -1286,12 +1277,10 @@ public class RecordStorageOnDiskTest {
 		DataGroup collectStorageTerm2 = new DataGroupSpy("storage");
 		collectedData2.addChild(collectStorageTerm2);
 
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm2.addChild(collectedDataTerm2);
+		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		recordStorage.create("place", "place:0002", dataGroup2, collectedData2, emptyLinkList,
+		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"testSystem");
 
 		String expectedCollectedDataOneTerm = "{\n";
@@ -1374,26 +1363,17 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
+		List<StorageTerm> storageTerms = new ArrayList<>();
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
 
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("2",
-						"placeNameStorageTerm", "Stockholm", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm2);
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup read = recordStorage.read("place", "place:0001");
-		collectStorageTerm.removeFirstChildWithNameInData("collectedDataTerm");
-		recordStorage.update("place", "place:0001", read, collectedData, emptyLinkList, "cora");
+		// collectStorageTerm.removeFirstChildWithNameInData("collectedDataTerm");
+		storageTerms.remove(0);
+		recordStorage.update("place", "place:0001", read, storageTerms, emptyLinkList, "cora");
 
 		String expectedCollectedDataOneTerm = "{\n";
 		expectedCollectedDataOneTerm += "    \"children\": [{\n";
@@ -1439,21 +1419,12 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
+		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
 
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("2",
-						"placeNameStorageTerm", "Stockholm", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm2);
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms2, emptyLinkList,
 				"cora");
 
 		Path path = Paths.get(basePath, "cora", COLLECTED_DATA_FILENAME);
@@ -1475,22 +1446,11 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
+		List<StorageTerm> storageTerms = new ArrayList<>();
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("2",
-						"placeNameStorageTerm", "Stockholm", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm2);
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		Path path = Paths.get(basePath, "cora", COLLECTED_DATA_FILENAME);
 		assertTrue(Files.exists(path));
@@ -1508,31 +1468,16 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
+		List<StorageTerm> storageTerms = new ArrayList<>();
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
-		DataGroup collectedData2 = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0002");
-		DataGroup collectStorageTerm2 = new DataGroupSpy("storage");
-		collectedData2.addChild(collectStorageTerm2);
+		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm2.addChild(collectedDataTerm2);
-
-		recordStorage.create("place", "place:0002", dataGroup2, collectedData2, emptyLinkList,
+		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"testSystem");
 
 		Path path = Paths.get(basePath, "cora", COLLECTED_DATA_FILENAME);
@@ -1557,31 +1502,17 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup collectedData = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0001");
-		DataGroup collectStorageTerm = new DataGroupSpy("storage");
-		collectedData.addChild(collectStorageTerm);
+		List<StorageTerm> storageTerms = new ArrayList<>();
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		DataGroup collectedDataTerm = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm.addChild(collectedDataTerm);
-
-		recordStorage.create("place", "place:0001", dataGroup, collectedData, emptyLinkList,
-				"cora");
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
-		DataGroup collectedData2 = DataCreator.createCollectedDataWithTypeAndId("place",
-				"place:0002");
-		DataGroup collectStorageTerm2 = new DataGroupSpy("storage");
-		collectedData2.addChild(collectStorageTerm2);
 
-		DataGroup collectedDataTerm2 = DataCreator
-				.createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey("1",
-						"placeNameStorageTerm", "Uppsala", "placeName");
-		collectStorageTerm2.addChild(collectedDataTerm2);
+		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
 
-		recordStorage.create("place", "place:0002", dataGroup2, collectedData2, emptyLinkList,
+		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"cora");
 
 		Path path = Paths.get(basePath, "cora", COLLECTED_DATA_FILENAME);
