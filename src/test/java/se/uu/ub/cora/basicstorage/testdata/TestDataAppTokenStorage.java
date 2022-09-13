@@ -29,7 +29,7 @@ import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;
 import se.uu.ub.cora.basicstorage.RecordStorageOnDisk;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.collectterms.StorageTerm;
+import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.converter.JsonToDataConverter;
 import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.json.parser.JsonParser;

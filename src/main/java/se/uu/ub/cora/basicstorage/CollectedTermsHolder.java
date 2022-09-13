@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.collectterms.StorageTerm;
+import se.uu.ub.cora.data.collected.StorageTerm;
 
 public interface CollectedTermsHolder {
 

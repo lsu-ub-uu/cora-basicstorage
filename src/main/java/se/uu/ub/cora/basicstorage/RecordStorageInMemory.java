@@ -30,7 +30,8 @@ import java.util.Map.Entry;
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
-import se.uu.ub.cora.data.collectterms.StorageTerm;
+import se.uu.ub.cora.data.collected.RecordToRecordLink;
+import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -70,12 +71,12 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public void create(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, List<RecordToRecordLink> links, String dataDivider) {
 		ensureStorageExistsForRecordType(recordType);
 		checkNoConflictOnRecordId(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
 		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
-		storeLinks(recordType, recordId, linkList, dataDivider);
+		storeLinks(recordType, recordId, links, dataDivider);
 	}
 
 	protected final void ensureStorageExistsForRecordType(String recordType) {
@@ -607,13 +608,13 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public void update(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, List<RecordToRecordLink> links, String dataDivider) {
 		checkRecordExists(recordType, recordId);
 		removeOldLinksStoredAsIncomingLinks(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
 		ensureStorageExistsForRecordType(recordType);
 		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
-		storeLinks(recordType, recordId, linkList, dataDivider);
+		storeLinks(recordType, recordId, links, dataDivider);
 	}
 
 	private void removeOldLinksStoredAsIncomingLinks(String recordType, String recordId) {

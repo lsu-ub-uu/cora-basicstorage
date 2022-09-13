@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.collectterms.StorageTerm;
+import se.uu.ub.cora.data.collected.StorageTerm;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
