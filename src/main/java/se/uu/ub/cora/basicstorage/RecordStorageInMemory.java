@@ -119,10 +119,10 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				recordIndependentOfEnteredRecord));
 	}
 
-	protected void storeLinks(String recordType, String recordId, DataGroup linkList,
+	protected void storeLinks(String recordType, String recordId, List<Link> links,
 			String dataDivider) {
-		if (!linkList.getChildren().isEmpty()) {
-			DataGroup linkListIndependentFromEntered = createIndependentCopy(linkList);
+		if (!links.getChildren().isEmpty()) {
+			DataGroup linkListIndependentFromEntered = createIndependentCopy(links);
 			storeLinkList(recordType, recordId, linkListIndependentFromEntered, dataDivider);
 			storeLinksInIncomingLinks(linkListIndependentFromEntered);
 		} else {
@@ -527,7 +527,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 		}
 	}
 
-	@Override
 	public DataGroup readLinkList(String recordType, String recordId) {
 		checkRecordExists(recordType, recordId);
 		if (linksMissingForRecord(recordType, recordId)) {

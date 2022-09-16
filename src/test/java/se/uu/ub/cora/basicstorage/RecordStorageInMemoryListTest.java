@@ -42,6 +42,7 @@ import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
@@ -50,7 +51,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemoryListTest {
 	private RecordStorageInMemory recordStorage;
-	private DataGroup emptyLinkList = DataCreator.createEmptyLinkList();
+	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private List<StorageTerm> storageTerms = Collections.emptyList();
 	private String dataDivider = "cora";

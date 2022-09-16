@@ -41,6 +41,7 @@ import se.uu.ub.cora.data.DataAtomicProvider;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
@@ -50,7 +51,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private String basePath = "/tmp/recordStorageOnDiskTemp/";
-	private DataGroup emptyLinkList = DataCreator.createEmptyLinkList();
+	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
 	private RecordStorageOnDisk recordStorage;
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
@@ -88,7 +89,6 @@ public class RecordStorageInMemoryReadFromDiskTest {
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 
-		DataGroup emptyLinkList = new DataGroupSpy("collectedDataLinks");
 		recordStorage = RecordStorageInMemoryReadFromDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 

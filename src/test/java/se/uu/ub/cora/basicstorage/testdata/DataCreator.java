@@ -19,10 +19,14 @@
 
 package se.uu.ub.cora.basicstorage.testdata;
 
+import java.util.Collections;
+import java.util.List;
+
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
 import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collected.Link;
 
 public final class DataCreator {
 	private static final String SELF_PRESENTATION_VIEW_ID = "selfPresentationViewId";
@@ -114,8 +118,8 @@ public final class DataCreator {
 		return dataGroup;
 	}
 
-	public static DataGroup createEmptyLinkList() {
-		return new DataGroupSpy("collectedDataLinks");
+	public static List<Link> createEmptyLinkList() {
+		return Collections.emptyList();
 	}
 
 	public static DataGroup createRecordToRecordLink(String fromRecordType, String fromRecordId,
