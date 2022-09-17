@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataProvider;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
@@ -121,8 +122,16 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	protected void storeLinks(String recordType, String recordId, List<Link> links,
 			String dataDivider) {
-		if (!links.getChildren().isEmpty()) {
-			DataGroup linkListIndependentFromEntered = createIndependentCopy(links);
+		DataGroup linkListIndependentFromEntered = convertLinkListToDataGroup(recordType, recordId,
+				links);
+		storeLinksUsingDataGroup(recordType, recordId, linkListIndependentFromEntered, dataDivider);
+	}
+
+	protected void storeLinksUsingDataGroup(String recordType, String recordId,
+			DataGroup linkListIndependentFromEntered, String dataDivider) {
+		if (!linkListIndependentFromEntered.getChildren().isEmpty()) {
+			// DataGroup linkListIndependentFromEntered = convertLinkListToDataGroup(recordType,
+			// recordId, linkListIndependentFromEntered2);
 			storeLinkList(recordType, recordId, linkListIndependentFromEntered, dataDivider);
 			storeLinksInIncomingLinks(linkListIndependentFromEntered);
 		} else {
@@ -130,6 +139,30 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				linkLists.get(recordType).remove(recordId);
 			}
 		}
+	}
+
+	private DataGroup convertLinkListToDataGroup(String recordType, String recordId,
+			List<Link> links) {
+		DataGroup linkListIndependentFromEntered = DataProvider
+				.createGroupUsingNameInData("collectedDataLinks");
+		for (Link link : links) {
+			DataGroup recordToRecordLink = DataProvider
+					.createGroupUsingNameInData("recordToRecordLink");
+			linkListIndependentFromEntered.addChild(recordToRecordLink);
+			DataGroup from = DataProvider.createGroupUsingNameInData("from");
+			recordToRecordLink.addChild(from);
+			from.addChild(DataProvider.createAtomicUsingNameInDataAndValue("linkedRecordType",
+					recordType));
+			from.addChild(
+					DataProvider.createAtomicUsingNameInDataAndValue("linkedRecordId", recordId));
+			DataGroup to = DataProvider.createGroupUsingNameInData("to");
+			recordToRecordLink.addChild(to);
+			to.addChild(DataProvider.createAtomicUsingNameInDataAndValue("linkedRecordType",
+					link.type()));
+			to.addChild(
+					DataProvider.createAtomicUsingNameInDataAndValue("linkedRecordId", link.id()));
+		}
+		return linkListIndependentFromEntered;
 	}
 
 	private void storeLinkList(String recordType, String recordId,

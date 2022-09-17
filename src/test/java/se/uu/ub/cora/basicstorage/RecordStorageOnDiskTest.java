@@ -426,7 +426,7 @@ public class RecordStorageOnDiskTest {
 	@Test
 	public void testRecordWithLinks() throws IOException {
 		createRecordTypePlace();
-		DataGroup linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -450,7 +450,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                \"children\": [\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                        \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                        \"value\": \"place\"\n";
 		expectedLinkListJson += "                                    },\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordId\",\n";
@@ -481,7 +482,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                \"children\": [\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                        \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                        \"value\": \"place\"\n";
 		expectedLinkListJson += "                                    },\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordId\",\n";
@@ -522,7 +524,7 @@ public class RecordStorageOnDiskTest {
 
 	@Test
 	public void testRecordWithLinksOneRecordTypeWithoutLinks() throws IOException {
-		DataGroup linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -543,7 +545,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                \"children\": [\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                        \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                        \"value\": \"place\"\n";
 		expectedLinkListJson += "                                    },\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordId\",\n";
@@ -574,7 +577,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                \"children\": [\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                        \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                        \"value\": \"place\"\n";
 		expectedLinkListJson += "                                    },\n";
 		expectedLinkListJson += "                                    {\n";
 		expectedLinkListJson += "                                        \"name\": \"linkedRecordId\",\n";
@@ -614,20 +618,23 @@ public class RecordStorageOnDiskTest {
 
 	}
 
-	private DataGroup createLinkListWithTwoLinks(String fromRecordId) {
-		DataGroup linkList = DataCreator.createEmptyLinkList();
-
-		linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-				TO_RECORD_TYPE, TO_RECORD_ID));
-
-		linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-				TO_RECORD_TYPE, "toRecordId2"));
-		return linkList;
+	private List<Link> createLinkListWithTwoLinks(String fromRecordId) {
+		// DataGroup linkList = DataCreator.createEmptyLinkList();
+		//
+		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
+		// TO_RECORD_TYPE, TO_RECORD_ID));
+		//
+		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
+		// TO_RECORD_TYPE, "toRecordId2"));
+		// return linkList;
+		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
+		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
+		return List.of(link1, link2);
 	}
 
 	@Test
 	public void testRecordWithLinksTwoSystems() throws IOException {
-		DataGroup linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -657,11 +664,13 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                    \"children\": [\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                            \"value\": \"organisation\"\n";
 		expectedLinkListJson += "                                        },\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson += "                                            \"value\": \"place:0001\"\n";
+		// expectedLinkListJson += " \"value\": \"place:0001\"\n";
+		expectedLinkListJson += "                                            \"value\": \"org:0001\"\n";
 		expectedLinkListJson += "                                        }\n";
 		expectedLinkListJson += "                                    ],\n";
 		expectedLinkListJson += "                                    \"name\": \"from\"\n";
@@ -688,11 +697,13 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                    \"children\": [\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                            \"value\": \"organisation\"\n";
 		expectedLinkListJson += "                                        },\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson += "                                            \"value\": \"place:0001\"\n";
+		// expectedLinkListJson += " \"value\": \"place:0001\"\n";
+		expectedLinkListJson += "                                            \"value\": \"org:0001\"\n";
 		expectedLinkListJson += "                                        }\n";
 		expectedLinkListJson += "                                    ],\n";
 		expectedLinkListJson += "                                    \"name\": \"from\"\n";
@@ -730,7 +741,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                    \"children\": [\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                            \"value\": \"place\"\n";
 		expectedLinkListJson += "                                        },\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordId\",\n";
@@ -761,7 +773,8 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson += "                                    \"children\": [\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson += "                                            \"value\": \"place\"\n";
 		expectedLinkListJson += "                                        },\n";
 		expectedLinkListJson += "                                        {\n";
 		expectedLinkListJson += "                                            \"name\": \"linkedRecordId\",\n";
@@ -812,11 +825,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                    \"children\": [\n";
 		expectedLinkListJson2 += "                                        {\n";
 		expectedLinkListJson2 += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                            \"value\": \"organisation\"\n";
 		expectedLinkListJson2 += "                                        },\n";
 		expectedLinkListJson2 += "                                        {\n";
 		expectedLinkListJson2 += "                                            \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                            \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                            \"value\": \"org:0002\"\n";
 		expectedLinkListJson2 += "                                        }\n";
 		expectedLinkListJson2 += "                                    ],\n";
 		expectedLinkListJson2 += "                                    \"name\": \"from\"\n";
@@ -843,11 +857,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                    \"children\": [\n";
 		expectedLinkListJson2 += "                                        {\n";
 		expectedLinkListJson2 += "                                            \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                            \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                            \"value\": \"organisation\"\n";
 		expectedLinkListJson2 += "                                        },\n";
 		expectedLinkListJson2 += "                                        {\n";
 		expectedLinkListJson2 += "                                            \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                            \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                            \"value\": \"org:0002\"\n";
 		expectedLinkListJson2 += "                                        }\n";
 		expectedLinkListJson2 += "                                    ],\n";
 		expectedLinkListJson2 += "                                    \"name\": \"from\"\n";
@@ -886,11 +901,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                        \"children\": [\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place\"\n";
 		expectedLinkListJson2 += "                                            },\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place:0002\"\n";
 		expectedLinkListJson2 += "                                            }\n";
 		expectedLinkListJson2 += "                                        ],\n";
 		expectedLinkListJson2 += "                                        \"name\": \"from\"\n";
@@ -917,11 +933,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                        \"children\": [\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place\"\n";
 		expectedLinkListJson2 += "                                            },\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place:0002\"\n";
 		expectedLinkListJson2 += "                                            }\n";
 		expectedLinkListJson2 += "                                        ],\n";
 		expectedLinkListJson2 += "                                        \"name\": \"from\"\n";
@@ -956,11 +973,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                        \"children\": [\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place\"\n";
 		expectedLinkListJson2 += "                                            },\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place:0003\"\n";
 		expectedLinkListJson2 += "                                            }\n";
 		expectedLinkListJson2 += "                                        ],\n";
 		expectedLinkListJson2 += "                                        \"name\": \"from\"\n";
@@ -987,11 +1005,12 @@ public class RecordStorageOnDiskTest {
 		expectedLinkListJson2 += "                                        \"children\": [\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordType\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"fromRecordType\"\n";
+		// expectedLinkListJson2 += " \"value\": \"fromRecordType\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place\"\n";
 		expectedLinkListJson2 += "                                            },\n";
 		expectedLinkListJson2 += "                                            {\n";
 		expectedLinkListJson2 += "                                                \"name\": \"linkedRecordId\",\n";
-		expectedLinkListJson2 += "                                                \"value\": \"place:0001\"\n";
+		expectedLinkListJson2 += "                                                \"value\": \"place:0003\"\n";
 		expectedLinkListJson2 += "                                            }\n";
 		expectedLinkListJson2 += "                                        ],\n";
 		expectedLinkListJson2 += "                                        \"name\": \"from\"\n";
@@ -1536,7 +1555,9 @@ public class RecordStorageOnDiskTest {
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		DataGroup linkListPlace = recordStorage.readLinkList("place", "place:0001");
-		assertJsonEqualDataGroup(linkListPlace, emptyLinkList);
+
+		DataGroup emptyLinkListDataGroup = new DataGroupSpy("collectedDataLinks");
+		assertJsonEqualDataGroup(linkListPlace, emptyLinkListDataGroup);
 	}
 
 	private void assertJsonEqualDataGroup(DataGroup dataGroupActual, DataGroup dataGroupExpected) {

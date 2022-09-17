@@ -366,11 +366,14 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 46);
 		DataGroup image = recordStorage.read("binary", "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
 		DataGroup image2 = recordStorage.read("binary", "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
 
 		assertNotSame(image, image2);
 	}
@@ -480,7 +483,8 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
-		// recordStorage.readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
+
+		((RecordStorageInMemory) recordStorage).readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
 
 	}
 
@@ -495,7 +499,7 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
-		// recordStorage.readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
+		((RecordStorageInMemory) recordStorage).readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
 
 	}
 

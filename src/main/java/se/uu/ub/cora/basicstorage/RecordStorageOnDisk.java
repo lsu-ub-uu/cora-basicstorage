@@ -218,7 +218,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		String recordId = record.getNameInData();
 		DataGroup collectedDataLinks = (DataGroup) record
 				.getFirstChildWithNameInData("collectedDataLinks");
-		storeLinks(recordTypeName, recordId, collectedDataLinks, dataDivider);
+		// storeLinks(recordTypeName, recordId, collectedDataLinks, dataDivider);
+		storeLinksUsingDataGroup(recordTypeName, recordId, collectedDataLinks, dataDivider);
 	}
 
 	private final void parseAndStoreCollectedStorageTermsInMemory(List<DataChild> recordsFromFile) {

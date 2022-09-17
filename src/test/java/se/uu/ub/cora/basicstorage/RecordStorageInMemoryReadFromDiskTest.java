@@ -138,7 +138,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 
 	@Test
 	public void testRecordWithLinks() throws IOException {
-		DataGroup linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, linkListWithTwoLinks,
@@ -161,15 +161,18 @@ public class RecordStorageInMemoryReadFromDiskTest {
 		assertFalse(Files.exists(path2));
 	}
 
-	private DataGroup createLinkListWithTwoLinks(String fromRecordId) {
-		DataGroup linkList = DataCreator.createEmptyLinkList();
-
-		linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-				TO_RECORD_TYPE, TO_RECORD_ID));
-
-		linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-				TO_RECORD_TYPE, "toRecordId2"));
-		return linkList;
+	private List<Link> createLinkListWithTwoLinks(String fromRecordId) {
+		// DataGroup linkList = DataCreator.createEmptyLinkList();
+		//
+		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
+		// TO_RECORD_TYPE, TO_RECORD_ID));
+		//
+		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
+		// TO_RECORD_TYPE, "toRecordId2"));
+		// return linkList;
+		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
+		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
+		return List.of(link1, link2);
 	}
 
 	@Test
