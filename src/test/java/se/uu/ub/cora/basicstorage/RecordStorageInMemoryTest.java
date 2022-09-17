@@ -40,8 +40,6 @@ import se.uu.ub.cora.basicstorage.testdata.DataCreator;
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.DataGroupFactory;
-import se.uu.ub.cora.data.DataGroupProvider;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
@@ -59,13 +57,13 @@ public class RecordStorageInMemoryTest {
 	private List<StorageTerm> storageTerms = Collections.emptyList();
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private String dataDivider = "cora";
-	private DataGroupFactory dataGroupFactory;
+	// private DataGroupFactory dataGroupFactory;
 	private DataCopierFactorySpy dataCopierFactory;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		dataGroupFactory = new DataGroupFactorySpy();
-		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
+		// dataGroupFactory = new DataGroupFactorySpy();
+		// DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 
