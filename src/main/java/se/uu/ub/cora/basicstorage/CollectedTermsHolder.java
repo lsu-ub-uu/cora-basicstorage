@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collected.StorageTerm;
 
 public interface CollectedTermsHolder {
 
-	void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
+	void storeCollectedTerms(String recordType, String recordId, List<StorageTerm> storageTerms,
 			String dataDivider);
 
 	List<String> findRecordIdsForFilter(String type, DataGroup filter);

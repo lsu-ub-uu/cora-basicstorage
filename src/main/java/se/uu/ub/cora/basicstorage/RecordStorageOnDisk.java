@@ -47,6 +47,8 @@ import java.util.zip.GZIPOutputStream;
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.collected.Link;
+import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.converter.DataToJsonConverter;
 import se.uu.ub.cora.data.converter.DataToJsonConverterFactory;
 import se.uu.ub.cora.data.converter.DataToJsonConverterProvider;
@@ -216,7 +218,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 		String recordId = record.getNameInData();
 		DataGroup collectedDataLinks = (DataGroup) record
 				.getFirstChildWithNameInData("collectedDataLinks");
-		storeLinks(recordTypeName, recordId, collectedDataLinks, dataDivider);
+		// storeLinks(recordTypeName, recordId, collectedDataLinks, dataDivider);
+		storeLinksUsingDataGroup(recordTypeName, recordId, collectedDataLinks, dataDivider);
 	}
 
 	private final void parseAndStoreCollectedStorageTermsInMemory(List<DataChild> recordsFromFile) {
@@ -259,8 +262,8 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 
 	@Override
 	public synchronized void create(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
-		super.create(recordType, recordId, record, collectedTerms, linkList, dataDivider);
+			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
+		super.create(recordType, recordId, record, storageTerms, links, dataDivider);
 		writeDataToDisk(recordType, dataDivider);
 	}
 
@@ -547,9 +550,9 @@ public class RecordStorageOnDisk extends RecordStorageInMemory
 
 	@Override
 	public synchronized void update(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
 		String previousDataDivider = records.get(recordType).get(recordId).dataDivider;
-		super.update(recordType, recordId, record, collectedTerms, linkList, dataDivider);
+		super.update(recordType, recordId, record, storageTerms, links, dataDivider);
 		writeDataToDisk(recordType, previousDataDivider);
 	}
 

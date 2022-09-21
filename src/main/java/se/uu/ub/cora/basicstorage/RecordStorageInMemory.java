@@ -29,7 +29,10 @@ import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataProvider;
+import se.uu.ub.cora.data.DataRecordLink;
+import se.uu.ub.cora.data.collected.Link;
+import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.searchstorage.SearchStorage;
@@ -45,7 +48,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
 
-	private DataGroup emptyFilter = DataGroupProvider.getDataGroupUsingNameInData("filter");
+	private DataGroup emptyFilter = DataProvider.createGroupUsingNameInData("filter");
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
 	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
 	protected Map<String, Map<String, DividerGroup>> linkLists = new HashMap<>();
@@ -69,12 +72,12 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public void create(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
 		ensureStorageExistsForRecordType(recordType);
 		checkNoConflictOnRecordId(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
-		collectedTermsHolder.storeCollectedTerms(recordType, recordId, collectedTerms, dataDivider);
-		storeLinks(recordType, recordId, linkList, dataDivider);
+		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
+		storeLinks(recordType, recordId, links, dataDivider);
 	}
 
 	protected final void ensureStorageExistsForRecordType(String recordType) {
@@ -117,10 +120,16 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				recordIndependentOfEnteredRecord));
 	}
 
-	protected void storeLinks(String recordType, String recordId, DataGroup linkList,
+	protected void storeLinks(String recordType, String recordId, List<Link> links,
 			String dataDivider) {
-		if (!linkList.getChildren().isEmpty()) {
-			DataGroup linkListIndependentFromEntered = createIndependentCopy(linkList);
+		DataGroup linkListIndependentFromEntered = convertLinkListToDataGroup(recordType, recordId,
+				links);
+		storeLinksUsingDataGroup(recordType, recordId, linkListIndependentFromEntered, dataDivider);
+	}
+
+	protected void storeLinksUsingDataGroup(String recordType, String recordId,
+			DataGroup linkListIndependentFromEntered, String dataDivider) {
+		if (!linkListIndependentFromEntered.getChildren().isEmpty()) {
 			storeLinkList(recordType, recordId, linkListIndependentFromEntered, dataDivider);
 			storeLinksInIncomingLinks(linkListIndependentFromEntered);
 		} else {
@@ -128,6 +137,25 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 				linkLists.get(recordType).remove(recordId);
 			}
 		}
+	}
+
+	private DataGroup convertLinkListToDataGroup(String recordType, String recordId,
+			List<Link> links) {
+		DataGroup linkListAsGroup = DataProvider.createGroupUsingNameInData("collectedDataLinks");
+		for (Link link : links) {
+			DataGroup recordToRecordLink = DataProvider
+					.createGroupUsingNameInData("recordToRecordLink");
+			linkListAsGroup.addChild(recordToRecordLink);
+
+			DataRecordLink from = DataProvider.createRecordLinkUsingNameInDataAndTypeAndId("from",
+					recordType, recordId);
+			recordToRecordLink.addChild(from);
+
+			DataRecordLink to = DataProvider.createRecordLinkUsingNameInDataAndTypeAndId("to",
+					link.type(), link.id());
+			recordToRecordLink.addChild(to);
+		}
+		return linkListAsGroup;
 	}
 
 	private void storeLinkList(String recordType, String recordId,
@@ -525,11 +553,10 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 		}
 	}
 
-	@Override
 	public DataGroup readLinkList(String recordType, String recordId) {
 		checkRecordExists(recordType, recordId);
 		if (linksMissingForRecord(recordType, recordId)) {
-			return DataGroupProvider.getDataGroupUsingNameInData("collectedDataLinks");
+			return DataProvider.createGroupUsingNameInData("collectedDataLinks");
 		}
 		return linkLists.get(recordType).get(recordId).dataGroup;
 	}
@@ -606,13 +633,13 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public void update(String recordType, String recordId, DataGroup record,
-			DataGroup collectedTerms, DataGroup linkList, String dataDivider) {
+			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
 		checkRecordExists(recordType, recordId);
 		removeOldLinksStoredAsIncomingLinks(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
 		ensureStorageExistsForRecordType(recordType);
-		collectedTermsHolder.storeCollectedTerms(recordType, recordId, collectedTerms, dataDivider);
-		storeLinks(recordType, recordId, linkList, dataDivider);
+		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
+		storeLinks(recordType, recordId, links, dataDivider);
 	}
 
 	private void removeOldLinksStoredAsIncomingLinks(String recordType, String recordId) {

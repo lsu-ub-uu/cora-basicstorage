@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.collected.StorageTerm;
 
 public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 
@@ -34,8 +35,8 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	public Map<String, List<String>> returnIdsForTypes = new HashMap<>();
 
 	@Override
-	public void storeCollectedTerms(String recordType, String recordId, DataGroup collectedTerms,
-			String dataDivider) {
+	public void storeCollectedTerms(String recordType, String recordId,
+			List<StorageTerm> storageTerms, String dataDivider) {
 		// TODO Auto-generated method stub
 
 	}
