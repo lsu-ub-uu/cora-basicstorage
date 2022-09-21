@@ -240,7 +240,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public StorageReadResult readList(String type, DataGroup filter) {
+	public StorageReadResult readList(List<String> type, DataGroup filter) {
 		Map<String, DividerGroup> typeDividerRecords = records.get(type);
 		throwErrorIfNoRecordOfType(type, typeDividerRecords);
 
@@ -440,7 +440,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public boolean recordExistsForAbstractOrImplementingRecordTypeAndRecordId(String recordType,
+	public boolean recordExistsForListOfImplementingRecordTypesAndRecordId(List<String> recordType,
 			String recordId) {
 		return recordExistsForRecordTypeAndRecordId(recordType, recordId)
 				|| recordExistsForAbstractRecordTypeAndRecordId(recordType, recordId);
@@ -754,7 +754,7 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	}
 
 	@Override
-	public long getTotalNumberOfRecordsForType(String type, DataGroup filter) {
+	public long getTotalNumberOfRecordsForType(List<String> type, DataGroup filter) {
 		if (recordsExistForRecordType(type)) {
 			return getTotalNumberOfRecordsForExistingType(type, filter);
 		}
