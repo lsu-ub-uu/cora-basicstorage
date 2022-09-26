@@ -45,8 +45,15 @@ public class TestDataRecordInMemoryStorage {
 		addPlace(recordsInMemory);
 		addSecondPlace(recordsInMemory);
 		addMetadata(recordsInMemory);
+
+		addRecordTypePresentation(recordsInMemory);
+		addRecordTypePresentationx(recordsInMemory);
 		addPresentation(recordsInMemory);
+
+		addRecordTypeText(recordsInMemory);
+		addRecordTypeTextx(recordsInMemory);
 		addText(recordsInMemory);
+
 		addRecordType(recordsInMemory);
 		addRecordTypeRecordType(recordsInMemory);
 		addRecordTypeBinary(recordsInMemory);
@@ -163,8 +170,24 @@ public class TestDataRecordInMemoryStorage {
 				createEmptyCollectedLinks(), "cora");
 	}
 
+	private static void addRecordTypePresentation(RecordStorageInMemory recordsInMemory) {
+		String recordType = "recordType";
+		DataGroup dataGroup = DataCreator
+				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("presentation", "true", "true");
+		recordsInMemory.create(recordType, "presentation", dataGroup, storageTerms,
+				createEmptyCollectedLinks(), "cora");
+	}
+
+	private static void addRecordTypePresentationx(RecordStorageInMemory recordsInMemory) {
+		String recordType = "recordType";
+		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndParentId(
+				"presentationx", "true", "presentation");
+		recordsInMemory.create(recordType, "presentationx", dataGroup, storageTerms,
+				createEmptyCollectedLinks(), "cora");
+	}
+
 	private static void addPresentation(RecordStorageInMemory recordsInMemory) {
-		String presentation = "presentation";
+		String presentation = "presentationx";
 		DataGroup dataGroup = new DataGroupSpy(presentation);
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(presentation,
@@ -175,8 +198,24 @@ public class TestDataRecordInMemoryStorage {
 				createEmptyCollectedLinks(), "cora");
 	}
 
+	private static void addRecordTypeText(RecordStorageInMemory recordsInMemory) {
+		String recordType = "recordType";
+		DataGroup dataGroup = DataCreator.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("text",
+				"true", "true");
+		recordsInMemory.create(recordType, "text", dataGroup, storageTerms,
+				createEmptyCollectedLinks(), "cora");
+	}
+
+	private static void addRecordTypeTextx(RecordStorageInMemory recordsInMemory) {
+		String recordType = "recordType";
+		DataGroup dataGroup = DataCreator
+				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("textx", "true", "text");
+		recordsInMemory.create(recordType, "textx", dataGroup, storageTerms,
+				createEmptyCollectedLinks(), "cora");
+	}
+
 	private static void addText(RecordStorageInMemory recordsInMemory) {
-		String text = "text";
+		String text = "textx";
 		DataGroup dataGroup = new DataGroupSpy("text");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(text,

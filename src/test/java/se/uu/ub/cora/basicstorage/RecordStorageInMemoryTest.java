@@ -365,13 +365,13 @@ public class RecordStorageInMemoryTest {
 		createGenericBinaryRecord();
 
 		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 46);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
 		DataGroup image = recordStorage.read("binary", "image:0001");
 		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
 		DataGroup image2 = recordStorage.read("binary", "image:0001");
 		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 52);
 
 		assertNotSame(image, image2);
 	}
@@ -725,8 +725,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId("type",
-				"place:0001"));
+		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("type"), "place:0001"));
 	}
 
 	@Test
@@ -738,7 +738,7 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"place", "NOTplace:0001"));
+				List.of("place"), "NOTplace:0001"));
 	}
 
 	@Test
@@ -755,7 +755,7 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"NOTtype", "place:0002"));
+				List.of("NOTtype"), "place:0002"));
 	}
 
 	@Test
@@ -784,7 +784,7 @@ public class RecordStorageInMemoryTest {
 				emptyLinkList, dataDivider);
 
 		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"abstractRecordType", "someType:0001"));
+				List.of("abstractRecordType", "implementingRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -802,7 +802,7 @@ public class RecordStorageInMemoryTest {
 				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"abstractRecordType", "someType:0001"));
+				List.of("abstractRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -814,7 +814,7 @@ public class RecordStorageInMemoryTest {
 				storageTerms, emptyLinkList, dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"notAbstractRecordType", "someType:0001"));
+				List.of("notAbstractRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -827,7 +827,7 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"binary", "NOTimage:0004"));
+				List.of("binary"), "NOTimage:0004"));
 	}
 
 	@Test
@@ -839,7 +839,7 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
-				"binary", "NOTimage:0004"));
+				List.of("binary"), "NOTimage:0004"));
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)

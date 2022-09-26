@@ -70,6 +70,7 @@ import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageOnDiskTest {
 	private static final String PLACE_JSCLIENT_FILENAME = "place_jsClient.json.gz";
@@ -1956,15 +1957,15 @@ public class RecordStorageOnDiskTest {
 				"Uppsala");
 		filter.addChild(part);
 
-		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
+		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
+				filter).listOfDataGroups;
 		assertEquals(readList.size(), 1);
 		DataGroup first = readList.iterator().next();
 		assertEquals(first.getFirstGroupWithNameInData("recordInfo")
 				.getFirstAtomicValueWithNameInData("id"), "place:0001");
 	}
 
-	@Test(expectedExceptions = RecordNotFoundException.class)
-	// @Test
+	@Test
 	public void testReadingEmptyCollectedDataBeforeReadingRecordFiles() throws IOException {
 		writeZippedStorageTermsPlaceFileToDisk();
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
@@ -1975,7 +1976,9 @@ public class RecordStorageOnDiskTest {
 				"Uppsala");
 		filter.addChild(part);
 
-		recordStorage.readList("place", filter);
+		StorageReadResult readResult = recordStorage.readList(List.of("place"), filter);
+
+		assertEquals(readResult.listOfDataGroups.size(), 0);
 	}
 
 	private void writeZippedPlaceLinksFileToDisk() throws IOException {
