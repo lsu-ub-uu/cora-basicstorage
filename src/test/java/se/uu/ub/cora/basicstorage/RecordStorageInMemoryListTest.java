@@ -320,13 +320,13 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private void updateUppsalaPlaceInStorageWithCollectedData(List<StorageTerm> storageTerms) {
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		recordStorage.update("place", "place:0001", dataGroupOut, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
 	private void updateStockholmPlaceInStorageWithCollectedData(List<StorageTerm> storageTerm) {
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0002");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0002");
 		recordStorage.update("place", "place:0002", dataGroupOut, storageTerm, emptyLinkList,
 				dataDivider);
 	}
@@ -512,13 +512,18 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
+	// @Test
 	public void testReadAbstractRecordListNoImplementingChildHasNoRecords() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 
 		// create no records
 
 		String recordType = "binary";
-		recordStorage.readAbstractList(recordType, emptyFilter);
+		StorageReadResult readResult = recordStorage.readAbstractList(recordType, emptyFilter);
+		//
+		// assertEquals(readResult.start, 0);
+		// assertEquals(readResult.totalNumberOfMatches, 0);
+		// assertEquals(readResult.listOfDataGroups.size(), 0);
 	}
 
 	@Test

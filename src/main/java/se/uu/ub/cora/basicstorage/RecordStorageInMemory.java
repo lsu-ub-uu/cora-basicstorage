@@ -248,15 +248,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public StorageReadResult readList(List<String> types, DataGroup filter) {
-		// Map<String, DividerGroup> typeDividerRecords = records.get(type);
-		// throwErrorIfNoRecordOfType(type, typeDividerRecords);
-		//
-		// return getStorageReadResult(type, filter, typeDividerRecords);
-
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
-		// addRecordsForParentIfParentIsNotAbstract(type, filter, aggregatedRecordList);
-		// throwErrorIfEmptyAggregatedList(type, aggregatedRecordList);
 		StorageReadResult readResult = new StorageReadResult();
 		readResult.listOfDataGroups = aggregatedRecordList;
 		readResult.totalNumberOfMatches = aggregatedRecordList.size();
@@ -299,7 +292,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 			List<String> foundRecordIdsForFilter) {
 		List<DataGroup> foundRecords = new ArrayList<>(foundRecordIdsForFilter.size());
 		for (String foundRecordId : foundRecordIdsForFilter) {
-			foundRecords.add(read(type, foundRecordId));
+			// foundRecords.add(read(type, foundRecordId));
+			foundRecords.add(read(List.of(type), foundRecordId));
 		}
 		return foundRecords;
 	}
@@ -443,7 +437,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private void addRecordsForParentIfParentIsNotAbstract(String type, DataGroup filter,
 			List<DataGroup> aggregatedRecordList) {
-		DataGroup recordTypeDataGroup = read(RECORD_TYPE, type);
+		// DataGroup recordTypeDataGroup = read(RECORD_TYPE, type);
+		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
 		if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
 			readRecordsForTypeAndFilterAndAddToList(type, filter, aggregatedRecordList);
 		}
@@ -459,8 +454,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	@Override
 	public boolean recordExistsForListOfImplementingRecordTypesAndRecordId(List<String> recordTypes,
 			String recordId) {
-		// return recordExistsForRecordTypeAndRecordId(recordType, recordId)
-		// || recordExistsForAbstractRecordTypeAndRecordId(recordType, recordId);
 
 		for (String childType : recordTypes) {
 			if (recordsExistForRecordType(childType)
@@ -475,43 +468,9 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 		return records.get(type) != null;
 	}
 
-	// private boolean recordExistsForRecordTypeAndRecordId(List<String> recordType, String
-	// recordId) {
-	// return recordsExistForRecordType(recordType)
-	// && recordIdExistsForRecordType(recordType, recordId);
-	// }
-
-	// private boolean recordExistsForAbstractRecordTypeAndRecordId(String recordType,
-	// String recordId) {
-	// return recordsExistForRecordType(RECORD_TYPE)
-	// && recordTypeExistsAndIsAbstractAndRecordIdExistInImplementingChild(recordType,
-	// recordId);
-	// }
-
 	private boolean recordIdExistsForRecordType(String recordType, String recordId) {
 		return records.get(recordType).containsKey(recordId);
 	}
-
-	// private boolean recordTypeExistsAndIsAbstractAndRecordIdExistInImplementingChild(
-	// String recordType, String recordId) {
-	// if (recordTypeDoesNotExist(recordType)) {
-	// return false;
-	// }
-	// return recordTypeIsAbstractAndRecordIdExistInImplementingChild(recordType, recordId);
-	// }
-
-	// private boolean recordTypeDoesNotExist(String recordType) {
-	// return !recordExistsForRecordTypeAndRecordId(RECORD_TYPE, recordType);
-	// }
-
-	// private boolean recordTypeIsAbstractAndRecordIdExistInImplementingChild(String recordType,
-	// String recordId) {
-	// DataGroup recordTypeDataGroup = read(RECORD_TYPE, recordType);
-	// if (recordTypeIsAbstract(recordTypeDataGroup)) {
-	// return checkIfRecordIdExistsInChildren(recordType, recordId);
-	// }
-	// return false;
-	// }
 
 	private boolean recordTypeIsAbstract(DataGroup recordTypeDataGroup) {
 		String abstractValue = recordTypeDataGroup.getFirstAtomicValueWithNameInData("abstract");
@@ -522,40 +481,28 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 		return "true".equals(typeIsAbstract);
 	}
 
-	// private boolean checkIfRecordIdExistsInChildren(String recordType, String recordId) {
-	// List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(recordType);
-	// for (String childType : implementingChildRecordTypes) {
-	// if (recordsExistForRecordType(childType)
-	// && recordIdExistsForRecordType(childType, recordId)) {
-	// return true;
-	// }
-	// }
-	// return false;
-	// }
-
 	@Override
-	public DataGroup read(String recordType, String recordId) {
-		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, recordType);
-		if (recordTypeIsAbstract(recordTypeDataGroup)) {
-			return createIndependentCopy(
-					readRecordFromImplementingRecordTypes(recordType, recordId));
-		}
-		return createIndependentCopy(returnRecordIfExisting(recordType, recordId));
+	public DataGroup read(List<String> types, String recordId) {
+		// DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, recordType);
+		// if (recordTypeIsAbstract(recordTypeDataGroup)) {
+		return createIndependentCopy(readRecordFromImplementingRecordTypes(types, recordId));
+		// }
+		// return createIndependentCopy(returnRecordIfExisting(recordType, recordId));
 	}
 
-	private DataGroup readRecordFromImplementingRecordTypes(String recordType, String recordId) {
-		DataGroup readRecord = tryToReadRecordFromImplementingRecordTypes(recordType, recordId);
+	private DataGroup readRecordFromImplementingRecordTypes(List<String> types, String recordId) {
+		DataGroup readRecord = tryToReadRecordFromImplementingRecordTypes(types, recordId);
 		if (readRecord == null) {
 			throw new RecordNotFoundException("No record exists with recordId: " + recordId);
 		}
 		return readRecord;
 	}
 
-	private DataGroup tryToReadRecordFromImplementingRecordTypes(String recordType,
+	private DataGroup tryToReadRecordFromImplementingRecordTypes(List<String> types,
 			String recordId) {
 		DataGroup readRecord = null;
-		List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(recordType);
-		for (String implementingType : implementingChildRecordTypes) {
+		// List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(types);
+		for (String implementingType : types) {
 			try {
 				readRecord = returnRecordIfExisting(implementingType, recordId);
 			} catch (RecordNotFoundException e) {
@@ -740,7 +687,8 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	private void readListForMetadataType(Collection<DataGroup> readDataGroups,
 			MetadataTypes metadataType) {
-		DataGroup recordTypeDataGroup = read(RECORD_TYPE, metadataType.type);
+		// DataGroup recordTypeDataGroup = read(RECORD_TYPE, metadataType.type);
+		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, metadataType.type);
 		if (recordTypeIsAbstract(recordTypeDataGroup)) {
 			readDataGroups
 					.addAll(readAbstractList(metadataType.type, emptyFilter).listOfDataGroups);
@@ -772,21 +720,16 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	@Override
 	public DataGroup getSearchTerm(String searchTermId) {
-		return read("searchTerm", searchTermId);
+		return read(List.of("searchTerm"), searchTermId);
 	}
 
 	@Override
 	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
-		return read("collectIndexTerm", collectIndexTermId);
+		return read(List.of("collectIndexTerm"), collectIndexTermId);
 	}
 
 	@Override
 	public long getTotalNumberOfRecordsForTypes(List<String> types, DataGroup filter) {
-		// if (recordsExistForRecordType(types)) {
-		// return getTotalNumberOfRecordsForExistingType(types, filter);
-		// }
-		// return 0;
-
 		long size = 0;
 		for (String type : types) {
 			size += getTotalNumberOfRecordsForImplementingType(filter, type);
@@ -795,25 +738,12 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 
 	}
 
-	// private long getTotalNumberOfRecordsForExistingType(String type, DataGroup filter) {
-	// long numberOfMatchingRecords = getNumberOfRecords(type, filter);
-	// if (noLimitInformationInFilter(filter)) {
-	// return numberOfMatchingRecords;
-	// }
-	// return getTotalNumberUsingLimitInFilter(numberOfMatchingRecords, filter);
-	// }
-
 	private long getNumberOfRecords(String type, DataGroup filter) {
 		if (filterContainsNoPart(filter)) {
 			return records.get(type).size();
 		}
 		return collectedTermsHolder.findRecordIdsForFilter(type, filter).size();
 	}
-
-	// private boolean noLimitInformationInFilter(DataGroup filter) {
-	// return !filter.containsChildWithNameInData("toNo")
-	// && !filter.containsChildWithNameInData(FROM_NO);
-	// }
 
 	private long getTotalNumberUsingLimitInFilter(long numberOfRecords, DataGroup filter) {
 		long toNo = getToNoOrNumOfMatchingRecords(filter, numberOfRecords);

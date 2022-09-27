@@ -12,7 +12,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 public class RecordStorageSpy implements RecordStorage {
 
 	@Override
-	public DataGroup read(String type, String id) {
+	public DataGroup read(List<String> types, String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
