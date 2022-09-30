@@ -81,7 +81,7 @@ public class AppTokenStorageImp extends SecurityStorage implements AppTokenStora
 		DataGroup user = null;
 		for (String userRecordTypeName : userRecordTypeNames) {
 			try {
-				user = recordStorage.read(userRecordTypeName, userId);
+				user = recordStorage.read(List.of(userRecordTypeName), userId);
 			} catch (RecordNotFoundException e) {
 				// do nothing
 			}
@@ -120,7 +120,7 @@ public class AppTokenStorageImp extends SecurityStorage implements AppTokenStora
 	}
 
 	private String getTokenFromStorage(String appTokenId) {
-		return recordStorage.read("appToken", appTokenId)
+		return recordStorage.read(List.of("appToken"), appTokenId)
 				.getFirstAtomicValueWithNameInData("token");
 	}
 

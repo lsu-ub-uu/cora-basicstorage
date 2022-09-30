@@ -20,6 +20,7 @@
 package se.uu.ub.cora.basicstorage;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.data.DataAtomicProvider;
@@ -54,7 +55,7 @@ public class UserStorageImp extends SecurityStorage implements UserStorage {
 		DataGroup user = null;
 		for (String userRecordTypeName : userRecordTypeNames) {
 			try {
-				user = recordStorage.read(userRecordTypeName, userId);
+				user = recordStorage.read(List.of(userRecordTypeName), userId);
 			} catch (RecordNotFoundException e) {
 				// do nothing
 			}

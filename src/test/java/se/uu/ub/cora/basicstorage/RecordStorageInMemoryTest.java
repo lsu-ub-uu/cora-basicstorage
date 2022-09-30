@@ -94,7 +94,7 @@ public class RecordStorageInMemoryTest {
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "true", "false");
 		recordsInMemoryWithData.create("recordType", "place", placeRecordType, storageTerms,
 				emptyLinkList, "cora");
-		assertEquals(recordsInMemoryWithData.read("place", "place:0001"), dataGroup,
+		assertEquals(recordsInMemoryWithData.read(List.of("place"), "place:0001"), dataGroup,
 				"dataGroup should be the one added on startup");
 
 	}
@@ -312,20 +312,20 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		DataGroup image = recordStorage.read("binary", "image:0001");
+		DataGroup image = recordStorage.read(List.of("image", "genericBinary"), "image:0001");
 		assertNotNull(image);
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testReadMissingRecordType() {
-		recordStorage.read("", "");
+		recordStorage.read(List.of("nonExistingType"), "someId");
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testReadMissingRecordId() {
 		RecordStorageInMemory recordsInMemoryWithTestData = TestDataRecordInMemoryStorage
 				.createRecordStorageInMemoryWithTestData();
-		recordsInMemoryWithTestData.read("place", "");
+		recordsInMemoryWithTestData.read(List.of("place"), "");
 	}
 
 	@Test
@@ -335,7 +335,7 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 	}
 
@@ -349,9 +349,9 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 3);
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 4);
-		DataGroup dataGroupOut2 = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 5);
 
 		assertNotSame(dataGroupOut, dataGroupOut2);
@@ -364,14 +364,11 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 46);
-		DataGroup image = recordStorage.read("binary", "image:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 47);
-		DataGroup image2 = recordStorage.read("binary", "image:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 48);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
+		DataGroup image = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
+		DataGroup image2 = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 52);
 
 		assertNotSame(image, image2);
 	}
@@ -386,10 +383,10 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0002", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 
-		DataGroup dataGroupOut2 = recordStorage.read("type", "place:0002");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0002");
 		assertEquals(dataGroupOut2.getNameInData(), dataGroup.getNameInData());
 	}
 
@@ -419,14 +416,14 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 
 		recordStorage.deleteByTypeAndId("type", "place:0001");
 
 		boolean recordFound = true;
 		try {
-			recordStorage.read("type", "place:0001");
+			recordStorage.read(List.of("type"), "place:0001");
 			recordFound = true;
 
 		} catch (RecordNotFoundException e) {
@@ -535,7 +532,7 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 
 		recordStorage.deleteByTypeAndId("type", "place:0001_NOT_FOUND");
@@ -548,7 +545,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		DataGroup dataGroupOut = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 		DataAtomic child = (DataAtomic) dataGroupOut.getChildren().get(1);
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
@@ -556,7 +553,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.update("type", "place:0001", dataGroup2, storageTerms, emptyLinkList,
 				dataDivider);
 
-		DataGroup dataGroupOut2 = recordStorage.read("type", "place:0001");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
 		DataAtomic child2 = (DataAtomic) dataGroupOut2.getChildren().get(1);
 
 		assertEquals(child.getValue(), "childValue");
@@ -725,8 +722,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertTrue(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId("type",
-				"place:0001"));
+		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("type"), "place:0001"));
 	}
 
 	@Test
@@ -737,8 +734,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("place", "place:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"place", "NOTplace:0001"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("place"), "NOTplace:0001"));
 	}
 
 	@Test
@@ -754,8 +751,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"NOTtype", "place:0002"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("NOTtype"), "place:0002"));
 	}
 
 	@Test
@@ -783,8 +780,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("implementingRecordType", "someType:0001", dataGroup, storageTerms,
 				emptyLinkList, dataDivider);
 
-		assertTrue(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"abstractRecordType", "someType:0001"));
+		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("abstractRecordType", "implementingRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -801,8 +798,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("recordType", "otherImplementingRecordType",
 				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"abstractRecordType", "someType:0001"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("abstractRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -813,8 +810,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("recordType", "notAbstractRecordType", abstractRecordType,
 				storageTerms, emptyLinkList, dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"notAbstractRecordType", "someType:0001"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("notAbstractRecordType"), "someType:0001"));
 	}
 
 	@Test
@@ -826,8 +823,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"binary", "NOTimage:0004"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("binary"), "NOTimage:0004"));
 	}
 
 	@Test
@@ -838,8 +835,8 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(
-				"binary", "NOTimage:0004"));
+		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+				List.of("binary"), "NOTimage:0004"));
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
@@ -856,7 +853,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("recordType", "otherImplementingRecordType",
 				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
 
-		recordStorage.read("abstractRecordType", "someType:0001");
+		recordStorage.read(List.of("otherImplementingRecordType"), "someType:0001");
 	}
 
 }

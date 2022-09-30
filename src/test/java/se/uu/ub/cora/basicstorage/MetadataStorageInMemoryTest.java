@@ -76,7 +76,7 @@ public class MetadataStorageInMemoryTest {
 	public void testGetPresentationElements() {
 		Collection<DataGroup> presentationElements = metadataStorage.getPresentationElements();
 		DataGroup presentationElement = presentationElements.iterator().next();
-		assertEquals(presentationElement.getNameInData(), "presentation");
+		assertEquals(presentationElement.getNameInData(), "presentationx");
 		assertIdInRecordInfoIsCorrect(presentationElement, "placeView");
 	}
 
@@ -99,7 +99,7 @@ public class MetadataStorageInMemoryTest {
 
 		recordType = iterator.next();
 		assertEquals(recordType.getNameInData(), "recordType");
-		assertIdInRecordInfoIsCorrect(recordType, "image");
+		assertIdInRecordInfoIsCorrect(recordType, "metadata");
 	}
 
 	@Test

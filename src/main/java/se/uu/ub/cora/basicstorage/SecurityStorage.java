@@ -42,7 +42,7 @@ public abstract class SecurityStorage {
 	}
 
 	private void populateUserRecordTypeNameList() {
-		Collection<DataGroup> recordTypes = recordStorage.readList(RECORD_TYPE,
+		Collection<DataGroup> recordTypes = recordStorage.readList(List.of(RECORD_TYPE),
 				DataGroupProvider.getDataGroupUsingNameInData("filter")).listOfDataGroups;
 
 		for (DataGroup recordTypePossibleChild : recordTypes) {

@@ -70,6 +70,7 @@ import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
+import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageOnDiskTest {
 	private static final String PLACE_JSCLIENT_FILENAME = "place_jsClient.json.gz";
@@ -272,7 +273,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		assertEquals(readJsonFileFromDisk(PLACE_CORA_FILENAME, "cora"),
@@ -359,13 +360,13 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
 						"place", "place:0002");
-		DataGroup dataGroupOut2 = recordStorage.read("place", "place:0002");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("place"), "place:0002");
 		assertJsonEqualDataGroup(dataGroupOut2, dataGroup2);
 	}
 
@@ -379,13 +380,13 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
 						"place", "place:0002");
-		DataGroup dataGroupOut2 = recordStorage.read("place", "place:0002");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("place"), "place:0002");
 		assertJsonEqualDataGroup(dataGroupOut2, dataGroup2);
 	}
 
@@ -398,7 +399,7 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		recordStorage.read("place", "place:0001");
+		recordStorage.read(List.of("place"), "place:0001");
 	}
 
 	@Test
@@ -413,13 +414,13 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
 						"place", "place:0002");
-		DataGroup dataGroupOut2 = recordStorage.read("place", "place:0002");
+		DataGroup dataGroupOut2 = recordStorage.read(List.of("place"), "place:0002");
 		assertJsonEqualDataGroup(dataGroupOut2, dataGroup2);
 	}
 
@@ -433,7 +434,7 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, linkListWithTwoLinks,
 				"cora");
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
 
 		assertEquals(readJsonFileFromDisk(PLACE_CORA_FILENAME, "cora"),
@@ -1387,7 +1388,7 @@ public class RecordStorageOnDiskTest {
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
-		DataGroup read = recordStorage.read("place", "place:0001");
+		DataGroup read = recordStorage.read(List.of("place"), "place:0001");
 		// collectStorageTerm.removeFirstChildWithNameInData("collectedDataTerm");
 		storageTerms.remove(0);
 		recordStorage.update("place", "place:0001", read, storageTerms, emptyLinkList, "cora");
@@ -1447,7 +1448,7 @@ public class RecordStorageOnDiskTest {
 		Path path = Paths.get(basePath, "cora", COLLECTED_DATA_FILENAME);
 		assertTrue(Files.exists(path));
 
-		DataGroup read = recordStorage.read("place", "place:0001");
+		DataGroup read = recordStorage.read(List.of("place"), "place:0001");
 		recordStorage.update("place", "place:0001", read, storageTerms, emptyLinkList, "cora");
 
 		assertFalse(Files.exists(path));
@@ -1549,7 +1550,7 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
@@ -1641,9 +1642,9 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		assertEquals(dataGroupOut.getNameInData(), "authority");
-		DataGroup dataGroupPersonOut = recordStorage.read("person", "person:0001");
+		DataGroup dataGroupPersonOut = recordStorage.read(List.of("person"), "person:0001");
 		assertEquals(dataGroupPersonOut.getNameInData(), "authority");
 	}
 
@@ -1833,7 +1834,7 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		DataGroup dataGroupOut = recordStorage.read("place", "place:0001");
+		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		assertJsonEqualDataGroup(dataGroupOut, dataGroup);
@@ -1956,15 +1957,15 @@ public class RecordStorageOnDiskTest {
 				"Uppsala");
 		filter.addChild(part);
 
-		Collection<DataGroup> readList = recordStorage.readList("place", filter).listOfDataGroups;
+		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
+				filter).listOfDataGroups;
 		assertEquals(readList.size(), 1);
 		DataGroup first = readList.iterator().next();
 		assertEquals(first.getFirstGroupWithNameInData("recordInfo")
 				.getFirstAtomicValueWithNameInData("id"), "place:0001");
 	}
 
-	@Test(expectedExceptions = RecordNotFoundException.class)
-	// @Test
+	@Test
 	public void testReadingEmptyCollectedDataBeforeReadingRecordFiles() throws IOException {
 		writeZippedStorageTermsPlaceFileToDisk();
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
@@ -1975,7 +1976,9 @@ public class RecordStorageOnDiskTest {
 				"Uppsala");
 		filter.addChild(part);
 
-		recordStorage.readList("place", filter);
+		StorageReadResult readResult = recordStorage.readList(List.of("place"), filter);
+
+		assertEquals(readResult.listOfDataGroups.size(), 0);
 	}
 
 	private void writeZippedPlaceLinksFileToDisk() throws IOException {

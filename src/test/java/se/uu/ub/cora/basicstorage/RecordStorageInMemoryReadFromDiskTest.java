@@ -116,7 +116,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
-		DataGroup readDataGroup = recordStorage.read("place", "place:0001");
+		DataGroup readDataGroup = recordStorage.read(List.of("place"), "place:0001");
 
 		Map<String, DividerGroup> map = recordStorage.records.get("place");
 		DividerGroup dividerGroup = map.get("place:0001");
@@ -143,7 +143,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, linkListWithTwoLinks,
 				"cora");
-		DataGroup readDataGroup = recordStorage.read("place", "place:0001");
+		DataGroup readDataGroup = recordStorage.read(List.of("place"), "place:0001");
 
 		Map<String, DividerGroup> map = recordStorage.records.get("place");
 		DividerGroup dividerGroup = map.get("place:0001");
