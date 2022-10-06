@@ -4,7 +4,6 @@ module se.uu.ub.cora.basicstorage {
 	requires transitive se.uu.ub.cora.apptokenstorage;
 	requires se.uu.ub.cora.logger;
 	requires transitive se.uu.ub.cora.storage;
-	requires se.uu.ub.cora.searchstorage;
 	requires se.uu.ub.cora.basicdata;
 
 	exports se.uu.ub.cora.basicstorage;
@@ -16,7 +15,7 @@ module se.uu.ub.cora.basicstorage {
 	provides se.uu.ub.cora.apptokenstorage.AppTokenStorageProvider
 			with se.uu.ub.cora.basicstorage.OnDiskAppTokenStorageProvider;
 
-	provides se.uu.ub.cora.storage.RecordStorageProvider
+	provides se.uu.ub.cora.storage.RecordStorageProviderTest
 			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
 	provides se.uu.ub.cora.storage.MetadataStorageProvider
 			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;

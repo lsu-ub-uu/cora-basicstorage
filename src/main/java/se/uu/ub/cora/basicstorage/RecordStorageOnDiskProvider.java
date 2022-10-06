@@ -25,9 +25,9 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
-import se.uu.ub.cora.storage.RecordStorageProvider;
+import se.uu.ub.cora.storage.RecordStorageFactory;
 
-public class RecordStorageOnDiskProvider implements RecordStorageProvider, MetadataStorageProvider {
+public class RecordStorageOnDiskProvider implements RecordStorageProviderTest, MetadataStorageProvider {
 	private Logger log = LoggerProvider.getLoggerForClass(RecordStorageOnDiskProvider.class);
 	private Map<String, String> initInfo;
 

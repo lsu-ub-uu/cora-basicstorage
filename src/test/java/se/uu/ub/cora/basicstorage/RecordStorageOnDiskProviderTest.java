@@ -42,14 +42,14 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
-import se.uu.ub.cora.storage.RecordStorageProvider;
+import se.uu.ub.cora.storage.RecordStorageFactory;
 
 public class RecordStorageOnDiskProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
 	private String basePath = "/tmp/recordStorageOnDiskTempBasicStorageProvider/";
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "RecordStorageOnDiskProvider";
-	private RecordStorageProvider recordStorageOnDiskProvider;
+	private RecordStorageProviderTest recordStorageOnDiskProvider;
 	private DataGroupFactory dataGroupFactory;
 
 	@BeforeMethod
