@@ -34,7 +34,9 @@
 	<name>Basic storage</name>
 
 	<properties>
+		<initialize.version>1.0-SNAPSHOT</initialize.version>
 		<logger.version>2.5.0</logger.version>
+		<loggerspies.version>1.0-SNAPSHOT</loggerspies.version>
 		<coradata.version>7.2-SNAPSHOT</coradata.version>
 		<basicdata.version>4.1.0</basicdata.version>
 		<storage.version>7.0-SNAPSHOT</storage.version>
@@ -54,8 +56,20 @@
 	<dependencies>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>initialize</artifactId>
+			<version>${initialize.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger</artifactId>
 			<version>${logger.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>logger-spies</artifactId>
+			<version>${loggerspies.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

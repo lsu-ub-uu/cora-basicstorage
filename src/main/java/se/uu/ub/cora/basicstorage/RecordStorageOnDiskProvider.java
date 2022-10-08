@@ -20,6 +20,7 @@ package se.uu.ub.cora.basicstorage;
 
 import java.util.Map;
 
+import se.uu.ub.cora.initialize.SettingsProvider;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
@@ -30,7 +31,6 @@ import se.uu.ub.cora.storage.RecordStorageInstanceProvider;
 public class RecordStorageOnDiskProvider
 		implements RecordStorageInstanceProvider, MetadataStorageProvider {
 	private Logger log = LoggerProvider.getLoggerForClass(RecordStorageOnDiskProvider.class);
-	private Map<String, String> initInfo;
 
 	@Override
 	public int getOrderToSelectImplementionsBy() {
@@ -38,11 +38,17 @@ public class RecordStorageOnDiskProvider
 	}
 
 	@Override
-	public void startUsingInitInfo(Map<String, String> initInfo) {
-		this.initInfo = initInfo;
-		log.logInfoUsingMessage("RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
-		startRecordStorage();
-		log.logInfoUsingMessage("RecordStorageOnDiskProvider started RecordStorageOnDisk");
+	public RecordStorage getRecordStorage() {
+		ensureRecordStorageIsStarted();
+		return RecordStorageInstance.getInstance();
+	}
+
+	private void ensureRecordStorageIsStarted() {
+		if (noRunningRecordStorageExists()) {
+			log.logInfoUsingMessage("RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
+			startNewRecordStorageOnDiskInstance();
+			log.logInfoUsingMessage("RecordStorageOnDiskProvider started RecordStorageOnDisk");
+		}
 	}
 
 	private void startRecordStorage() {
@@ -58,8 +64,9 @@ public class RecordStorageOnDiskProvider
 	}
 
 	private void startNewRecordStorageOnDiskInstance() {
-		String basePath = tryToGetInitParameter("storageOnDiskBasePath");
-		String type = tryToGetInitParameter("storageType");
+		String basePath = SettingsProvider.getSetting("storageOnDiskBasePath");
+		String type = SettingsProvider.getSetting("storageType");
+
 		if ("memory".equals(type)) {
 			setStaticInstance(RecordStorageInMemoryReadFromDisk
 					.createRecordStorageOnDiskWithBasePath(basePath));
@@ -76,24 +83,12 @@ public class RecordStorageOnDiskProvider
 		RecordStorageInstance.setInstance(recordStorage);
 	}
 
-	private String tryToGetInitParameter(String parameterName) {
-		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
-		String parameter = initInfo.get(parameterName);
-		log.logInfoUsingMessage("Found " + parameter + " as " + parameterName);
-		return parameter;
-	}
-
-	private void throwErrorIfKeyIsMissingFromInitInfo(String key) {
-		if (!initInfo.containsKey(key)) {
-			String errorMessage = "InitInfo must contain " + key;
-			log.logFatalUsingMessage(errorMessage);
-			throw DataStorageException.withMessage(errorMessage);
-		}
-	}
-
+	// TODO: remove once metadtaStorage no longer uses this
 	@Override
-	public RecordStorage getRecordStorage() {
-		return RecordStorageInstance.getInstance();
+	public void startUsingInitInfo(Map<String, String> initInfo) {
+		log.logInfoUsingMessage("RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
+		startRecordStorage();
+		log.logInfoUsingMessage("RecordStorageOnDiskProvider started RecordStorageOnDisk");
 	}
 
 	@Override
