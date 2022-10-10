@@ -37,31 +37,32 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.data.DataGroupFactory;
-import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.initialize.SettingsProvider;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
-import se.uu.ub.cora.storage.RecordStorageProvider;
+import se.uu.ub.cora.storage.RecordStorageInstanceProvider;
 
 public class RecordStorageOnDiskProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
 	private String basePath = "/tmp/recordStorageOnDiskTempBasicStorageProvider/";
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "RecordStorageOnDiskProvider";
-	private RecordStorageProvider recordStorageOnDiskProvider;
+	private RecordStorageInstanceProvider recordStorageOnDiskProvider;
 	private DataGroupFactory dataGroupFactory;
 
 	@BeforeMethod
 	public void beforeMethod() throws Exception {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		dataGroupFactory = new DataGroupFactorySpy();
-		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
+		// dataGroupFactory = new DataGroupFactorySpy();
+		// DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 
 		initInfo = new HashMap<>();
 		initInfo.put("storageOnDiskBasePath", basePath);
 		initInfo.put("storageType", "disk");
+		SettingsProvider.setSettings(initInfo);
 		makeSureBasePathExistsAndIsEmpty();
 		recordStorageOnDiskProvider = new RecordStorageOnDiskProvider();
 		RecordStorageInstance.setInstance(null);
@@ -95,13 +96,15 @@ public class RecordStorageOnDiskProviderTest {
 
 	@Test
 	public void testGetOrderToSelectImplementationsByIsZero() {
+		recordStorageOnDiskProvider.getRecordStorage();
+
 		assertEquals(recordStorageOnDiskProvider.getOrderToSelectImplementionsBy(), 0);
 	}
 
 	@Test
 	public void testNormalStartupReturnsRecordStorageOnDisk() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
+
 		assertTrue(recordStorage instanceof RecordStorageOnDisk);
 		assertFalse(recordStorage instanceof RecordStorageInMemoryReadFromDisk);
 	}
@@ -109,24 +112,26 @@ public class RecordStorageOnDiskProviderTest {
 	@Test
 	public void testNormalStartupReturnsRecordStorageInMemoryReadFromDisk() {
 		initInfo.put("storageType", "memory");
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
+
+		recordStorageOnDiskProvider.getRecordStorage();
+
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
 		assertTrue(recordStorage instanceof RecordStorageInMemoryReadFromDisk);
 	}
 
 	@Test
 	public void testNormalStartupBasePathSentToRecordStorage() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		RecordStorageOnDisk recordStorage = (RecordStorageOnDisk) recordStorageOnDiskProvider
 				.getRecordStorage();
+
 		assertEquals(recordStorage.getBasePath(), initInfo.get("storageOnDiskBasePath"));
 	}
 
 	@Test
 	public void testNormalStartupReturnsTheSameRecordStorageForMultipleCalls() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
 		RecordStorage recordStorage2 = recordStorageOnDiskProvider.getRecordStorage();
+
 		assertSame(recordStorage, recordStorage2);
 	}
 
@@ -134,38 +139,23 @@ public class RecordStorageOnDiskProviderTest {
 	public void testRecordStorageStartedByOtherProviderIsReturned() {
 		RecordStorageSpy recordStorageSpy = new RecordStorageSpy();
 		RecordStorageInstance.setInstance(recordStorageSpy);
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
+
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
+
 		assertSame(recordStorage, recordStorageSpy);
 	}
 
 	@Test
-	public void testLoggingRecordStorageStartedByOtherProvider() {
-		RecordStorageSpy recordStorageSpy = new RecordStorageSpy();
-		RecordStorageInstance.setInstance(recordStorageSpy);
-
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
-
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
-				"Using previously started RecordStorage as RecordStorage");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 2),
-				"RecordStorageOnDiskProvider started RecordStorageOnDisk");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 3);
-	}
-
-	@Test
 	public void testRecordStorageIsAccessibleToOthers() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
+
 		assertSame(recordStorage, RecordStorageInstance.getInstance());
 	}
 
 	@Test
 	public void testMetadataStorageIsRecordStorage() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		MetadataStorageProvider metadataStorageProvider = (MetadataStorageProvider) recordStorageOnDiskProvider;
+
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
 		MetadataStorage metadataStorage = metadataStorageProvider.getMetadataStorage();
 		assertSame(metadataStorage, recordStorage);
@@ -173,39 +163,26 @@ public class RecordStorageOnDiskProviderTest {
 
 	@Test
 	public void testLoggingNormalStartup() {
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
+		recordStorageOnDiskProvider.getRecordStorage();
+
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
 				"RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
-				"Found /tmp/recordStorageOnDiskTempBasicStorageProvider/ as storageOnDiskBasePath");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 2),
-				"Found disk as storageType");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 3),
 				"RecordStorageOnDiskProvider started RecordStorageOnDisk");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 4);
+		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 2);
 	}
 
 	@Test
 	public void testLoggingAndErrorIfMissingStartParameters() {
 		initInfo.remove("storageOnDiskBasePath");
 		try {
-			recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
+			recordStorageOnDiskProvider.getRecordStorage();
 		} catch (Exception e) {
 
 		}
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
 				"RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
 		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 1);
-		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"InitInfo must contain storageOnDiskBasePath");
-		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
-	}
-
-	@Test(expectedExceptions = DataStorageException.class, expectedExceptionsMessageRegExp = ""
-			+ "InitInfo must contain storageOnDiskBasePath")
-	public void testErrorIfMissingStartParameters() {
-		initInfo.remove("storageOnDiskBasePath");
-		recordStorageOnDiskProvider.startUsingInitInfo(initInfo);
 	}
 
 }

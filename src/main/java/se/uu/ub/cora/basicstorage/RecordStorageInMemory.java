@@ -35,7 +35,6 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
-import se.uu.ub.cora.searchstorage.SearchStorage;
 import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataTypes;
 import se.uu.ub.cora.storage.RecordConflictException;
@@ -43,7 +42,7 @@ import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
-public class RecordStorageInMemory implements RecordStorage, MetadataStorage, SearchStorage {
+public class RecordStorageInMemory implements RecordStorage, MetadataStorage {
 	private static final String FROM_NO = "fromNo";
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
@@ -716,16 +715,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage, Se
 	@Override
 	public Collection<DataGroup> getCollectTerms() {
 		return readAbstractList("collectTerm", emptyFilter).listOfDataGroups;
-	}
-
-	@Override
-	public DataGroup getSearchTerm(String searchTermId) {
-		return read(List.of("searchTerm"), searchTermId);
-	}
-
-	@Override
-	public DataGroup getCollectIndexTerm(String collectIndexTermId) {
-		return read(List.of("collectIndexTerm"), collectIndexTermId);
 	}
 
 	@Override
