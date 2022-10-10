@@ -40,7 +40,6 @@
 		<coradata.version>7.2-SNAPSHOT</coradata.version>
 		<basicdata.version>4.1.0</basicdata.version>
 		<storage.version>7.0-SNAPSHOT</storage.version>
-		<initialize.version>1.0-SNAPSHOT</initialize.version>
 		<apptokenstorage.version>2.5.0</apptokenstorage.version>
 		<gatekeeper.version>3.14.0</gatekeeper.version>
 		<json.version>3.3.0</json.version>
@@ -82,19 +81,12 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>basicdata</artifactId>
 			<version>${basicdata.version}</version>
-<!-- 			<scope>test</scope> -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>storage</artifactId>
 			<version>${storage.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>initialize</artifactId>
-			<version>${initialize.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
