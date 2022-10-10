@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -83,7 +83,7 @@ public class RecordStorageOnDiskProvider
 		RecordStorageInstance.setInstance(recordStorage);
 	}
 
-	// TODO: remove once metadtaStorage no longer uses this
+	// TODO: remove once metadataStorage no longer uses this
 	@Override
 	public void startUsingInitInfo(Map<String, String> initInfo) {
 		log.logInfoUsingMessage("RecordStorageOnDiskProvider starting RecordStorageOnDisk...");

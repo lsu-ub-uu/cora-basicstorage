@@ -16,8 +16,8 @@ module se.uu.ub.cora.basicstorage {
 	provides se.uu.ub.cora.apptokenstorage.AppTokenStorageProvider
 			with se.uu.ub.cora.basicstorage.OnDiskAppTokenStorageProvider;
 
-	// provides se.uu.ub.cora.storage.RecordStorageProvider
-	// with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
+	provides se.uu.ub.cora.storage.RecordStorageInstanceProvider
+			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
 	provides se.uu.ub.cora.storage.MetadataStorageProvider
 			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
 	provides se.uu.ub.cora.storage.StreamStorageProvider
