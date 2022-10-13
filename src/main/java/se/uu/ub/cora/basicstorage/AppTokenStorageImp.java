@@ -24,13 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.apptokenstorage.AppTokenStorageView;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 
-public class AppTokenStorageImp extends SecurityStorage implements AppTokenStorageView {
+public class AppTokenStorageImp extends SecurityStorage implements UserStorageView {
 	private Logger log = LoggerProvider.getLoggerForClass(AppTokenStorageImp.class);
 	private Map<String, String> initInfo;
 
