@@ -34,12 +34,15 @@
 	<name>Basic storage</name>
 
 	<properties>
+		<initialize.version>1.0-SNAPSHOT</initialize.version>
 		<logger.version>2.5.0</logger.version>
+		<loggerspies.version>1.0-SNAPSHOT</loggerspies.version>
 		<coradata.version>7.2-SNAPSHOT</coradata.version>
 		<basicdata.version>4.1.0</basicdata.version>
 		<storage.version>7.0-SNAPSHOT</storage.version>
-		<searchstorage.version>3.14.0</searchstorage.version>
-		<apptokenstorage.version>2.5.0</apptokenstorage.version>
+		<beefeater.version>3.7.0</beefeater.version>
+		<bookkeeper.version>8.0-SNAPSHOT</bookkeeper.version>
+		<search.version>5.0-SNAPSHOT</search.version>
 		<gatekeeper.version>3.14.0</gatekeeper.version>
 		<json.version>3.3.0</json.version>
 	</properties>
@@ -54,8 +57,20 @@
 	<dependencies>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>initialize</artifactId>
+			<version>${initialize.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger</artifactId>
 			<version>${logger.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>logger-spies</artifactId>
+			<version>${loggerspies.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -68,25 +83,12 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>basicdata</artifactId>
 			<version>${basicdata.version}</version>
-<!-- 			<scope>test</scope> -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>storage</artifactId>
 			<version>${storage.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>searchstorage</artifactId>
-			<version>${searchstorage.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>apptokenstorage</artifactId>
-			<version>${apptokenstorage.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
