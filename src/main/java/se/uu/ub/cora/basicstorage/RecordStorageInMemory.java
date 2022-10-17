@@ -35,14 +35,13 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
-import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.MetadataTypes;
 import se.uu.ub.cora.storage.RecordConflictException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
-public class RecordStorageInMemory implements RecordStorage, MetadataStorage {
+public class RecordStorageInMemory implements RecordStorage {
 	private static final String FROM_NO = "fromNo";
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
