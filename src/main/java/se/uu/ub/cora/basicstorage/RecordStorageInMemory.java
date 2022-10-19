@@ -35,19 +35,16 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
-import se.uu.ub.cora.storage.MetadataStorage;
-import se.uu.ub.cora.storage.MetadataTypes;
 import se.uu.ub.cora.storage.RecordConflictException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
-public class RecordStorageInMemory implements RecordStorage, MetadataStorage {
+public class RecordStorageInMemory implements RecordStorage {
 	private static final String FROM_NO = "fromNo";
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
 
-	private DataGroup emptyFilter = DataProvider.createGroupUsingNameInData("filter");
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
 	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
 	protected Map<String, Map<String, DividerGroup>> linkLists = new HashMap<>();
@@ -673,48 +670,6 @@ public class RecordStorageInMemory implements RecordStorage, MetadataStorage {
 		if (incomingLinks.get(toType).isEmpty()) {
 			incomingLinks.remove(toType);
 		}
-	}
-
-	@Override
-	public Collection<DataGroup> getMetadataElements() {
-		Collection<DataGroup> readDataGroups = new ArrayList<>();
-		for (MetadataTypes metadataType : MetadataTypes.values()) {
-			readListForMetadataType(readDataGroups, metadataType);
-		}
-		return readDataGroups;
-	}
-
-	private void readListForMetadataType(Collection<DataGroup> readDataGroups,
-			MetadataTypes metadataType) {
-		// DataGroup recordTypeDataGroup = read(RECORD_TYPE, metadataType.type);
-		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, metadataType.type);
-		if (recordTypeIsAbstract(recordTypeDataGroup)) {
-			readDataGroups
-					.addAll(readAbstractList(metadataType.type, emptyFilter).listOfDataGroups);
-		} else {
-			readDataGroups
-					.addAll(readListImplementing(metadataType.type, emptyFilter).listOfDataGroups);
-		}
-	}
-
-	@Override
-	public Collection<DataGroup> getPresentationElements() {
-		return readAbstractList("presentation", emptyFilter).listOfDataGroups;
-	}
-
-	@Override
-	public Collection<DataGroup> getTexts() {
-		return readAbstractList("text", emptyFilter).listOfDataGroups;
-	}
-
-	@Override
-	public Collection<DataGroup> getRecordTypes() {
-		return readAbstractList(RECORD_TYPE, emptyFilter).listOfDataGroups;
-	}
-
-	@Override
-	public Collection<DataGroup> getCollectTerms() {
-		return readAbstractList("collectTerm", emptyFilter).listOfDataGroups;
 	}
 
 	@Override

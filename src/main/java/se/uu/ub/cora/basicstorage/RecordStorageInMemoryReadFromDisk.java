@@ -18,11 +18,10 @@
  */
 package se.uu.ub.cora.basicstorage;
 
-import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public final class RecordStorageInMemoryReadFromDisk extends RecordStorageOnDisk
-		implements RecordStorage, MetadataStorage {
+		implements RecordStorage {
 
 	public static RecordStorageInMemoryReadFromDisk createRecordStorageOnDiskWithBasePath(
 			String basePath) {

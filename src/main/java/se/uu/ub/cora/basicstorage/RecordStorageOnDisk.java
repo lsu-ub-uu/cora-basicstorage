@@ -57,11 +57,9 @@ import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
 import se.uu.ub.cora.json.parser.JsonParser;
 import se.uu.ub.cora.json.parser.JsonValue;
 import se.uu.ub.cora.json.parser.org.OrgJsonParser;
-import se.uu.ub.cora.storage.MetadataStorage;
 import se.uu.ub.cora.storage.RecordStorage;
 
-public class RecordStorageOnDisk extends RecordStorageInMemory
-		implements RecordStorage, MetadataStorage {
+public class RecordStorageOnDisk extends RecordStorageInMemory implements RecordStorage {
 	private static final String GZ_ENDING = ".gz";
 	private static final String COLLECTED_DATA = "collectedData";
 	private static final String LINK_LISTS = "linkLists";

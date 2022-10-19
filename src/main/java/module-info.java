@@ -10,11 +10,9 @@ module se.uu.ub.cora.basicstorage {
 
 	provides se.uu.ub.cora.storage.RecordStorageInstanceProvider
 			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
-	provides se.uu.ub.cora.storage.MetadataStorageProvider
-			with se.uu.ub.cora.basicstorage.RecordStorageOnDiskProvider;
+
 	provides se.uu.ub.cora.storage.StreamStorageProvider
 			with se.uu.ub.cora.basicstorage.StreamStorageOnDiskProvider;
-
 	provides se.uu.ub.cora.storage.RecordIdGeneratorProvider
 			with se.uu.ub.cora.basicstorage.TimeStampIdGeneratorProvider;
 }

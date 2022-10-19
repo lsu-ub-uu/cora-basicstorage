@@ -36,11 +36,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
-import se.uu.ub.cora.data.DataGroupFactory;
 import se.uu.ub.cora.initialize.SettingsProvider;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.storage.MetadataStorage;
-import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.RecordStorageInstanceProvider;
 
@@ -50,14 +47,11 @@ public class RecordStorageOnDiskProviderTest {
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "RecordStorageOnDiskProvider";
 	private RecordStorageInstanceProvider recordStorageOnDiskProvider;
-	private DataGroupFactory dataGroupFactory;
 
 	@BeforeMethod
 	public void beforeMethod() throws Exception {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		// dataGroupFactory = new DataGroupFactorySpy();
-		// DataGroupProvider.setDataGroupFactory(dataGroupFactory);
 
 		initInfo = new HashMap<>();
 		initInfo.put("storageOnDiskBasePath", basePath);
@@ -150,15 +144,6 @@ public class RecordStorageOnDiskProviderTest {
 		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
 
 		assertSame(recordStorage, RecordStorageInstance.getInstance());
-	}
-
-	@Test
-	public void testMetadataStorageIsRecordStorage() {
-		MetadataStorageProvider metadataStorageProvider = (MetadataStorageProvider) recordStorageOnDiskProvider;
-
-		RecordStorage recordStorage = recordStorageOnDiskProvider.getRecordStorage();
-		MetadataStorage metadataStorage = metadataStorageProvider.getMetadataStorage();
-		assertSame(metadataStorage, recordStorage);
 	}
 
 	@Test

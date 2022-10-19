@@ -18,18 +18,13 @@
  */
 package se.uu.ub.cora.basicstorage;
 
-import java.util.Map;
-
 import se.uu.ub.cora.initialize.SettingsProvider;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.storage.MetadataStorage;
-import se.uu.ub.cora.storage.MetadataStorageProvider;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.RecordStorageInstanceProvider;
 
-public class RecordStorageOnDiskProvider
-		implements RecordStorageInstanceProvider, MetadataStorageProvider {
+public class RecordStorageOnDiskProvider implements RecordStorageInstanceProvider {
 	private Logger log = LoggerProvider.getLoggerForClass(RecordStorageOnDiskProvider.class);
 
 	@Override
@@ -51,14 +46,6 @@ public class RecordStorageOnDiskProvider
 		}
 	}
 
-	private void startRecordStorage() {
-		if (noRunningRecordStorageExists()) {
-			startNewRecordStorageOnDiskInstance();
-		} else {
-			useExistingRecordStorage();
-		}
-	}
-
 	private boolean noRunningRecordStorageExists() {
 		return RecordStorageInstance.getInstance() == null;
 	}
@@ -75,25 +62,7 @@ public class RecordStorageOnDiskProvider
 		}
 	}
 
-	private void useExistingRecordStorage() {
-		log.logInfoUsingMessage("Using previously started RecordStorage as RecordStorage");
-	}
-
 	static void setStaticInstance(RecordStorage recordStorage) {
 		RecordStorageInstance.setInstance(recordStorage);
 	}
-
-	// TODO: remove once metadataStorage no longer uses this
-	@Override
-	public void startUsingInitInfo(Map<String, String> initInfo) {
-		log.logInfoUsingMessage("RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
-		startRecordStorage();
-		log.logInfoUsingMessage("RecordStorageOnDiskProvider started RecordStorageOnDisk");
-	}
-
-	@Override
-	public MetadataStorage getMetadataStorage() {
-		return (MetadataStorage) RecordStorageInstance.getInstance();
-	}
-
 }
