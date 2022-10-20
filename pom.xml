@@ -34,17 +34,17 @@
 	<name>Basic storage</name>
 
 	<properties>
-		<initialize.version>1.0-SNAPSHOT</initialize.version>
+		<initialize.version>1.0.0</initialize.version>
 		<logger.version>2.5.0</logger.version>
-		<loggerspies.version>1.0-SNAPSHOT</loggerspies.version>
-		<coradata.version>7.2-SNAPSHOT</coradata.version>
-		<basicdata.version>4.1.0</basicdata.version>
-		<storage.version>7.0-SNAPSHOT</storage.version>
+		<loggerspies.version>1.0.0</loggerspies.version>
+		<coradata.version>7.2.0</coradata.version>
+		<basicdata.version>5.0.0</basicdata.version>
+		<storage.version>7.0.0</storage.version>
 		<beefeater.version>3.7.0</beefeater.version>
 		<bookkeeper.version>8.0-SNAPSHOT</bookkeeper.version>
 		<search.version>5.0-SNAPSHOT</search.version>
-		<gatekeeper.version>3.14.0</gatekeeper.version>
-		<json.version>3.3.0</json.version>
+		<gatekeeper.version>4.0.0</gatekeeper.version>
+		<json.version>3.4.0</json.version>
 	</properties>
 
 	<scm>
