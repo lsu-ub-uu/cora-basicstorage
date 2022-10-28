@@ -121,7 +121,7 @@ public class RecordStorageInMemoryTest {
 		createTwoLinksPointingToSameRecordFromDifferentRecords();
 
 		Collection<DataGroup> generatedLinksPointingToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
+				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
 		assertCorrectTwoLinksPointingToSameRecordFromDifferentRecords(
 				generatedLinksPointingToRecord);
@@ -157,7 +157,7 @@ public class RecordStorageInMemoryTest {
 		createTwoLinksPointingToSameRecordFromSameRecord();
 
 		Collection<DataGroup> generatedLinksPointToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
+				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
 		assertEquals(generatedLinksPointToRecord.size(), 2);
 
@@ -211,7 +211,7 @@ public class RecordStorageInMemoryTest {
 	private void assertNoGeneratedLinksForRecordTypeAndRecordId(String toRecordType,
 			String toRecordId) {
 		Collection<DataGroup> generatedLinksPointToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(toRecordType, toRecordId);
+				.getLinksToRecord(toRecordType, toRecordId);
 		assertEquals(generatedLinksPointToRecord.size(), 0);
 	}
 
@@ -437,7 +437,7 @@ public class RecordStorageInMemoryTest {
 		createTwoLinksPointingToSameRecordFromSameRecord();
 
 		Collection<DataGroup> generatedLinksPointToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
+				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
 		assertEquals(generatedLinksPointToRecord.size(), 2);
 
@@ -450,7 +450,7 @@ public class RecordStorageInMemoryTest {
 		createTwoLinksPointingToSameRecordFromSameRecord();
 
 		Collection<DataGroup> generatedLinksPointToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
+				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
 		assertEquals(generatedLinksPointToRecord.size(), 2);
 
@@ -678,7 +678,7 @@ public class RecordStorageInMemoryTest {
 	private void assertNoOfLinksPointingToRecord(String toRecordType, String toRecordId,
 			int expectedNoOfLinksPointingToRecord) {
 		Collection<DataGroup> generatedLinksPointToRecord = recordStorage
-				.generateLinkCollectionPointingToRecord(toRecordType, toRecordId);
+				.getLinksToRecord(toRecordType, toRecordId);
 		assertEquals(generatedLinksPointToRecord.size(), expectedNoOfLinksPointingToRecord);
 	}
 

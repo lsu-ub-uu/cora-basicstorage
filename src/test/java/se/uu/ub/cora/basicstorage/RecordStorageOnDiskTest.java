@@ -1939,7 +1939,7 @@ public class RecordStorageOnDiskTest {
 		recordStorage.create("toRecordType", "toRecordId", dataGroupTo, storageTerms, emptyLinkList,
 				"cora");
 		Collection<DataGroup> incomingLinksTo = recordStorage
-				.generateLinkCollectionPointingToRecord("toRecordType", "toRecordId");
+				.getLinksToRecord("toRecordType", "toRecordId");
 
 		assertEquals(incomingLinksTo.size(), 1);
 	}

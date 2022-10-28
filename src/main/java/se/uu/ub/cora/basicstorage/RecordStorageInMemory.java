@@ -557,7 +557,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
+	public Collection<DataGroup> getLinksToRecord(String type, String id) {
 		if (linksExistForRecord(type, id)) {
 			return generateLinkCollectionFromStoredLinks(type, id);
 		}

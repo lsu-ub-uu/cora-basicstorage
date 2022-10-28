@@ -50,7 +50,7 @@ public class RecordStorageSpy implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
+	public Collection<DataGroup> getLinksToRecord(String type, String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
