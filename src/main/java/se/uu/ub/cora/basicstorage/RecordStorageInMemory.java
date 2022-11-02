@@ -448,7 +448,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public boolean recordExistsForListOfImplementingRecordTypesAndRecordId(List<String> recordTypes,
+	public boolean recordExists(List<String> recordTypes,
 			String recordId) {
 
 		for (String childType : recordTypes) {
@@ -557,7 +557,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> getLinksToRecord(String type, String id) {
+	public Collection<Link> getLinksToRecord(String type, String id) {
 		if (linksExistForRecord(type, id)) {
 			return generateLinkCollectionFromStoredLinks(type, id);
 		}

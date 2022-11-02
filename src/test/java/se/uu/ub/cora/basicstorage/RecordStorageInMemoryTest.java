@@ -722,7 +722,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertTrue(recordStorage.recordExists(
 				List.of("type"), "place:0001"));
 	}
 
@@ -734,7 +734,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("place", "place:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("place"), "NOTplace:0001"));
 	}
 
@@ -751,7 +751,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("NOTtype"), "place:0002"));
 	}
 
@@ -780,7 +780,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("implementingRecordType", "someType:0001", dataGroup, storageTerms,
 				emptyLinkList, dataDivider);
 
-		assertTrue(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertTrue(recordStorage.recordExists(
 				List.of("abstractRecordType", "implementingRecordType"), "someType:0001"));
 	}
 
@@ -798,7 +798,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("recordType", "otherImplementingRecordType",
 				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("abstractRecordType"), "someType:0001"));
 	}
 
@@ -810,7 +810,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("recordType", "notAbstractRecordType", abstractRecordType,
 				storageTerms, emptyLinkList, dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("notAbstractRecordType"), "someType:0001"));
 	}
 
@@ -823,7 +823,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("binary"), "NOTimage:0004"));
 	}
 
@@ -835,7 +835,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertFalse(recordStorage.recordExistsForListOfImplementingRecordTypesAndRecordId(
+		assertFalse(recordStorage.recordExists(
 				List.of("binary"), "NOTimage:0004"));
 	}
 
