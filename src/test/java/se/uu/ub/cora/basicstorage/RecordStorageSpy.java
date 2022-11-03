@@ -50,14 +50,13 @@ public class RecordStorageSpy implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> getLinksToRecord(String type, String id) {
+	public Collection<Link> getLinksToRecord(String type, String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean recordExists(List<String> types,
-			String id) {
+	public boolean recordExists(List<String> types, String id) {
 		// TODO Auto-generated method stub
 		return false;
 	}

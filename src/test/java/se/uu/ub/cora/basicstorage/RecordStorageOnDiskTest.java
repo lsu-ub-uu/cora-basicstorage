@@ -1938,8 +1938,8 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroupTo = createDataGroupWithRecordInfo();
 		recordStorage.create("toRecordType", "toRecordId", dataGroupTo, storageTerms, emptyLinkList,
 				"cora");
-		Collection<DataGroup> incomingLinksTo = recordStorage
-				.getLinksToRecord("toRecordType", "toRecordId");
+		Collection<Link> incomingLinksTo = recordStorage.getLinksToRecord("toRecordType",
+				"toRecordId");
 
 		assertEquals(incomingLinksTo.size(), 1);
 	}
