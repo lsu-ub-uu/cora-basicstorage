@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.storage.RecordStorage;
+import se.uu.ub.cora.storage.spies.RecordStorageSpy;
 
 public class RecordStorageInstanceTest {
 

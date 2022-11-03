@@ -35,17 +35,18 @@ import java.util.stream.Stream;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.initialize.SettingsProvider;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
+import se.uu.ub.cora.logger.spies.LoggerSpy;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.RecordStorageInstanceProvider;
+import se.uu.ub.cora.storage.spies.RecordStorageSpy;
 
 public class RecordStorageOnDiskProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
 	private String basePath = "/tmp/recordStorageOnDiskTempBasicStorageProvider/";
 	private LoggerFactorySpy loggerFactorySpy;
-	private String testedClassName = "RecordStorageOnDiskProvider";
 	private RecordStorageInstanceProvider recordStorageOnDiskProvider;
 
 	@BeforeMethod
@@ -150,11 +151,12 @@ public class RecordStorageOnDiskProviderTest {
 	public void testLoggingNormalStartup() {
 		recordStorageOnDiskProvider.getRecordStorage();
 
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
+		loggerFactorySpy.MCR.assertParameters("factorForClass", 0,
+				RecordStorageOnDiskProvider.class);
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+
+		assertInfoMessages(loggerSpy, "RecordStorageOnDiskProvider starting RecordStorageOnDisk...",
 				"RecordStorageOnDiskProvider started RecordStorageOnDisk");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 2);
 	}
 
 	@Test
@@ -165,9 +167,25 @@ public class RecordStorageOnDiskProviderTest {
 		} catch (Exception e) {
 
 		}
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
+		loggerFactorySpy.MCR.assertParameters("factorForClass", 0,
+				RecordStorageOnDiskProvider.class);
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+
+		assertInfoMessages(loggerSpy,
 				"RecordStorageOnDiskProvider starting RecordStorageOnDisk...");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 1);
 	}
 
+	private void assertInfoMessages(LoggerSpy loggerSpy, String... infoMessages) {
+		String methodName = "logInfoUsingMessage";
+		assertMessage(loggerSpy, methodName, infoMessages);
+	}
+
+	private void assertMessage(LoggerSpy loggerSpy, String methodName, String... messages) {
+		int i = 0;
+		for (String message : messages) {
+			loggerSpy.MCR.assertParameters(methodName, i, message);
+			i++;
+		}
+		loggerSpy.MCR.assertNumberOfCallsToMethod(methodName, i);
+	}
 }

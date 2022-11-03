@@ -288,7 +288,6 @@ public class RecordStorageInMemory implements RecordStorage {
 			List<String> foundRecordIdsForFilter) {
 		List<DataGroup> foundRecords = new ArrayList<>(foundRecordIdsForFilter.size());
 		for (String foundRecordId : foundRecordIdsForFilter) {
-			// foundRecords.add(read(type, foundRecordId));
 			foundRecords.add(read(List.of(type), foundRecordId));
 		}
 		return foundRecords;
@@ -346,7 +345,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		return typeRecords;
 	}
 
-	// @Override
 	public StorageReadResult readAbstractList(String type, DataGroup filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(type);
@@ -433,7 +431,6 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private void addRecordsForParentIfParentIsNotAbstract(String type, DataGroup filter,
 			List<DataGroup> aggregatedRecordList) {
-		// DataGroup recordTypeDataGroup = read(RECORD_TYPE, type);
 		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
 		if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
 			readRecordsForTypeAndFilterAndAddToList(type, filter, aggregatedRecordList);
@@ -448,8 +445,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public boolean recordExistsForListOfImplementingRecordTypesAndRecordId(List<String> recordTypes,
-			String recordId) {
+	public boolean recordExists(List<String> recordTypes, String recordId) {
 
 		for (String childType : recordTypes) {
 			if (recordsExistForRecordType(childType)
@@ -479,11 +475,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	@Override
 	public DataGroup read(List<String> types, String recordId) {
-		// DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, recordType);
-		// if (recordTypeIsAbstract(recordTypeDataGroup)) {
 		return createIndependentCopy(readRecordFromImplementingRecordTypes(types, recordId));
-		// }
-		// return createIndependentCopy(returnRecordIfExisting(recordType, recordId));
 	}
 
 	private DataGroup readRecordFromImplementingRecordTypes(List<String> types, String recordId) {
@@ -497,7 +489,6 @@ public class RecordStorageInMemory implements RecordStorage {
 	private DataGroup tryToReadRecordFromImplementingRecordTypes(List<String> types,
 			String recordId) {
 		DataGroup readRecord = null;
-		// List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(types);
 		for (String implementingType : types) {
 			try {
 				readRecord = returnRecordIfExisting(implementingType, recordId);
@@ -557,33 +548,45 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
+	public Collection<Link> getLinksToRecord(String type, String id) {
 		if (linksExistForRecord(type, id)) {
 			return generateLinkCollectionFromStoredLinks(type, id);
 		}
 		return Collections.emptyList();
 	}
 
-	private Collection<DataGroup> generateLinkCollectionFromStoredLinks(String type, String id) {
-		List<DataGroup> generatedLinkList = new ArrayList<>();
+	private Collection<Link> generateLinkCollectionFromStoredLinks(String type, String id) {
+		List<Link> generatedLinkList = new ArrayList<>();
 		Map<String, Map<String, List<DataGroup>>> linkStorageForRecord = incomingLinks.get(type)
 				.get(id);
 		addLinksForRecordFromAllRecordTypes(generatedLinkList, linkStorageForRecord);
 		return generatedLinkList;
 	}
 
-	private void addLinksForRecordFromAllRecordTypes(List<DataGroup> generatedLinkList,
+	private void addLinksForRecordFromAllRecordTypes(List<Link> generatedLinkList,
 			Map<String, Map<String, List<DataGroup>>> linkStorageForRecord) {
-		for (Map<String, List<DataGroup>> mapOfId : linkStorageForRecord.values()) {
-			addLinksForRecordForThisRecordType(generatedLinkList, mapOfId);
+		for (Map<String, List<DataGroup>> linkStorageMapOfId : linkStorageForRecord.values()) {
+			addLinksForRecordForThisRecordType(generatedLinkList, linkStorageMapOfId);
 		}
 	}
 
-	private void addLinksForRecordForThisRecordType(List<DataGroup> generatedLinkList,
-			Map<String, List<DataGroup>> mapOfId) {
-		for (List<DataGroup> recordToRecordLinkList : mapOfId.values()) {
-			generatedLinkList.addAll(recordToRecordLinkList);
+	private void addLinksForRecordForThisRecordType(List<Link> generatedLinkList,
+			Map<String, List<DataGroup>> linkStorageMapOfId) {
+		for (List<DataGroup> recordToRecordLinkList : linkStorageMapOfId.values()) {
+			generatedLinkList.addAll(convertDataGroupToLink(recordToRecordLinkList));
+
 		}
+	}
+
+	private List<Link> convertDataGroupToLink(List<DataGroup> recordToRecordLinkList) {
+		List<Link> linkList = new ArrayList<>();
+
+		for (DataGroup rtrLink : recordToRecordLinkList) {
+			DataRecordLink fromPart = (DataRecordLink) rtrLink.getFirstChildWithNameInData("from");
+			Link link = new Link(fromPart.getLinkedRecordType(), fromPart.getLinkedRecordId());
+			linkList.add(link);
+		}
+		return linkList;
 	}
 
 	@Override
@@ -720,16 +723,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		collectedTermsHolder = termsHolder;
 
 	}
-
-	// @Override
-	// public long getTotalNumberOfRecordsForAbstractType(String abstractType,
-	// List<String> implementingTypes, DataGroup filter) {
-	// long size = 0;
-	// for (String type : implementingTypes) {
-	// size += getTotalNumberOfRecordsForImplementingType(filter, type);
-	// }
-	// return getTotalNumberUsingLimitInFilter(size, filter);
-	// }
 
 	private long getTotalNumberOfRecordsForImplementingType(DataGroup filter, String type) {
 		if (recordsExistForRecordType(type)) {
