@@ -78,7 +78,6 @@ public class RecordStorageOnDiskTest {
 	private static final String PLACE_CORA_FILENAME = "place_cora.json.gz";
 	private static final String COLLECTED_DATA_FILENAME = "collectedData_cora.json.gz";
 	private static final String LINK_LISTS_FILENAME = "linkLists_cora.json.gz";
-	private static final String FROM_RECORD_TYPE = "fromRecordType";
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private String basePath = "/tmp/recordStorageOnDiskTemp/";

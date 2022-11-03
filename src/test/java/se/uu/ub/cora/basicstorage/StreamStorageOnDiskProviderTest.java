@@ -34,8 +34,9 @@ import java.util.stream.Stream;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.basicstorage.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
+import se.uu.ub.cora.logger.spies.LoggerSpy;
 import se.uu.ub.cora.storage.StreamStorage;
 import se.uu.ub.cora.storage.StreamStorageProvider;
 
@@ -43,7 +44,6 @@ public class StreamStorageOnDiskProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
 	private String basePath = "/tmp/streamOnDiskTempBasicStorageProvider/";
 	private LoggerFactorySpy loggerFactorySpy;
-	private String testedClassName = "StreamStorageOnDiskProvider";
 	private StreamStorageProvider streamStorageOnDiskProvider;
 
 	@BeforeMethod
@@ -114,13 +114,33 @@ public class StreamStorageOnDiskProviderTest {
 	@Test
 	public void testLoggingNormalStartup() {
 		streamStorageOnDiskProvider.startUsingInitInfo(initInfo);
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"StreamStorageOnDiskProvider starting StreamStorageOnDisk...");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
-				"Found /tmp/streamOnDiskTempBasicStorageProvider/ as storageOnDiskBasePath");
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 2),
+
+		loggerFactorySpy.MCR.assertParameters("factorForClass", 0,
+				StreamStorageOnDiskProvider.class);
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+
+		assertInfoMessages(loggerSpy, "StreamStorageOnDiskProvider starting StreamStorageOnDisk...",
+				"Found /tmp/streamOnDiskTempBasicStorageProvider/ as storageOnDiskBasePath",
 				"StreamStorageOnDiskProvider started StreamStorageOnDisk");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 3);
+	}
+
+	private void assertInfoMessages(LoggerSpy loggerSpy, String... infoMessages) {
+		String methodName = "logInfoUsingMessage";
+		assertMessage(loggerSpy, methodName, infoMessages);
+	}
+
+	private void assertMessage(LoggerSpy loggerSpy, String methodName, String... messages) {
+		int i = 0;
+		for (String message : messages) {
+			loggerSpy.MCR.assertParameters(methodName, i, message);
+			i++;
+		}
+		loggerSpy.MCR.assertNumberOfCallsToMethod(methodName, i);
+	}
+
+	private void assertFatalMessages(LoggerSpy loggerSpy, String... fatalMessages) {
+		String methodName = "logFatalUsingMessage";
+		assertMessage(loggerSpy, methodName, fatalMessages);
 	}
 
 	@Test
@@ -131,12 +151,13 @@ public class StreamStorageOnDiskProviderTest {
 		} catch (Exception e) {
 
 		}
-		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
+		loggerFactorySpy.MCR.assertParameters("factorForClass", 0,
+				StreamStorageOnDiskProvider.class);
+		LoggerSpy loggerSpy = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass", 0);
+
+		assertInfoMessages(loggerSpy,
 				"StreamStorageOnDiskProvider starting StreamStorageOnDisk...");
-		assertEquals(loggerFactorySpy.getNoOfInfoLogMessagesUsingClassName(testedClassName), 1);
-		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
-				"InitInfo must contain storageOnDiskBasePath");
-		assertEquals(loggerFactorySpy.getNoOfFatalLogMessagesUsingClassName(testedClassName), 1);
+		assertFatalMessages(loggerSpy, "InitInfo must contain storageOnDiskBasePath");
 	}
 
 	@Test(expectedExceptions = DataStorageException.class, expectedExceptionsMessageRegExp = ""
