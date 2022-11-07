@@ -35,6 +35,7 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.storage.Filter;
 import se.uu.ub.cora.storage.RecordConflictException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -243,7 +244,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public StorageReadResult readList(List<String> types, DataGroup filter) {
+	public StorageReadResult readList(List<String> types, Filter filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
 		StorageReadResult readResult = new StorageReadResult();
