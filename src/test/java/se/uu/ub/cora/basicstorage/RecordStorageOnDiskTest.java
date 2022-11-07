@@ -1067,7 +1067,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1116,7 +1116,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1125,7 +1125,7 @@ public class RecordStorageOnDiskTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
 						"place", "place:0002");
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"cora");
@@ -1204,8 +1204,8 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1284,7 +1284,7 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1295,7 +1295,7 @@ public class RecordStorageOnDiskTest {
 		collectedData2.addChild(collectStorageTerm2);
 
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"testSystem");
@@ -1382,8 +1382,8 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1438,8 +1438,8 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms2, emptyLinkList,
 				"cora");
@@ -1464,8 +1464,8 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
@@ -1486,13 +1486,13 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"testSystem");
@@ -1520,14 +1520,14 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 
 		List<StorageTerm> storageTerms2 = new ArrayList<>();
-		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName"));
+		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
 				"cora");

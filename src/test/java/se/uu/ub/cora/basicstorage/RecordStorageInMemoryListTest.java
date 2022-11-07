@@ -305,7 +305,7 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private List<StorageTerm> createCollectedDataWithUppsalaStorageTerm() {
-		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName");
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
 		List<StorageTerm> storageTerms = List.of(storageTerm1);
 		return storageTerms;
 	}
@@ -342,7 +342,7 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private List<StorageTerm> createCollectedDataWithStockholmStorageTerm() {
-		StorageTerm storageTerm = new StorageTerm("placeNameStorageTerm", "Stockholm", "placeName");
+		StorageTerm storageTerm = new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm");
 		return List.of(storageTerm);
 	}
 
@@ -351,9 +351,9 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"place", "place:0003");
 
-		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "Uppsala", "placeName");
-		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "Stockholm",
-				"placeName");
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
+		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName",
+				"Stockholm");
 		List<StorageTerm> storageTerms1 = List.of(storageTerm1, storageTerm2);
 
 		recordStorage.create("place", "place:0003", dataGroup, storageTerms1, emptyLinkList,
@@ -473,7 +473,7 @@ public class RecordStorageInMemoryListTest {
 						"image", imageValue);
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		List<StorageTerm> storageTerms1 = List
-				.of(new StorageTerm("idStorageTerm", imageValue, "id"));
+				.of(new StorageTerm("idStorageTerm", "id", imageValue));
 
 		recordStorage.create("image", imageValue, dataGroup, storageTerms1, emptyLinkList,
 				dataDivider);
