@@ -677,7 +677,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public long getTotalNumberOfRecordsForTypes(List<String> types, DataGroup filter) {
+	public long getTotalNumberOfRecordsForTypes(List<String> types, Filter filter) {
 		long size = 0;
 		for (String type : types) {
 			size += getTotalNumberOfRecordsForImplementingType(filter, type);
