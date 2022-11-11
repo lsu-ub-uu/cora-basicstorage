@@ -46,13 +46,17 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.storage.Condition;
+import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.storage.Part;
 import se.uu.ub.cora.storage.RecordNotFoundException;
+import se.uu.ub.cora.storage.RelationalOperator;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemoryListTest {
 	private RecordStorageInMemory recordStorage;
 	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
-	DataGroup emptyFilter = new DataGroupSpy("filter");
+	Filter emptyFilter = new Filter();
 	private List<StorageTerm> storageTerms = Collections.emptyList();
 	private String dataDivider = "cora";
 	private DataGroupFactory dataGroupFactory;
@@ -74,17 +78,22 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListWithFilterButNoDataForTheType() {
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		StorageReadResult readResult = recordStorage.readList(List.of("place"), filter);
 
 		assertEquals(readResult.listOfDataGroups.size(), 0);
 	}
 
-	private DataGroup setUpFilterWithKeyAndValue(String key, String value) {
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", key, value);
-		filter.addChild(part);
+	private Filter createFilterWithAPart(String key, String value) {
+		Condition condition = new Condition(key, RelationalOperator.EQUAL_TO, value);
+
+		Part part = new Part();
+		part.conditions.add(condition);
+
+		Filter filter = new Filter();
+		filter.include.add(part);
+
 		return filter;
 	}
 
@@ -120,10 +129,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"NOT_UPPSALA");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "NOT_UPPSALA");
 
 		StorageReadResult readResult = recordStorage.readList(List.of("place"), filter);
 		Collection<DataGroup> readList = readResult.listOfDataGroups;
@@ -137,10 +143,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0",
-				"NOT_placeName", "Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("NOT_placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -151,10 +154,7 @@ public class RecordStorageInMemoryListTest {
 	public void testListWithNoCollectedStorageTermReadWithFilter() {
 		createPlaceInStorageWithCollectedData(storageTerms, "nameInData");
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -166,10 +166,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -184,10 +181,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("createNewWhenCopyingThisTopLevelGroup");
 		createPlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -203,10 +197,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		updateUppsalaPlaceInStorageWithCollectedData(storageTerms);
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -215,7 +206,8 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
+
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		createPlaceInStorageWithCollectedData(storageTerms, "nameInData");
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
@@ -233,10 +225,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		createPlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -254,10 +243,7 @@ public class RecordStorageInMemoryListTest {
 		createPlaceInStorageWithStockholmStorageTerm();
 		createPlaceInStorageWithUppsalaStorageAndStockholmTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -279,10 +265,7 @@ public class RecordStorageInMemoryListTest {
 		updatePlaceInStorageWithUppsalaStorageTerm();
 		updatePlaceInStorageWithStockholmStorageTerm();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -423,11 +406,6 @@ public class RecordStorageInMemoryListTest {
 		createImageRecord("nameInData", "image:0002");
 		createGenericBinaryRecord("createNewWhenCopyingThisTopLevelGroup");
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "id",
-				"image:0001");
-		filter.addChild(part);
-
 		// three have createNewWhenCopyingThisTopLevelGroup as nameInData
 		Collection<DataGroup> readList = recordStorage.readAbstractList("binary",
 				emptyFilter).listOfDataGroups;
@@ -452,10 +430,7 @@ public class RecordStorageInMemoryListTest {
 		createImageRecord("nameInData", "image:0002");
 		createGenericBinaryRecord();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "id",
-				"image:0001");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("id", "image:0001");
 
 		StorageReadResult readResult = recordStorage.readAbstractList("binary", filter);
 		Collection<DataGroup> readList = readResult.listOfDataGroups;
@@ -519,11 +494,7 @@ public class RecordStorageInMemoryListTest {
 		// create no records
 
 		String recordType = "binary";
-		StorageReadResult readResult = recordStorage.readAbstractList(recordType, emptyFilter);
-		//
-		// assertEquals(readResult.start, 0);
-		// assertEquals(readResult.totalNumberOfMatches, 0);
-		// assertEquals(readResult.listOfDataGroups.size(), 0);
+		recordStorage.readAbstractList(recordType, emptyFilter);
 	}
 
 	@Test
@@ -597,10 +568,9 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testGetTotalNumberOfRecordsNoRecordsEmptyFilter() {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		DataGroup filter = DataCreator.createEmptyFilter();
 
 		long totalNumberOfRecords = recordStorage
-				.getTotalNumberOfRecordsForTypes(List.of("NOExistingRecords"), filter);
+				.getTotalNumberOfRecordsForTypes(List.of("NOExistingRecords"), emptyFilter);
 		assertEquals(totalNumberOfRecords, 0);
 
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -610,7 +580,7 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfRecordsNoRecordsWithFilter() {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		long totalNumberOfRecords = recordStorage
 				.getTotalNumberOfRecordsForTypes(List.of("NOExistingRecords"), filter);
@@ -623,8 +593,8 @@ public class RecordStorageInMemoryListTest {
 		setUpStorageWithAuthorityRecords(3, 2);
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
-		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForTypes(
-				List.of("organisation"), DataCreator.createEmptyFilter());
+		long totalNumberOfRecords = recordStorage
+				.getTotalNumberOfRecordsForTypes(List.of("organisation"), emptyFilter);
 		assertEquals(totalNumberOfRecords, 2);
 
 		assertFalse(termsHolder.findRecordsForFilterWasCalled);
@@ -638,7 +608,7 @@ public class RecordStorageInMemoryListTest {
 
 		termsHolder.returnIdsForTypes.put("person", Arrays.asList("person:001"));
 
-		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+		Filter filter = createFilterWithAPart("personDomain", "uu");
 
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForTypes(List.of("person"),
 				filter);
@@ -662,8 +632,8 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
 		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("toNo", "10"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.toNo = 10;
 
 		int asserterNumberReturned = 10;
 		assertCorrectReturnedNumberOfRecords(termsHolder, filter, asserterNumberReturned);
@@ -677,8 +647,8 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("fromNo", "10"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.fromNo = 10;
 
 		int asserterNumberReturned = 7;
 		assertCorrectReturnedNumberOfRecords(termsHolder, filter, asserterNumberReturned);
@@ -694,9 +664,9 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		filter.addChild(new DataAtomicSpy("fromNo", "8"));
-		filter.addChild(new DataAtomicSpy("toNo", "15"));
+		Filter filter = new Filter();
+		filter.fromNo = 8;
+		filter.toNo = 15;
 
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForTypes(List.of("person"),
 				filter);
@@ -711,9 +681,9 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
 
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("fromNo", "8"));
-		filter.addChild(new DataAtomicSpy("toNo", "35"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.fromNo = 8;
+		filter.toNo = 35;
 
 		int asserterNumberReturned = 9;
 		assertCorrectReturnedNumberOfRecords(termsHolder, filter, asserterNumberReturned);
@@ -725,8 +695,8 @@ public class RecordStorageInMemoryListTest {
 
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		setUpRecordsToReturnFromTermsHolder(termsHolder, "person", 16);
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("fromNo", "18"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.fromNo = 18;
 
 		int assertNumberReturned = 0;
 		assertCorrectReturnedNumberOfRecords(termsHolder, filter, assertNumberReturned);
@@ -734,7 +704,7 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private void assertCorrectReturnedNumberOfRecords(CollectedTermsHolderSpy termsHolder,
-			DataGroup filter, int assertNumberReturned) {
+			Filter filter, int assertNumberReturned) {
 		long totalNumberOfRecords = recordStorage.getTotalNumberOfRecordsForTypes(List.of("person"),
 				filter);
 		assertEquals(totalNumberOfRecords, assertNumberReturned);
@@ -810,8 +780,6 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("organisation", "person"));
 
-		// long totalNumberOfAbstractRecords = recordStorage.getTotalNumberOfRecordsForAbstractType(
-		// "authorityNOTUsedInThisImplementation", implementingTypes, emptyFilter);
 		long totalNumberOfAbstractRecords = recordStorage
 				.getTotalNumberOfRecordsForTypes(implementingTypes, emptyFilter);
 		assertEquals(totalNumberOfAbstractRecords, 2);
@@ -824,7 +792,7 @@ public class RecordStorageInMemoryListTest {
 		recordStorage = new RecordStorageInMemory(records);
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+		Filter filter = createFilterWithAPart("personDomain", "uu");
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("NOExistingRecords"));
 
 		long totalNumberOfAbstractRecords = recordStorage
@@ -840,7 +808,7 @@ public class RecordStorageInMemoryListTest {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		termsHolder.returnIdsForTypes.put("organisation", Arrays.asList("organisation:001"));
 
-		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
+		Filter filter = createFilterWithAPart("personDomain", "uu");
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
@@ -877,8 +845,8 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithNoFromButTo() {
 		setUpStorageCommonForAbstract();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
-		filter.addChild(new DataAtomicSpy("toNo", "11"));
+		Filter filter = createFilterWithAPart("personDomain", "uu");
+		filter.toNo = 11;
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
@@ -891,8 +859,8 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromNoTo() {
 		setUpStorageCommonForAbstract();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("personDomain", "uu");
-		filter.addChild(new DataAtomicSpy("fromNo", "10"));
+		Filter filter = createFilterWithAPart("personDomain", "uu");
+		filter.fromNo = 10;
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
@@ -905,9 +873,10 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromAndToNOPart() {
 		setUpStorageCommonForAbstract();
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		filter.addChild(new DataAtomicSpy("fromNo", "6"));
-		filter.addChild(new DataAtomicSpy("toNo", "13"));
+		Filter filter = new Filter();
+		filter.fromNo = 6;
+		filter.toNo = 13;
+
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 
 		long totalNumberOfAbstractRecords = recordStorage
@@ -919,9 +888,9 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromAndToWhenToLargerThanSize() {
 		setUpStorageCommonForAbstract();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("fromNo", "8"));
-		filter.addChild(new DataAtomicSpy("toNo", "35"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.fromNo = 8;
+		filter.toNo = 35;
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 		long totalNumberOfAbstractRecords = recordStorage
@@ -940,8 +909,8 @@ public class RecordStorageInMemoryListTest {
 	public void testGetTotalNumberOfAbstractRecordsWithRecordsWithFilterWithFromWhenFromLargerThanSize() {
 		setUpStorageCommonForAbstract();
 
-		DataGroup filter = setUpFilterWithKeyAndValue("placeName", "Uppsala");
-		filter.addChild(new DataAtomicSpy("fromNo", "20"));
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
+		filter.fromNo = 20;
 
 		List<String> implementingTypes = new ArrayList<>(Arrays.asList("person", "organisation"));
 		long totalNumberOfAbstractRecords = recordStorage
@@ -953,7 +922,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListNoFromOrTo() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "");
+		Filter filter = setUpFilterForOrganisationWithFromTo("", "");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -968,7 +937,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListFromButNoTo() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("4", "");
+		Filter filter = setUpFilterForOrganisationWithFromTo("4", "");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -978,7 +947,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListNoFromButTo() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "7");
+		Filter filter = setUpFilterForOrganisationWithFromTo("", "7");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -988,7 +957,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListFromAndTo() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("2", "9");
+		Filter filter = setUpFilterForOrganisationWithFromTo("2", "9");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -998,7 +967,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListFromAndToMinAndMaxNumber() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "14");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "14");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -1008,7 +977,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListFromAndToFirstRecord() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "1");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -1018,7 +987,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListFromAndToLastRecord() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "1");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
@@ -1028,23 +997,23 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadListToGreaterThanNumberOfRecords() {
 		createRecordStorageWithOrganisationRecords();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "18");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "18");
 
 		StorageReadResult readList = recordStorage.readList(List.of("organisation"), filter);
 
 		assertEquals(readList.listOfDataGroups.size(), 14);
 	}
 
-	private DataGroup setUpFilterForOrganisationWithFromTo(String fromNo, String toNo) {
+	private Filter setUpFilterForOrganisationWithFromTo(String fromNo, String toNo) {
 		CollectedTermsHolderSpy termsHolder = setUpCollectedTermsHolderSpy();
 		addIdsToReturnFromTermsHolder(termsHolder, 14, "organisation");
 
-		DataGroup filter = setUpFilterWithKeyAndValue("organisationDomain", "uu");
+		Filter filter = createFilterWithAPart("organisationDomain", "uu");
 		if (!fromNo.isEmpty()) {
-			filter.addChild(new DataAtomicSpy("fromNo", fromNo));
+			filter.fromNo = Long.valueOf(fromNo);
 		}
 		if (!toNo.isEmpty()) {
-			filter.addChild(new DataAtomicSpy("toNo", toNo));
+			filter.toNo = Long.valueOf(toNo);
 		}
 		return filter;
 	}
@@ -1079,7 +1048,7 @@ public class RecordStorageInMemoryListTest {
 	public void testReadAbstractListNoFromOrTo() {
 		createRecordStorageWithOrganisationRecordsAbstract();
 
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "");
+		Filter filter = setUpFilterForOrganisationWithFromTo("", "");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1089,7 +1058,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListFromButNoTo() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("4", "");
+		Filter filter = setUpFilterForOrganisationWithFromTo("4", "");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1099,7 +1068,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListNoFromButTo() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("", "7");
+		Filter filter = setUpFilterForOrganisationWithFromTo("", "7");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1109,7 +1078,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListFromAndTo() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("2", "9");
+		Filter filter = setUpFilterForOrganisationWithFromTo("2", "9");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1119,7 +1088,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListFromAndToMinAndMaxNumber() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "14");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "14");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1129,7 +1098,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListFromAndToFirstRecord() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "1");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1139,7 +1108,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListFromAndToLastRecord() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "1");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "1");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 
@@ -1149,7 +1118,7 @@ public class RecordStorageInMemoryListTest {
 	@Test
 	public void testReadAbstractListToGreaterThanNumberOfRecords() {
 		createRecordStorageWithOrganisationRecordsAbstract();
-		DataGroup filter = setUpFilterForOrganisationWithFromTo("1", "18");
+		Filter filter = setUpFilterForOrganisationWithFromTo("1", "18");
 
 		StorageReadResult readList = recordStorage.readAbstractList("organisation", filter);
 

@@ -69,7 +69,11 @@ import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
 import se.uu.ub.cora.data.converter.JsonToDataConverterProvider;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.storage.Condition;
+import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.storage.Part;
 import se.uu.ub.cora.storage.RecordNotFoundException;
+import se.uu.ub.cora.storage.RelationalOperator;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageOnDiskTest {
@@ -1951,10 +1955,7 @@ public class RecordStorageOnDiskTest {
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
 				filter).listOfDataGroups;
@@ -1964,16 +1965,25 @@ public class RecordStorageOnDiskTest {
 				.getFirstAtomicValueWithNameInData("id"), "place:0001");
 	}
 
+	private Filter createFilterWithAPart(String key, String value) {
+		Condition condition = new Condition(key, RelationalOperator.EQUAL_TO, value);
+
+		Part part = new Part();
+		part.conditions.add(condition);
+
+		Filter filter = new Filter();
+		filter.include.add(part);
+
+		return filter;
+	}
+
 	@Test
 	public void testReadingEmptyCollectedDataBeforeReadingRecordFiles() throws IOException {
 		writeZippedStorageTermsPlaceFileToDisk();
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
-		DataGroup filter = DataCreator.createEmptyFilter();
-		DataGroup part = DataCreator.createFilterPartWithRepeatIdAndKeyAndValue("0", "placeName",
-				"Uppsala");
-		filter.addChild(part);
+		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		StorageReadResult readResult = recordStorage.readList(List.of("place"), filter);
 

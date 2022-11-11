@@ -23,13 +23,14 @@ import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
+import se.uu.ub.cora.storage.Filter;
 
 public interface CollectedTermsHolder {
 
 	void storeCollectedTerms(String recordType, String recordId, List<StorageTerm> storageTerms,
 			String dataDivider);
 
-	List<String> findRecordIdsForFilter(String type, DataGroup filter);
+	List<String> findRecordIdsForFilter(String type, Filter filter);
 
 	void removePreviousCollectedStorageTerms(String recordType, String recordId);
 

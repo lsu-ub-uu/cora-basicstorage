@@ -173,19 +173,8 @@ public class RecordStorageInMemoryTest {
 
 	private void assertRecordLinkIsCorrect(Link link, String fromRecordType, String fromRecordId,
 			String toRecordType, String toRecordId) {
-		// assertEquals(link.getNameInData(), "recordToRecordLink");
-
-		// DataGroup fromOut = link.getFirstGroupWithNameInData("from");
-
-		// assertEquals(fromOut.getFirstAtomicValueWithNameInData("linkedRecordType"),
-		// fromRecordType);
-		// assertEquals(fromOut.getFirstAtomicValueWithNameInData("linkedRecordId"), fromRecordId);
 		assertEquals(link.type(), fromRecordType);
 		assertEquals(link.id(), fromRecordId);
-
-		// DataGroup toOut = link.getFirstGroupWithNameInData("to");
-		// assertEquals(toOut.getFirstAtomicValueWithNameInData("linkedRecordType"), toRecordType);
-		// assertEquals(toOut.getFirstAtomicValueWithNameInData("linkedRecordId"), toRecordId);
 	}
 
 	private void assertNoGeneratedLinksForRecordTypeAndRecordId(String toRecordType,

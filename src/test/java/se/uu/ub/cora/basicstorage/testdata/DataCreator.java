@@ -174,17 +174,4 @@ public final class DataCreator {
 		extraData.addChild(new DataAtomicSpy("storageKey", storageKey));
 		return collectedDataTerm;
 	}
-
-	public static DataGroup createEmptyFilter() {
-		return new DataGroupSpy("filter");
-	}
-
-	public static DataGroup createFilterPartWithRepeatIdAndKeyAndValue(String repeatId, String key,
-			String value) {
-		DataGroup part = new DataGroupSpy("part");
-		part.setRepeatId(repeatId);
-		part.addChild(new DataAtomicSpy("key", key));
-		part.addChild(new DataAtomicSpy("value", value));
-		return part;
-	}
 }
