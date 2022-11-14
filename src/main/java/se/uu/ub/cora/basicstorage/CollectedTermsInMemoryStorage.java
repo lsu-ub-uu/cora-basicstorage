@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
+import se.uu.ub.cora.storage.Condition;
+import se.uu.ub.cora.storage.Filter;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
@@ -141,17 +143,17 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	}
 
 	@Override
-	public List<String> findRecordIdsForFilter(String type, DataGroup filter) {
-		DataGroup filterPart = filter.getFirstGroupWithNameInData("part");
+	public List<String> findRecordIdsForFilter(String type, Filter filter) {
+		Condition condition = filter.include.get(0).conditions.get(0);
 		if (terms.containsKey(type)) {
-			return findRecordIdsMatchingFilterPart(type, filterPart);
+			return findRecordIdsMatchingFilterPart(type, condition);
 		}
 		return Collections.emptyList();
 	}
 
-	private List<String> findRecordIdsMatchingFilterPart(String type, DataGroup filterPart) {
-		String key = filterPart.getFirstAtomicValueWithNameInData("key");
-		String value = filterPart.getFirstAtomicValueWithNameInData("value");
+	private List<String> findRecordIdsMatchingFilterPart(String type, Condition condition) {
+		String key = condition.key();
+		String value = condition.value();
 		Map<String, Map<String, List<StorageTermData>>> storageTermsForRecordType = terms.get(type);
 
 		Map<String, List<StorageTermData>> mapOfIdsAndStorageTermForTypeAndKey = storageTermsForRecordType

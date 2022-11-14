@@ -25,11 +25,12 @@ import java.util.Map;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
+import se.uu.ub.cora.storage.Filter;
 
 public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 
 	public String type;
-	public DataGroup filter;
+	public Filter filter;
 	public List<String> returnedIds;
 	public boolean findRecordsForFilterWasCalled = false;
 	public Map<String, List<String>> returnIdsForTypes = new HashMap<>();
@@ -42,7 +43,7 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	}
 
 	@Override
-	public List<String> findRecordIdsForFilter(String type, DataGroup filter) {
+	public List<String> findRecordIdsForFilter(String type, Filter filter) {
 		findRecordsForFilterWasCalled = true;
 		this.type = type;
 		this.filter = filter;

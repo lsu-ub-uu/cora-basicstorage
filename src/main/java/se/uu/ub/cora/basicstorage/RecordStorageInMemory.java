@@ -35,13 +35,13 @@ import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.storage.Filter;
 import se.uu.ub.cora.storage.RecordConflictException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
 import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemory implements RecordStorage {
-	private static final String FROM_NO = "fromNo";
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
 
@@ -235,7 +235,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		}
 	}
 
-	public StorageReadResult readListImplementing(String type, DataGroup filter) {
+	public StorageReadResult readListImplementing(String type, Filter filter) {
 		Map<String, DividerGroup> typeDividerRecords = records.get(type);
 		throwErrorIfNoRecordOfType(type, typeDividerRecords);
 
@@ -243,7 +243,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public StorageReadResult readList(List<String> types, DataGroup filter) {
+	public StorageReadResult readList(List<String> types, Filter filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
 		StorageReadResult readResult = new StorageReadResult();
@@ -252,7 +252,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		return readResult;
 	}
 
-	private StorageReadResult getStorageReadResult(String type, DataGroup filter,
+	private StorageReadResult getStorageReadResult(String type, Filter filter,
 			Map<String, DividerGroup> typeDividerRecords) {
 		StorageReadResult readResult = new StorageReadResult();
 		Collection<DataGroup> readFromList = readFromList(type, filter, typeDividerRecords);
@@ -264,12 +264,12 @@ public class RecordStorageInMemory implements RecordStorage {
 		return readResult;
 	}
 
-	private Collection<DataGroup> readFromList(String type, DataGroup filter,
+	private Collection<DataGroup> readFromList(String type, Filter filter,
 			Map<String, DividerGroup> typeDividerRecords) {
-		if (filterContainsNoPart(filter)) {
-			return readListWithoutFilter(typeDividerRecords);
+		if (!filter.include.isEmpty()) {
+			return readListWithFilter(type, filter);
 		}
-		return readListWithFilter(type, filter);
+		return readListWithoutFilter(typeDividerRecords);
 	}
 
 	private Collection<DataGroup> readListWithoutFilter(
@@ -278,7 +278,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		return typeRecords.values();
 	}
 
-	private Collection<DataGroup> readListWithFilter(String type, DataGroup filter) {
+	private Collection<DataGroup> readListWithFilter(String type, Filter filter) {
 		List<String> foundRecordIdsForFilter = collectedTermsHolder.findRecordIdsForFilter(type,
 				filter);
 		return readRecordsForTypeAndListOfIds(type, foundRecordIdsForFilter);
@@ -293,35 +293,30 @@ public class RecordStorageInMemory implements RecordStorage {
 		return foundRecords;
 	}
 
-	private List<DataGroup> getSubList(DataGroup filter, Collection<DataGroup> readFromList) {
+	private List<DataGroup> getSubList(Filter filter, Collection<DataGroup> readFromList) {
 		ArrayList<DataGroup> arrayList = new ArrayList<>(readFromList);
-		Integer calculateFromNum = calculateFromNum(filter);
-		Integer calculateToNum = calculateToNum(filter, arrayList.size());
+		int calculateFromNum = calculateFromNum(filter);
+		int calculateToNum = calculateToNum(filter, arrayList.size());
 		return arrayList.subList(calculateFromNum, calculateToNum);
 	}
 
-	private Integer calculateFromNum(DataGroup filter) {
-		if (fromExistsInFilter(filter)) {
-			return getAtomicValueAsInteger(filter, FROM_NO) - 1;
+	private int calculateFromNum(Filter filter) {
+		if (!filter.fromNoIsDefault()) {
+			return Math.toIntExact(filter.fromNo - 1);
 		}
 		return 0;
 	}
 
-	private Integer getAtomicValueAsInteger(DataGroup filter, String nameInData) {
-		String atomicValue = filter.getFirstAtomicValueWithNameInData(nameInData);
-		return Integer.valueOf(atomicValue);
-	}
-
-	private Integer calculateToNum(DataGroup filter, int listSize) {
-		if (filter.containsChildWithNameInData("toNo")) {
+	private int calculateToNum(Filter filter, int listSize) {
+		if (!filter.toNoIsDefault()) {
 			return getToNumFromFilterOrListSize(filter, listSize);
 		}
 		return listSize;
 	}
 
-	private Integer getToNumFromFilterOrListSize(DataGroup filter, int listSize) {
-		Integer atomicValueAsInteger = getAtomicValueAsInteger(filter, "toNo");
-		return (atomicValueAsInteger < listSize) ? atomicValueAsInteger : listSize;
+	private int getToNumFromFilterOrListSize(Filter filter, int listSize) {
+		long atomicValueAsInteger = filter.toNo;
+		return (atomicValueAsInteger < listSize) ? Math.toIntExact(atomicValueAsInteger) : listSize;
 	}
 
 	private void throwErrorIfNoRecordOfType(String type,
@@ -329,10 +324,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		if (null == typeDividerRecords) {
 			throw new RecordNotFoundException(NO_RECORDS_EXISTS_MESSAGE + type);
 		}
-	}
-
-	private boolean filterContainsNoPart(DataGroup filter) {
-		return !filter.containsChildWithNameInData("part");
 	}
 
 	private Map<String, DataGroup> addDataGroupToRecordTypeList(
@@ -345,7 +336,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		return typeRecords;
 	}
 
-	public StorageReadResult readAbstractList(String type, DataGroup filter) {
+	public StorageReadResult readAbstractList(String type, Filter filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(type);
 
@@ -407,7 +398,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	private void addRecordsToAggregatedRecordList(List<DataGroup> aggregatedRecordList,
-			List<String> implementingChildRecordTypes, DataGroup filter) {
+			List<String> implementingChildRecordTypes, Filter filter) {
 		for (String implementingRecordType : implementingChildRecordTypes) {
 			try {
 				readRecordsForTypeAndFilterAndAddToList(implementingRecordType, filter,
@@ -419,7 +410,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	private void readRecordsForTypeAndFilterAndAddToList(String implementingRecordType,
-			DataGroup filter, List<DataGroup> aggregatedRecordList) {
+			Filter filter, List<DataGroup> aggregatedRecordList) {
 		Collection<DataGroup> readList = readListImplementing(implementingRecordType,
 				filter).listOfDataGroups;
 		aggregatedRecordList.addAll(readList);
@@ -429,7 +420,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		return !recordTypeIsAbstract(recordTypeDataGroup);
 	}
 
-	private void addRecordsForParentIfParentIsNotAbstract(String type, DataGroup filter,
+	private void addRecordsForParentIfParentIsNotAbstract(String type, Filter filter,
 			List<DataGroup> aggregatedRecordList) {
 		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
 		if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
@@ -676,46 +667,37 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public long getTotalNumberOfRecordsForTypes(List<String> types, DataGroup filter) {
+	public long getTotalNumberOfRecordsForTypes(List<String> types, Filter filter) {
 		long size = 0;
 		for (String type : types) {
-			size += getTotalNumberOfRecordsForImplementingType(filter, type);
+			size += getTotalNumberOfRecordsForImplementingType(type, filter);
 		}
 		return getTotalNumberUsingLimitInFilter(size, filter);
 
 	}
 
-	private long getNumberOfRecords(String type, DataGroup filter) {
-		if (filterContainsNoPart(filter)) {
-			return records.get(type).size();
+	private long getNumberOfRecords(String type, Filter filter) {
+		if (!filter.include.isEmpty()) {
+			return collectedTermsHolder.findRecordIdsForFilter(type, filter).size();
 		}
-		return collectedTermsHolder.findRecordIdsForFilter(type, filter).size();
+		return records.get(type).size();
 	}
 
-	private long getTotalNumberUsingLimitInFilter(long numberOfRecords, DataGroup filter) {
+	private long getTotalNumberUsingLimitInFilter(long numberOfRecords, Filter filter) {
 		long toNo = getToNoOrNumOfMatchingRecords(filter, numberOfRecords);
-		return fromExistsInFilter(filter) ? getTotalNumberUsingFrom(filter, toNo) : toNo;
+		return !filter.fromNoIsDefault() ? getTotalNumberUsingFrom(filter, toNo) : toNo;
 	}
 
-	private long getToNoOrNumOfMatchingRecords(DataGroup filter, long numOfRecordsMatchingFilter) {
-		if (noToNumInFilter(filter)) {
+	private long getToNoOrNumOfMatchingRecords(Filter filter, long numOfRecordsMatchingFilter) {
+		if (filter.toNoIsDefault()) {
 			return numOfRecordsMatchingFilter;
 		}
-		Long toNo = Long.valueOf(filter.getFirstAtomicValueWithNameInData("toNo"));
+		Long toNo = filter.toNo;
 		return toNo > numOfRecordsMatchingFilter ? numOfRecordsMatchingFilter : toNo;
 	}
 
-	private boolean noToNumInFilter(DataGroup filter) {
-		return !filter.containsChildWithNameInData("toNo");
-	}
-
-	private boolean fromExistsInFilter(DataGroup filter) {
-		return filter.containsChildWithNameInData(FROM_NO);
-	}
-
-	private long getTotalNumberUsingFrom(DataGroup filter, Long toNo) {
-		String fromNoString = filter.getFirstAtomicValueWithNameInData(FROM_NO);
-		Long fromNo = Long.valueOf(fromNoString);
+	private long getTotalNumberUsingFrom(Filter filter, Long toNo) {
+		Long fromNo = filter.fromNo;
 		return fromNo > toNo ? 0 : toNo - fromNo + 1;
 	}
 
@@ -724,7 +706,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	}
 
-	private long getTotalNumberOfRecordsForImplementingType(DataGroup filter, String type) {
+	private long getTotalNumberOfRecordsForImplementingType(String type, Filter filter) {
 		if (recordsExistForRecordType(type)) {
 			return getNumberOfRecords(type, filter);
 		}
