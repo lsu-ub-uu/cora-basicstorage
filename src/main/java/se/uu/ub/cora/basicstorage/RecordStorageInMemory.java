@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataGroup;
@@ -68,7 +70,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	@Override
 	public void create(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
+			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
 		ensureStorageExistsForRecordType(recordType);
 		checkNoConflictOnRecordId(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
@@ -116,7 +118,7 @@ public class RecordStorageInMemory implements RecordStorage {
 				recordIndependentOfEnteredRecord));
 	}
 
-	protected void storeLinks(String recordType, String recordId, List<Link> links,
+	protected void storeLinks(String recordType, String recordId, Set<Link> links,
 			String dataDivider) {
 		DataGroup linkListIndependentFromEntered = convertLinkListToDataGroup(recordType, recordId,
 				links);
@@ -136,7 +138,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	private DataGroup convertLinkListToDataGroup(String recordType, String recordId,
-			List<Link> links) {
+			Set<Link> links) {
 		DataGroup linkListAsGroup = DataProvider.createGroupUsingNameInData("collectedDataLinks");
 		for (Link link : links) {
 			DataGroup recordToRecordLink = DataProvider
@@ -539,29 +541,29 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public Collection<Link> getLinksToRecord(String type, String id) {
+	public Set<Link> getLinksToRecord(String type, String id) {
 		if (linksExistForRecord(type, id)) {
 			return generateLinkCollectionFromStoredLinks(type, id);
 		}
-		return Collections.emptyList();
+		return Collections.emptySet();
 	}
 
-	private Collection<Link> generateLinkCollectionFromStoredLinks(String type, String id) {
-		List<Link> generatedLinkList = new ArrayList<>();
+	private Set<Link> generateLinkCollectionFromStoredLinks(String type, String id) {
+		Set<Link> generatedLinkList = new LinkedHashSet<>();
 		Map<String, Map<String, List<DataGroup>>> linkStorageForRecord = incomingLinks.get(type)
 				.get(id);
 		addLinksForRecordFromAllRecordTypes(generatedLinkList, linkStorageForRecord);
 		return generatedLinkList;
 	}
 
-	private void addLinksForRecordFromAllRecordTypes(List<Link> generatedLinkList,
+	private void addLinksForRecordFromAllRecordTypes(Set<Link> generatedLinkList,
 			Map<String, Map<String, List<DataGroup>>> linkStorageForRecord) {
 		for (Map<String, List<DataGroup>> linkStorageMapOfId : linkStorageForRecord.values()) {
 			addLinksForRecordForThisRecordType(generatedLinkList, linkStorageMapOfId);
 		}
 	}
 
-	private void addLinksForRecordForThisRecordType(List<Link> generatedLinkList,
+	private void addLinksForRecordForThisRecordType(Set<Link> generatedLinkList,
 			Map<String, List<DataGroup>> linkStorageMapOfId) {
 		for (List<DataGroup> recordToRecordLinkList : linkStorageMapOfId.values()) {
 			generatedLinkList.addAll(convertDataGroupToLink(recordToRecordLinkList));
@@ -596,7 +598,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	@Override
 	public void update(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
+			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
 		checkRecordExists(recordType, recordId);
 		removeOldLinksStoredAsIncomingLinks(recordType, recordId);
 		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);

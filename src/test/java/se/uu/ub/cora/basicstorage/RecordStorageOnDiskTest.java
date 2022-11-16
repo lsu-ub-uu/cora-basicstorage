@@ -40,10 +40,11 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -85,13 +86,13 @@ public class RecordStorageOnDiskTest {
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private String basePath = "/tmp/recordStorageOnDiskTemp/";
-	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
+	private Set<Link> emptyLinkList = Collections.emptySet();
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
 	private DataCopierFactory dataCopierFactory;
 	private DataToJsonConverterFactory dataToJsonConverterFactory;
 	private JsonToDataConverterFactory jsonToDataConverterFactory;
-	List<StorageTerm> storageTerms = Collections.emptyList();
+	Set<StorageTerm> storageTerms = Collections.emptySet();
 
 	private String expectedRecordJsonOneRecordPlace1 = getExpectedRecordJsonOneRecordPlace1();
 
@@ -430,7 +431,7 @@ public class RecordStorageOnDiskTest {
 	@Test
 	public void testRecordWithLinks() throws IOException {
 		createRecordTypePlace();
-		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		Set<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -528,7 +529,7 @@ public class RecordStorageOnDiskTest {
 
 	@Test
 	public void testRecordWithLinksOneRecordTypeWithoutLinks() throws IOException {
-		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		Set<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -622,23 +623,16 @@ public class RecordStorageOnDiskTest {
 
 	}
 
-	private List<Link> createLinkListWithTwoLinks(String fromRecordId) {
-		// DataGroup linkList = DataCreator.createEmptyLinkList();
-		//
-		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-		// TO_RECORD_TYPE, TO_RECORD_ID));
-		//
-		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-		// TO_RECORD_TYPE, "toRecordId2"));
-		// return linkList;
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
-		return List.of(link1, link2);
+	private Set<Link> createLinkListWithTwoLinks(String fromRecordId) {
+		Set<Link> links = new LinkedHashSet<>();
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		links.add(new Link(TO_RECORD_TYPE, "toRecordId2"));
+		return links;
 	}
 
 	@Test
 	public void testRecordWithLinksTwoSystems() throws IOException {
-		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		Set<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 		RecordStorageOnDisk recordStorage = RecordStorageOnDisk
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
@@ -1070,7 +1064,7 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
@@ -1119,7 +1113,7 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
@@ -1128,7 +1122,7 @@ public class RecordStorageOnDiskTest {
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("authority",
 						"place", "place:0002");
-		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		Set<StorageTerm> storageTerms2 = new LinkedHashSet<>();
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
@@ -1207,7 +1201,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
@@ -1287,7 +1281,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
@@ -1298,7 +1292,7 @@ public class RecordStorageOnDiskTest {
 		DataGroup collectStorageTerm2 = new DataGroupSpy("storage");
 		collectedData2.addChild(collectStorageTerm2);
 
-		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		Set<StorageTerm> storageTerms2 = new LinkedHashSet<>();
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
@@ -1385,15 +1379,16 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		List<StorageTerm> storageTerms = new ArrayList<>();
-		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
+		StorageTerm term1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
+		storageTerms.add(term1);
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup read = recordStorage.read(List.of("place"), "place:0001");
 		// collectStorageTerm.removeFirstChildWithNameInData("collectedDataTerm");
-		storageTerms.remove(0);
+		storageTerms.remove(term1);
 		recordStorage.update("place", "place:0001", read, storageTerms, emptyLinkList, "cora");
 
 		String expectedCollectedDataOneTerm = "{\n";
@@ -1441,7 +1436,7 @@ public class RecordStorageOnDiskTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		Set<StorageTerm> storageTerms2 = new LinkedHashSet<>();
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
@@ -1467,7 +1462,7 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
@@ -1489,13 +1484,13 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		Set<StorageTerm> storageTerms2 = new LinkedHashSet<>();
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,
@@ -1523,14 +1518,14 @@ public class RecordStorageOnDiskTest {
 				.createRecordStorageOnDiskWithBasePath(basePath);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<StorageTerm> storageTerms = new ArrayList<>();
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
 		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList, "cora");
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 
-		List<StorageTerm> storageTerms2 = new ArrayList<>();
+		Set<StorageTerm> storageTerms2 = new LinkedHashSet<>();
 		storageTerms2.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
 
 		recordStorage.create("place", "place:0002", dataGroup2, storageTerms2, emptyLinkList,

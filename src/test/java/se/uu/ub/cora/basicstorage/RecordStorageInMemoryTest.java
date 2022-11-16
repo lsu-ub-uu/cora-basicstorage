@@ -30,8 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,8 +55,8 @@ public class RecordStorageInMemoryTest {
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private RecordStorage recordStorage;
-	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
-	private List<StorageTerm> storageTerms = Collections.emptyList();
+	private Set<Link> emptyLinkList = Collections.emptySet();
+	private Set<StorageTerm> storageTerms = Collections.emptySet();
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private String dataDivider = "cora";
 	private DataCopierFactorySpy dataCopierFactory;
@@ -114,11 +116,11 @@ public class RecordStorageInMemoryTest {
 
 	private void createTwoLinksPointingToSameRecordFromDifferentRecords() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 
-		List<Link> linkList2 = createLinkListWithTwoLinks("fromRecordId2");
+		Set<Link> linkList2 = createLinkListWithTwoLinks("fromRecordId2");
 		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList2,
 				dataDivider);
 	}
@@ -137,38 +139,18 @@ public class RecordStorageInMemoryTest {
 		assertNoGeneratedLinksForRecordTypeAndRecordId("NOT_toRecordType", TO_RECORD_ID);
 	}
 
-	@Test
-	public void testGenerateTwoLinksPointingToSameRecordFromSameRecord() {
-		createTwoLinksPointingToSameRecordFromSameRecord();
-
-		Collection<Link> generatedLinksPointToRecord = recordStorage
-				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
-
-		assertEquals(generatedLinksPointToRecord.size(), 2);
-
-		assertCorrectTwoLinksPointingToSameRecordFromSameRecord(generatedLinksPointToRecord);
-	}
-
 	private void createTwoLinksPointingToSameRecordFromSameRecord() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinksToSameRecord(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinksToSameRecord();
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 	}
 
-	private List<Link> createLinkListWithTwoLinksToSameRecord(String fromRecordId) {
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		return List.of(link1, link2);
-	}
-
-	private void assertCorrectTwoLinksPointingToSameRecordFromSameRecord(
-			Collection<Link> generatedLinksPointToRecord) {
-		Iterator<Link> generatedLinks = generatedLinksPointToRecord.iterator();
-		assertRecordLinkIsCorrect(generatedLinks.next(), FROM_RECORD_TYPE, FROM_RECORD_ID,
-				TO_RECORD_TYPE, TO_RECORD_ID);
-		assertRecordLinkIsCorrect(generatedLinks.next(), FROM_RECORD_TYPE, FROM_RECORD_ID,
-				TO_RECORD_TYPE, TO_RECORD_ID);
+	private Set<Link> createLinkListWithTwoLinksToSameRecord() {
+		Set<Link> links = new LinkedHashSet<>();
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		return links;
 	}
 
 	private void assertRecordLinkIsCorrect(Link link, String fromRecordType, String fromRecordId,
@@ -184,10 +166,11 @@ public class RecordStorageInMemoryTest {
 		assertEquals(generatedLinksPointToRecord.size(), 0);
 	}
 
-	private List<Link> createLinkListWithTwoLinks(String fromRecordId) {
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
-		return List.of(link1, link2);
+	private Set<Link> createLinkListWithTwoLinks(String fromRecordId) {
+		Set<Link> links = new LinkedHashSet<>();
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		links.add(new Link(TO_RECORD_TYPE, "toRecordId2"));
+		return links;
 	}
 
 	@Test
@@ -385,7 +368,7 @@ public class RecordStorageInMemoryTest {
 		Collection<Link> generatedLinksPointToRecord = recordStorage
 				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
-		assertEquals(generatedLinksPointToRecord.size(), 2);
+		assertEquals(generatedLinksPointToRecord.size(), 1);
 
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
 	}
@@ -398,7 +381,7 @@ public class RecordStorageInMemoryTest {
 		Collection<Link> generatedLinksPointToRecord = recordStorage
 				.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID);
 
-		assertEquals(generatedLinksPointToRecord.size(), 2);
+		assertEquals(generatedLinksPointToRecord.size(), 1);
 
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
 	}
@@ -406,7 +389,7 @@ public class RecordStorageInMemoryTest {
 	private void createRecordFromOtherRecordIdWithLinkToToTypeAndOtherToRecordId() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Link link1 = new Link(TO_RECORD_TYPE, "toOtherRecordId");
-		List<Link> linkList = List.of(link1);
+		Set<Link> linkList = Set.of(link1);
 
 		recordStorage.create(FROM_RECORD_TYPE, "fromOtherRecordId", dataGroup, storageTerms,
 				linkList, dataDivider);
@@ -415,7 +398,7 @@ public class RecordStorageInMemoryTest {
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testLinkListIsRemovedOnDelete() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
@@ -429,10 +412,10 @@ public class RecordStorageInMemoryTest {
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testLinkListIsRemovedOnDeleteRecordTypeStillExistsInLinkListStorage() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
-				createLinkListWithLinksForTestingRemoveOfLinks(), dataDivider);
+				createLinkListWithTwoLinksToSameRecord(), dataDivider);
 		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList,
 				dataDivider);
 
@@ -441,16 +424,16 @@ public class RecordStorageInMemoryTest {
 
 	}
 
-	private List<Link> createLinkListWithLinksForTestingRemoveOfLinks() {
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		return List.of(link1, link2);
-	}
+	// private List<Link> createLinkListWithLinksForTestingRemoveOfLinks() {
+	// Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
+	// Link link2 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
+	// return List.of(link1, link2);
+	// }
 
 	@Test
 	public void testGenerateLinksPointToRecordAreRemovedOnDelete() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
@@ -512,24 +495,24 @@ public class RecordStorageInMemoryTest {
 	@Test
 	public void testUpdateAndReadLinkList() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 
 		// update
-		List<Link> linkListOne = createLinkListWithOneLink(FROM_RECORD_ID);
+		Set<Link> linkListOne = createLinkListWithOneLink(FROM_RECORD_ID);
 		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkListOne,
 				dataDivider);
 	}
 
-	private List<Link> createLinkListWithOneLink(String fromRecordId) {
-		return List.of(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+	private Set<Link> createLinkListWithOneLink(String fromRecordId) {
+		return Set.of(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
 	}
 
 	@Test
 	public void testUpdateGenerateLinksPointToRecordAreRemovedAndAdded() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
@@ -548,11 +531,11 @@ public class RecordStorageInMemoryTest {
 	@Test
 	public void testLinksFromSameRecordToSameRecordThanRemovingOne() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		List<Link> linkList = createLinkListWithThreeLinksTwoOfThemFromSameRecord(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithThreeLinksTwoOfThemFromSameRecord(FROM_RECORD_ID);
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
-		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 3);
+		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 		// update
 		linkList = createLinkListWithTwoLinksFromDifferentRecords(FROM_RECORD_ID);
 		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
@@ -560,17 +543,17 @@ public class RecordStorageInMemoryTest {
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 	}
 
-	private List<Link> createLinkListWithThreeLinksTwoOfThemFromSameRecord(String fromRecordId) {
+	private Set<Link> createLinkListWithThreeLinksTwoOfThemFromSameRecord(String fromRecordId) {
 		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link3 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		return List.of(link1, link2, link3);
+		Link link3 = new Link(TO_RECORD_TYPE, "notSame");
+		return Set.of(link1, link3);
 	}
 
-	private List<Link> createLinkListWithTwoLinksFromDifferentRecords(String fromRecordId) {
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
-		return List.of(link1, link2);
+	private Set<Link> createLinkListWithTwoLinksFromDifferentRecords(String fromRecordId) {
+		Set<Link> links = new LinkedHashSet<>();
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		links.add(new Link(TO_RECORD_TYPE, "toRecordId2"));
+		return links;
 	}
 
 	private void assertNoOfLinksPointingToRecord(String toRecordType, String toRecordId,

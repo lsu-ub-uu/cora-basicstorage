@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
@@ -85,7 +86,7 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 
 	@Override
 	public void storeCollectedTerms(String recordType, String recordId,
-			List<StorageTerm> storageTerms, String dataDivider) {
+			Set<StorageTerm> storageTerms, String dataDivider) {
 		removePreviousCollectedStorageTerms(recordType, recordId);
 		for (StorageTerm storageTerm : storageTerms) {
 			storeCollectedStorageTerm(recordType, recordId, dataDivider, storageTerm);

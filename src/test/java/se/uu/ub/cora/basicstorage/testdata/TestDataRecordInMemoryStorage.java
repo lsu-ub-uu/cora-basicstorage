@@ -20,7 +20,7 @@
 package se.uu.ub.cora.basicstorage.testdata;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
@@ -38,7 +38,7 @@ import se.uu.ub.cora.json.parser.org.OrgJsonParser;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class TestDataRecordInMemoryStorage {
-	private static List<StorageTerm> storageTerms = Collections.emptyList();
+	private static Set<StorageTerm> storageTerms = Collections.emptySet();
 
 	public static RecordStorageInMemory createRecordStorageInMemoryWithTestData() {
 		RecordStorageInMemory recordsInMemory = new RecordStorageInMemory();
@@ -100,8 +100,8 @@ public class TestDataRecordInMemoryStorage {
 		return recordsInMemory;
 	}
 
-	private static List<Link> createEmptyCollectedLinks() {
-		return Collections.emptyList();
+	private static Set<Link> createEmptyCollectedLinks() {
+		return Collections.emptySet();
 	}
 
 	private static void addPlace(RecordStorageInMemory recordsInMemory) {
@@ -125,11 +125,8 @@ public class TestDataRecordInMemoryStorage {
 		dataGroup.addChild(dataRecordLink);
 		addLinkedRecordTypeAndLinkedRecordIdToRecordLink("place", "place:0001", dataRecordLink);
 
-		// dataGroup.addChild(DataRecordLink.withNameInDataAndLinkedRecordTypeAndLinkedRecordId("link",
-		// "place", "place:0001"));
-
-		List<Link> collectedLinksList = createLinkList();
-		recordsInMemory.create("place", "place:0002", dataGroup, Collections.emptyList(),
+		Set<Link> collectedLinksList = createLinkList();
+		recordsInMemory.create("place", "place:0002", dataGroup, Collections.emptySet(),
 				collectedLinksList, "cora");
 	}
 
@@ -142,21 +139,9 @@ public class TestDataRecordInMemoryStorage {
 		dataRecordLink.addChild(linkedRecordId);
 	}
 
-	private static List<Link> createLinkList() {
-		// List<Link> collectedLinksList = new ArrayList<>();
-		// DataGroup recordToRecordLink = new DataGroupSpy("recordToRecordLink");
-		//
-		// DataGroup from = new DataGroupSpy("from");
-		// recordToRecordLink.addChild(from);
-		// addLinkedRecordTypeAndLinkedRecordIdToRecordLink("place", "place:0002", from);
-		// DataGroup to = new DataGroupSpy("to");
-		// recordToRecordLink.addChild(to);
-		// addLinkedRecordTypeAndLinkedRecordIdToRecordLink("place", "place:0001", to);
-		//
-		// collectedLinksList.addChild(recordToRecordLink);
-		// return collectedLinksList;
+	private static Set<Link> createLinkList() {
 		Link link = new Link("place", "place:0001");
-		return List.of(link);
+		return Set.of(link);
 	}
 
 	private static void addMetadata(RecordStorageInMemory recordsInMemory) {
