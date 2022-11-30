@@ -1,5 +1,4 @@
 module se.uu.ub.cora.basicstorage {
-	requires transitive se.uu.ub.cora.gatekeeper;
 	requires se.uu.ub.cora.json;
 	requires se.uu.ub.cora.logger;
 	requires transitive se.uu.ub.cora.storage;
