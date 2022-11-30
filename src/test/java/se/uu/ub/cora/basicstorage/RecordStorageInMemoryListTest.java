@@ -31,8 +31,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -55,9 +57,9 @@ import se.uu.ub.cora.storage.StorageReadResult;
 
 public class RecordStorageInMemoryListTest {
 	private RecordStorageInMemory recordStorage;
-	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
+	private Set<Link> emptyLinkList = Collections.emptySet();
 	Filter emptyFilter = new Filter();
-	private List<StorageTerm> storageTerms = Collections.emptyList();
+	private Set<StorageTerm> storageTerms = Collections.emptySet();
 	private String dataDivider = "cora";
 	private DataGroupFactory dataGroupFactory;
 	private DataCopierFactory dataCopierFactory;
@@ -273,42 +275,42 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private void createPlaceInStorageWithUppsalaStorageTerm(String nameInData) {
-		List<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
+		Set<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
 		createPlaceInStorageWithCollectedData(storageTerms, nameInData);
 	}
 
 	private void updatePlaceInStorageWithUppsalaStorageTerm() {
-		List<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
+		Set<StorageTerm> storageTerms = createCollectedDataWithUppsalaStorageTerm();
 		updateUppsalaPlaceInStorageWithCollectedData(storageTerms);
 	}
 
 	private void updatePlaceInStorageWithStockholmStorageTerm() {
-		List<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
+		Set<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
 		updateStockholmPlaceInStorageWithCollectedData(storageTerms);
 	}
 
-	private List<StorageTerm> createCollectedDataWithUppsalaStorageTerm() {
+	private Set<StorageTerm> createCollectedDataWithUppsalaStorageTerm() {
 		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
-		List<StorageTerm> storageTerms = List.of(storageTerm1);
+		Set<StorageTerm> storageTerms = Set.of(storageTerm1);
 		return storageTerms;
 	}
 
-	private void createPlaceInStorageWithCollectedData(List<StorageTerm> storageTerms,
+	private void createPlaceInStorageWithCollectedData(Set<StorageTerm> storageTerms2,
 			String nameInData) {
 		DataGroup dataGroup = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"place", "place:0001");
-		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("place", "place:0001", dataGroup, storageTerms2, emptyLinkList,
 				dataDivider);
 	}
 
-	private void updateUppsalaPlaceInStorageWithCollectedData(List<StorageTerm> storageTerms) {
+	private void updateUppsalaPlaceInStorageWithCollectedData(Set<StorageTerm> storageTerms) {
 		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0001");
 		recordStorage.update("place", "place:0001", dataGroupOut, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
-	private void updateStockholmPlaceInStorageWithCollectedData(List<StorageTerm> storageTerm) {
+	private void updateStockholmPlaceInStorageWithCollectedData(Set<StorageTerm> storageTerm) {
 		DataGroup dataGroupOut = recordStorage.read(List.of("place"), "place:0002");
 		recordStorage.update("place", "place:0002", dataGroupOut, storageTerm, emptyLinkList,
 				dataDivider);
@@ -319,14 +321,14 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"place", "place:0002");
 
-		List<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
+		Set<StorageTerm> storageTerms = createCollectedDataWithStockholmStorageTerm();
 		recordStorage.create("place", "place:0002", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
-	private List<StorageTerm> createCollectedDataWithStockholmStorageTerm() {
+	private Set<StorageTerm> createCollectedDataWithStockholmStorageTerm() {
 		StorageTerm storageTerm = new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm");
-		return List.of(storageTerm);
+		return Set.of(storageTerm);
 	}
 
 	private void createPlaceInStorageWithUppsalaStorageAndStockholmTerm() {
@@ -334,12 +336,11 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"place", "place:0003");
 
-		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
-		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName",
-				"Stockholm");
-		List<StorageTerm> storageTerms1 = List.of(storageTerm1, storageTerm2);
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala"));
+		storageTerms.add(new StorageTerm("placeNameStorageTerm", "placeName", "Stockholm"));
 
-		recordStorage.create("place", "place:0003", dataGroup, storageTerms1, emptyLinkList,
+		recordStorage.create("place", "place:0003", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 	}
 
@@ -447,8 +448,7 @@ public class RecordStorageInMemoryListTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
 						"image", imageValue);
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		List<StorageTerm> storageTerms1 = List
-				.of(new StorageTerm("idStorageTerm", "id", imageValue));
+		Set<StorageTerm> storageTerms1 = Set.of(new StorageTerm("idStorageTerm", "id", imageValue));
 
 		recordStorage.create("image", imageValue, dataGroup, storageTerms1, emptyLinkList,
 				dataDivider);

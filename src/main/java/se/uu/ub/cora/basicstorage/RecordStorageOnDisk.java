@@ -260,7 +260,7 @@ public class RecordStorageOnDisk extends RecordStorageInMemory implements Record
 
 	@Override
 	public synchronized void create(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
+			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
 		super.create(recordType, recordId, record, storageTerms, links, dataDivider);
 		writeDataToDisk(recordType, dataDivider);
 	}
@@ -548,7 +548,7 @@ public class RecordStorageOnDisk extends RecordStorageInMemory implements Record
 
 	@Override
 	public synchronized void update(String recordType, String recordId, DataGroup record,
-			List<StorageTerm> storageTerms, List<Link> links, String dataDivider) {
+			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
 		String previousDataDivider = records.get(recordType).get(recordId).dataDivider;
 		super.update(recordType, recordId, record, storageTerms, links, dataDivider);
 		writeDataToDisk(recordType, previousDataDivider);

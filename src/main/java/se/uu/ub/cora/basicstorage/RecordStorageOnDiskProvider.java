@@ -29,7 +29,7 @@ public class RecordStorageOnDiskProvider implements RecordStorageInstanceProvide
 
 	@Override
 	public int getOrderToSelectImplementionsBy() {
-		return 0;
+		return -10;
 	}
 
 	@Override

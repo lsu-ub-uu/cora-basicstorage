@@ -20,6 +20,7 @@ package se.uu.ub.cora.basicstorage;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
@@ -27,7 +28,7 @@ import se.uu.ub.cora.storage.Filter;
 
 public interface CollectedTermsHolder {
 
-	void storeCollectedTerms(String recordType, String recordId, List<StorageTerm> storageTerms,
+	void storeCollectedTerms(String recordType, String recordId, Set<StorageTerm> storageTerms,
 			String dataDivider);
 
 	List<String> findRecordIdsForFilter(String type, Filter filter);

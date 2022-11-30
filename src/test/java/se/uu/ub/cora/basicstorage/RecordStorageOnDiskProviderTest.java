@@ -93,7 +93,7 @@ public class RecordStorageOnDiskProviderTest {
 	public void testGetOrderToSelectImplementationsByIsZero() {
 		recordStorageOnDiskProvider.getRecordStorage();
 
-		assertEquals(recordStorageOnDiskProvider.getOrderToSelectImplementionsBy(), 0);
+		assertEquals(recordStorageOnDiskProvider.getOrderToSelectImplementionsBy(), -10);
 	}
 
 	@Test

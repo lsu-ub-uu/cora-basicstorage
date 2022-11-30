@@ -27,8 +27,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.testng.annotations.AfterMethod;
@@ -51,12 +53,12 @@ public class RecordStorageInMemoryReadFromDiskTest {
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private String basePath = "/tmp/recordStorageOnDiskTemp/";
-	private List<Link> emptyLinkList = DataCreator.createEmptyLinkList();
+	private Set<Link> emptyLinkList = Collections.emptySet();
 	private RecordStorageOnDisk recordStorage;
 	private DataGroupFactory dataGroupFactory;
 	private DataAtomicFactory dataAtomicFactory;
 	private DataCopierFactory dataCopierFactory;
-	List<StorageTerm> storageTerms = Collections.emptyList();
+	Set<StorageTerm> storageTerms = Collections.emptySet();
 
 	@BeforeMethod
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -138,7 +140,7 @@ public class RecordStorageInMemoryReadFromDiskTest {
 
 	@Test
 	public void testRecordWithLinks() throws IOException {
-		List<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
+		Set<Link> linkListWithTwoLinks = createLinkListWithTwoLinks("place:0001");
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		recordStorage.create("place", "place:0001", dataGroup, storageTerms, linkListWithTwoLinks,
@@ -161,18 +163,11 @@ public class RecordStorageInMemoryReadFromDiskTest {
 		assertFalse(Files.exists(path2));
 	}
 
-	private List<Link> createLinkListWithTwoLinks(String fromRecordId) {
-		// DataGroup linkList = DataCreator.createEmptyLinkList();
-		//
-		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-		// TO_RECORD_TYPE, TO_RECORD_ID));
-		//
-		// linkList.addChild(DataCreator.createRecordToRecordLink(FROM_RECORD_TYPE, fromRecordId,
-		// TO_RECORD_TYPE, "toRecordId2"));
-		// return linkList;
-		Link link1 = new Link(TO_RECORD_TYPE, TO_RECORD_ID);
-		Link link2 = new Link(TO_RECORD_TYPE, "toRecordId2");
-		return List.of(link1, link2);
+	private Set<Link> createLinkListWithTwoLinks(String fromRecordId) {
+		Set<Link> links = new LinkedHashSet<>();
+		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
+		links.add(new Link(TO_RECORD_TYPE, "toRecordId2"));
+		return links;
 	}
 
 	@Test
