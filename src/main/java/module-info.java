@@ -2,7 +2,6 @@ module se.uu.ub.cora.basicstorage {
 	requires se.uu.ub.cora.json;
 	requires se.uu.ub.cora.logger;
 	requires transitive se.uu.ub.cora.storage;
-	requires se.uu.ub.cora.basicdata;
 	requires se.uu.ub.cora.initialize;
 
 	exports se.uu.ub.cora.basicstorage;
