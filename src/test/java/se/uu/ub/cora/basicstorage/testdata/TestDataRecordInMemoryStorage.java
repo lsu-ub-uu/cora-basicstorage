@@ -22,7 +22,6 @@ package se.uu.ub.cora.basicstorage.testdata;
 import java.util.Collections;
 import java.util.Set;
 
-import se.uu.ub.cora.basicdata.converter.jsontodata.JsonToDataConverterFactoryImp;
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
 import se.uu.ub.cora.basicstorage.DataGroupSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;
@@ -30,11 +29,6 @@ import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
-import se.uu.ub.cora.data.converter.JsonToDataConverter;
-import se.uu.ub.cora.data.converter.JsonToDataConverterFactory;
-import se.uu.ub.cora.json.parser.JsonParser;
-import se.uu.ub.cora.json.parser.JsonValue;
-import se.uu.ub.cora.json.parser.org.OrgJsonParser;
 import se.uu.ub.cora.storage.RecordStorage;
 
 public class TestDataRecordInMemoryStorage {
@@ -66,7 +60,7 @@ public class TestDataRecordInMemoryStorage {
 		addChildToChildToRecordTypeOfAbstractAuthority(recordsInMemory);
 		addRecordTypeSearchTerm(recordsInMemory);
 		addSearchTerm(recordsInMemory);
-		addSomeSearchTerm(recordsInMemory);
+		// addSomeSearchTerm(recordsInMemory);
 		addMetadataRecordTypes(recordsInMemory);
 		addRecordTypeGenericCollectionItem(recordsInMemory);
 		addGenericCollectionItem(recordsInMemory);
@@ -347,22 +341,36 @@ public class TestDataRecordInMemoryStorage {
 				createEmptyCollectedLinks(), "cora");
 	}
 
-	private static void addSomeSearchTerm(RecordStorageInMemory recordsInMemory) {
-		String searchTermJson = "{\"name\":\"searchTerm\",\"children\":[{\"name\":\"recordInfo\",\"children\":[{\"name\":\"id\",\"value\":\"someSearchTerm\"},{\"name\":\"type\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"recordType\"},{\"name\":\"linkedRecordId\",\"value\":\"searchTerm\"}]},{\"name\":\"createdBy\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"user\"},{\"name\":\"linkedRecordId\",\"value\":\"141414\"}]},{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},{\"name\":\"searchTermType\",\"value\":\"linkedData\"},{\"name\":\"searchFieldRef\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"metadata\"},{\"name\":\"linkedRecordId\",\"value\":\"refTextVar\"}]},{\"name\":\"indexType\",\"value\":\"indexTypeString\"}]}";
-		DataGroup searchTerm = convertJsonStringToDataGroup(searchTermJson);
-		recordsInMemory.create("searchTerm", "someSearchTerm", searchTerm, storageTerms,
-				createEmptyCollectedLinks(), "systemOne");
-	}
+	// private static void addSomeSearchTerm(RecordStorageInMemory recordsInMemory) {
+	// String searchTermJson = "{\"name\":\"searchTerm\",\"children\":[{\"name\":\"recordInfo\""
+	// + ",\"children\":[{\"name\":\"id\",\"value\":\"someSearchTerm\"},"
+	// + "{\"name\":\"type\",\"children\":[{\"name\":\"linkedRecordType\","
+	// + "\"value\":\"recordType\"},{\"name\":\"linkedRecordId\",\"value\":\"searchTerm\"}]}"
+	// +
+	// ",{\"name\":\"createdBy\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"user\"},"
+	// + "{\"name\":\"linkedRecordId\",\"value\":\"141414\"}]},"
+	// +
+	// "{\"name\":\"dataDivider\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"system\"},"
+	// + "{\"name\":\"linkedRecordId\",\"value\":\"cora\"}]}]},"
+	// + "{\"name\":\"searchTermType\",\"value\":\"linkedData\"},"
+	// +
+	// "{\"name\":\"searchFieldRef\",\"children\":[{\"name\":\"linkedRecordType\",\"value\":\"metadata\"},"
+	// + "{\"name\":\"linkedRecordId\",\"value\":\"refTextVar\"}]},"
+	// + "{\"name\":\"indexType\",\"value\":\"indexTypeString\"}]}";
+	// DataGroup searchTerm = convertJsonStringToDataGroup(searchTermJson);
+	// recordsInMemory.create("searchTerm", "someSearchTerm", searchTerm, storageTerms,
+	// createEmptyCollectedLinks(), "systemOne");
+	// }
 
-	private static DataGroup convertJsonStringToDataGroup(String jsonRecord) {
-		JsonParser jsonParser = new OrgJsonParser();
-		JsonValue jsonValue = jsonParser.parseString(jsonRecord);
-		JsonToDataConverterFactory jsonToDataConverterFactory = new JsonToDataConverterFactoryImp();
-		JsonToDataConverter jsonToDataConverter = jsonToDataConverterFactory
-				.createForJsonObject(jsonValue);
-		DataGroup dataPart = (DataGroup) jsonToDataConverter.toInstance();
-		return dataPart;
-	}
+	// private static DataGroup convertJsonStringToDataGroup(String jsonRecord) {
+	// JsonParser jsonParser = new OrgJsonParser();
+	// JsonValue jsonValue = jsonParser.parseString(jsonRecord);
+	// JsonToDataConverterFactory jsonToDataConverterFactory = new JsonToDataConverterFactoryImp();
+	// JsonToDataConverter jsonToDataConverter = jsonToDataConverterFactory
+	// .createForJsonObject(jsonValue);
+	// DataGroup dataPart = (DataGroup) jsonToDataConverter.toInstance();
+	// return dataPart;
+	// }
 
 	private static void addRecordTypeCollectTerm(RecordStorageInMemory recordsInMemory) {
 		String recordType = "recordType";

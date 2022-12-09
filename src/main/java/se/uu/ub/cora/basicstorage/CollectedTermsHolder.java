@@ -19,10 +19,8 @@
 package se.uu.ub.cora.basicstorage;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Filter;
 
@@ -34,10 +32,5 @@ public interface CollectedTermsHolder {
 	List<String> findRecordIdsForFilter(String type, Filter filter);
 
 	void removePreviousCollectedStorageTerms(String recordType, String recordId);
-
-	void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
-			StorageTermData storageTermData);
-
-	Map<String, DataGroup> structureCollectedTermsForDisk();
 
 }

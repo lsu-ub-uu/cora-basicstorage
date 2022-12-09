@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Condition;
 import se.uu.ub.cora.storage.Filter;
@@ -104,15 +103,6 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 		listOfStorageTermData.add(StorageTermData.withValueAndDataDivider(termValue, dataDivider));
 	}
 
-	@Override
-	public void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
-			StorageTermData storageTermData) {
-		List<StorageTermData> listOfStorageTermData = ensureStorageListExistsForTermForTypeAndKeyAndId(
-				recordType, storageKey, recordId);
-
-		listOfStorageTermData.add(storageTermData);
-	}
-
 	private List<StorageTermData> ensureStorageListExistsForTermForTypeAndKeyAndId(
 			String recordType, String storageKey, String recordId) {
 		ensureStorageMapExistsForRecordType(recordType);
@@ -186,10 +176,4 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 			}
 		}
 	}
-
-	@Override
-	public Map<String, DataGroup> structureCollectedTermsForDisk() {
-		return new CollectedDataOrganiser().structureCollectedDataForDisk(terms);
-	}
-
 }

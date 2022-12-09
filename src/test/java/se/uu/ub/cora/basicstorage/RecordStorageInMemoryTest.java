@@ -29,7 +29,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +40,13 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.basicstorage.testdata.DataCreator;
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataAtomic;
+import se.uu.ub.cora.data.DataFactory;
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataProvider;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.data.spies.DataFactorySpy;
 import se.uu.ub.cora.storage.RecordConflictException;
 import se.uu.ub.cora.storage.RecordNotFoundException;
 import se.uu.ub.cora.storage.RecordStorage;
@@ -60,9 +62,13 @@ public class RecordStorageInMemoryTest {
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private String dataDivider = "cora";
 	private DataCopierFactorySpy dataCopierFactory;
+	private DataFactory dataFactorySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
+		dataFactorySpy = new DataFactorySpy();
+		DataProvider.onlyForTestSetDataFactory(dataFactorySpy);
+
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 
@@ -116,11 +122,11 @@ public class RecordStorageInMemoryTest {
 
 	private void createTwoLinksPointingToSameRecordFromDifferentRecords() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 
-		Set<Link> linkList2 = createLinkListWithTwoLinks("fromRecordId2");
+		Set<Link> linkList2 = createLinkListWithTwoLinks();
 		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList2,
 				dataDivider);
 	}
@@ -129,11 +135,9 @@ public class RecordStorageInMemoryTest {
 			Collection<Link> generatedLinksPointingToRecord) {
 		assertEquals(generatedLinksPointingToRecord.size(), 2);
 
-		Iterator<Link> generatedLinks = generatedLinksPointingToRecord.iterator();
-		assertRecordLinkIsCorrect(generatedLinks.next(), FROM_RECORD_TYPE, "fromRecordId2",
-				TO_RECORD_TYPE, TO_RECORD_ID);
-		assertRecordLinkIsCorrect(generatedLinks.next(), FROM_RECORD_TYPE, FROM_RECORD_ID,
-				TO_RECORD_TYPE, TO_RECORD_ID);
+		Link l1 = new Link(FROM_RECORD_TYPE, FROM_RECORD_ID);
+		Link l2 = new Link(FROM_RECORD_TYPE, "fromRecordId2");
+		generatedLinksPointingToRecord.containsAll(Set.of(l1, l2));
 
 		assertNoGeneratedLinksForRecordTypeAndRecordId(TO_RECORD_TYPE, "NOT_toRecordId");
 		assertNoGeneratedLinksForRecordTypeAndRecordId("NOT_toRecordType", TO_RECORD_ID);
@@ -153,12 +157,6 @@ public class RecordStorageInMemoryTest {
 		return links;
 	}
 
-	private void assertRecordLinkIsCorrect(Link link, String fromRecordType, String fromRecordId,
-			String toRecordType, String toRecordId) {
-		assertEquals(link.type(), fromRecordType);
-		assertEquals(link.id(), fromRecordId);
-	}
-
 	private void assertNoGeneratedLinksForRecordTypeAndRecordId(String toRecordType,
 			String toRecordId) {
 		Collection<Link> generatedLinksPointToRecord = recordStorage.getLinksToRecord(toRecordType,
@@ -166,7 +164,7 @@ public class RecordStorageInMemoryTest {
 		assertEquals(generatedLinksPointToRecord.size(), 0);
 	}
 
-	private Set<Link> createLinkListWithTwoLinks(String fromRecordId) {
+	private Set<Link> createLinkListWithTwoLinks() {
 		Set<Link> links = new LinkedHashSet<>();
 		links.add(new Link(TO_RECORD_TYPE, TO_RECORD_ID));
 		links.add(new Link(TO_RECORD_TYPE, "toRecordId2"));
@@ -293,11 +291,11 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
 		DataGroup image = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
 		DataGroup image2 = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 52);
+		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
 
 		assertNotSame(image, image2);
 	}
@@ -395,33 +393,35 @@ public class RecordStorageInMemoryTest {
 				linkList, dataDivider);
 	}
 
-	@Test(expectedExceptions = RecordNotFoundException.class)
+	@Test
 	public void testLinkListIsRemovedOnDelete() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 
+		assertFalse(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).isEmpty());
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
 
-		((RecordStorageInMemory) recordStorage).readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
-
+		assertTrue(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).isEmpty());
 	}
 
-	@Test(expectedExceptions = RecordNotFoundException.class)
-	public void testLinkListIsRemovedOnDeleteRecordTypeStillExistsInLinkListStorage() {
+	@Test
+	public void testTwoRecordsPointsToSameRecordAfterDeleteOnlyOneStillThere() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
 				createLinkListWithTwoLinksToSameRecord(), dataDivider);
 		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList,
 				dataDivider);
 
+		assertEquals(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).size(), 2);
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
-		((RecordStorageInMemory) recordStorage).readLinkList(FROM_RECORD_TYPE, FROM_RECORD_ID);
 
+		assertEquals(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).size(), 1);
+		assertFalse(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).isEmpty());
 	}
 
 	// private List<Link> createLinkListWithLinksForTestingRemoveOfLinks() {
@@ -433,15 +433,16 @@ public class RecordStorageInMemoryTest {
 	@Test
 	public void testGenerateLinksPointToRecordAreRemovedOnDelete() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 		// delete
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
-		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 0);
+		// assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 0);
 
+		assertEquals(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).size(), 0);
 		assertFalse(recordStorage.linksExistForRecord(TO_RECORD_TYPE, TO_RECORD_ID));
 	}
 
@@ -495,7 +496,7 @@ public class RecordStorageInMemoryTest {
 	@Test
 	public void testUpdateAndReadLinkList() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);
 
@@ -512,7 +513,7 @@ public class RecordStorageInMemoryTest {
 	@Test
 	public void testUpdateGenerateLinksPointToRecordAreRemovedAndAdded() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks(FROM_RECORD_ID);
+		Set<Link> linkList = createLinkListWithTwoLinks();
 
 		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
 				dataDivider);

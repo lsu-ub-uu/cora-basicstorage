@@ -41,13 +41,14 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.basicstorage.testdata.DataCreator;
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
+import se.uu.ub.cora.data.DataFactory;
 import se.uu.ub.cora.data.DataGroup;
-import se.uu.ub.cora.data.DataGroupFactory;
-import se.uu.ub.cora.data.DataGroupProvider;
+import se.uu.ub.cora.data.DataProvider;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
+import se.uu.ub.cora.data.spies.DataFactorySpy;
 import se.uu.ub.cora.storage.Condition;
 import se.uu.ub.cora.storage.Filter;
 import se.uu.ub.cora.storage.Part;
@@ -61,13 +62,14 @@ public class RecordStorageInMemoryListTest {
 	Filter emptyFilter = new Filter();
 	private Set<StorageTerm> storageTerms = Collections.emptySet();
 	private String dataDivider = "cora";
-	private DataGroupFactory dataGroupFactory;
 	private DataCopierFactory dataCopierFactory;
+	private DataFactory dataFactorySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		dataGroupFactory = new DataGroupFactorySpy();
-		DataGroupProvider.setDataGroupFactory(dataGroupFactory);
+		dataFactorySpy = new DataFactorySpy();
+		DataProvider.onlyForTestSetDataFactory(dataFactorySpy);
+
 		dataCopierFactory = new DataCopierFactorySpy();
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 

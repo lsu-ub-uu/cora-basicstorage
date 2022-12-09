@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Filter;
 
@@ -58,20 +57,5 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	@Override
 	public void removePreviousCollectedStorageTerms(String recordType, String recordId) {
 		// TODO Auto-generated method stub
-
 	}
-
-	@Override
-	public void storeCollectedStorageTermData(String recordType, String storageKey, String recordId,
-			StorageTermData storageTermData) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Map<String, DataGroup> structureCollectedTermsForDisk() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
