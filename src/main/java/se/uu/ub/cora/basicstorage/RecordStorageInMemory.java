@@ -216,7 +216,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	private void throwErrorIfNoRecordOfType(String type,
 			Map<String, DividerGroup> typeDividerRecords) {
 		if (null == typeDividerRecords) {
-			throw new RecordNotFoundException(NO_RECORDS_EXISTS_MESSAGE + type);
+			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + type);
 		}
 	}
 
@@ -325,7 +325,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	private void throwErrorIfEmptyAggregatedList(String type,
 			List<DataGroup> aggregatedRecordList) {
 		if (aggregatedRecordList.isEmpty()) {
-			throw new RecordNotFoundException(NO_RECORDS_EXISTS_MESSAGE + type);
+			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + type);
 		}
 	}
 
@@ -366,7 +366,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	private DataGroup readRecordFromImplementingRecordTypes(List<String> types, String recordId) {
 		DataGroup readRecord = tryToReadRecordFromImplementingRecordTypes(types, recordId);
 		if (readRecord == null) {
-			throw new RecordNotFoundException("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
 		}
 		return readRecord;
 	}
@@ -391,10 +391,10 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private void checkRecordExists(String recordType, String recordId) {
 		if (holderForRecordTypeDoesNotExistInStorage(recordType)) {
-			throw new RecordNotFoundException(NO_RECORDS_EXISTS_MESSAGE + recordType);
+			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + recordType);
 		}
 		if (null == records.get(recordType).get(recordId)) {
-			throw new RecordNotFoundException("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
 		}
 	}
 
