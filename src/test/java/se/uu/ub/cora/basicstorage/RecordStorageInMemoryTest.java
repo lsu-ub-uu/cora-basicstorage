@@ -38,7 +38,6 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.basicstorage.testdata.DataCreator;
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
-import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataProvider;
 import se.uu.ub.cora.data.DataRecordGroup;
@@ -55,6 +54,7 @@ public class RecordStorageInMemoryTest {
 	private static final String FROM_RECORD_ID = "fromRecordId";
 	private static final String TO_RECORD_ID = "toRecordId";
 	private static final String TO_RECORD_TYPE = "toRecordType";
+	private static final int NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD = 2;
 	private RecordStorage recordStorage;
 	private Set<Link> emptyLinkList = Collections.emptySet();
 	private Set<StorageTerm> storageTerms = Collections.emptySet();
@@ -100,8 +100,15 @@ public class RecordStorageInMemoryTest {
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "true", "false");
 		recordsInMemoryWithData.create("recordType", "place", placeRecordType, storageTerms,
 				emptyLinkList, "cora");
-		assertEquals(recordsInMemoryWithData.read(List.of("place"), "place:0001"), dataGroup,
-				"dataGroup should be the one added on startup");
+		DataGroup read = recordsInMemoryWithData.read(List.of("place"), "place:0001");
+
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 2);
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD, placeRecordType);
+		DataCopierSpy dataCopier = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 1);
+		dataCopier.MCR.assertReturn("copy", 0, read);
 
 	}
 
@@ -270,24 +277,21 @@ public class RecordStorageInMemoryTest {
 	public void testRead() {
 		Map<String, Map<String, DividerGroup>> records = new HashMap<>();
 		records.put("type", new HashMap<String, DividerGroup>());
-
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-
 		records.get("type").put("id:0001",
 				DividerGroup.withDataDividerAndDataGroup(dataDivider, dataGroup));
-
 		RecordStorageInMemory recordsInMemoryWithData = new RecordStorageInMemory(records);
-
-		// DataGroup dataGroup = createDataGroupWithRecordInfo();
-		// recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
-		// dataDivider);
 
 		DataRecordGroup dataRecordGroupOut = recordsInMemoryWithData.read("type", "id:0001");
 
-		// assertEquals(dataRecordGroupOut.getNameInData(), dataGroup.getNameInData());
 		dataFactorySpy.MCR.assertReturn("factorRecordGroupFromDataGroup", 0, dataRecordGroupOut);
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD, dataGroup);
+		DataCopierSpy dataCopier = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD);
+		var copiedDataGroup = dataCopier.MCR.getReturnValue("copy", 0);
 		dataFactorySpy.MCR.assertParameter("factorRecordGroupFromDataGroup", 0, "dataGroup",
-				dataGroup);
+				copiedDataGroup);
 	}
 	// TO HERE
 
@@ -305,7 +309,12 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
+
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD, dataGroup);
+		DataCopierSpy dataCopier = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 1);
+		dataCopier.MCR.assertReturn("copy", 0, dataGroupOut);
 	}
 
 	@Test
@@ -359,10 +368,18 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 1, dataGroup);
+		DataCopierSpy dataCopier = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 2);
+		dataCopier.MCR.assertReturn("copy", 0, dataGroupOut);
 
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0002");
-		assertEquals(dataGroupOut2.getNameInData(), dataGroup.getNameInData());
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD, dataGroup);
+		DataCopierSpy dataCopier2 = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 3);
+		dataCopier2.MCR.assertReturn("copy", 0, dataGroupOut2);
 	}
 
 	@Test
@@ -390,8 +407,6 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
-		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 
 		recordStorage.deleteByTypeAndId("type", "place:0001");
 
@@ -499,8 +514,6 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
-		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataGroupOut.getNameInData(), dataGroup.getNameInData());
 
 		recordStorage.deleteByTypeAndId("type", "place:0001_NOT_FOUND");
 	}
@@ -512,19 +525,20 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		DataAtomic child = (DataAtomic) dataGroupOut.getChildren().get(1);
-
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 		dataGroup2.addChild(new DataAtomicSpy("childId2", "childValue2"));
 		recordStorage.update("type", "place:0001", dataGroup2, storageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
-		DataAtomic child2 = (DataAtomic) dataGroupOut2.getChildren().get(1);
 
-		assertEquals(child.getValue(), "childValue");
-		assertEquals(child2.getValue(), "childValue2");
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 3);
+		dataCopierFactory.MCR.assertParameters("factorForDataElement",
+				NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 1, dataGroup2);
+		DataCopierSpy dataCopier = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD + 2);
+		dataCopier.MCR.assertReturn("copy", 0, dataGroupOut2);
 	}
 
 	@Test

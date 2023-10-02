@@ -364,7 +364,8 @@ public class RecordStorageInMemory implements RecordStorage {
 	@Override
 	public DataRecordGroup read(String type, String id) {
 		DataGroup dataGroup = returnRecordIfExisting(type, id);
-		return DataProvider.createRecordGroupFromDataGroup(dataGroup);
+		DataGroup independentCopy = createIndependentCopy(dataGroup);
+		return DataProvider.createRecordGroupFromDataGroup(independentCopy);
 	}
 
 	@Override
