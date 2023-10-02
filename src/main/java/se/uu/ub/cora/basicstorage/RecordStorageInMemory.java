@@ -30,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataProvider;
+import se.uu.ub.cora.data.DataRecordGroup;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
@@ -43,6 +45,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 public class RecordStorageInMemory implements RecordStorage {
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
+	private static final String NO_RECORD_EXISTS_MESSAGE = "No record exists with recordType: ";
 
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
 	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
@@ -359,6 +362,12 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
+	public DataRecordGroup read(String type, String id) {
+		DataGroup dataGroup = returnRecordIfExisting(type, id);
+		return DataProvider.createRecordGroupFromDataGroup(dataGroup);
+	}
+
+	@Override
 	public DataGroup read(List<String> types, String recordId) {
 		return createIndependentCopy(readRecordFromImplementingRecordTypes(types, recordId));
 	}
@@ -366,7 +375,8 @@ public class RecordStorageInMemory implements RecordStorage {
 	private DataGroup readRecordFromImplementingRecordTypes(List<String> types, String recordId) {
 		DataGroup readRecord = tryToReadRecordFromImplementingRecordTypes(types, recordId);
 		if (readRecord == null) {
-			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException
+					.withMessage("No record exists with recordId: " + recordId);
 		}
 		return readRecord;
 	}
@@ -391,10 +401,11 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private void checkRecordExists(String recordType, String recordId) {
 		if (holderForRecordTypeDoesNotExistInStorage(recordType)) {
-			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + recordType);
+			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + recordType);
 		}
 		if (null == records.get(recordType).get(recordId)) {
-			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException
+					.withMessage("No record exists with recordId: " + recordId);
 		}
 	}
 

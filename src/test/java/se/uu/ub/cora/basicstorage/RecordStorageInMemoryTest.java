@@ -23,7 +23,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collection;
@@ -40,9 +39,9 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.basicstorage.testdata.DataCreator;
 import se.uu.ub.cora.basicstorage.testdata.TestDataRecordInMemoryStorage;
 import se.uu.ub.cora.data.DataAtomic;
-import se.uu.ub.cora.data.DataFactory;
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataProvider;
+import se.uu.ub.cora.data.DataRecordGroup;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
@@ -62,7 +61,7 @@ public class RecordStorageInMemoryTest {
 	DataGroup emptyFilter = new DataGroupSpy("filter");
 	private String dataDivider = "cora";
 	private DataCopierFactorySpy dataCopierFactory;
-	private DataFactory dataFactorySpy;
+	private DataFactorySpy dataFactorySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -73,10 +72,12 @@ public class RecordStorageInMemoryTest {
 		DataCopierProvider.setDataCopierFactory(dataCopierFactory);
 
 		recordStorage = new RecordStorageInMemory();
+
 		DataGroup typeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("type", "true", "false");
 		recordStorage.create("recordType", "type", typeRecordType, storageTerms, emptyLinkList,
 				"cora");
+
 		DataGroup recordTypeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
 		recordStorage.create("recordType", "recordType", recordTypeRecordType, storageTerms,
@@ -248,6 +249,48 @@ public class RecordStorageInMemoryTest {
 		recordStorage.read(List.of("nonExistingType"), "someId");
 	}
 
+	// HERE
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "No record exists with recordId: nonExistingRecordId")
+	public void testCallReadMissingRecordId() throws Exception {
+		RecordStorageInMemory recordsInMemoryWithTestData = TestDataRecordInMemoryStorage
+				.createRecordStorageInMemoryWithTestData();
+		recordsInMemoryWithTestData.read("place", "nonExistingRecordId");
+	}
+
+	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
+			+ "No record exists with recordType: nonExistingRecordType")
+	public void testCallReadMissingRecordType() throws Exception {
+		RecordStorageInMemory recordsInMemoryWithTestData = TestDataRecordInMemoryStorage
+				.createRecordStorageInMemoryWithTestData();
+		recordsInMemoryWithTestData.read("nonExistingRecordType", "someId");
+	}
+
+	@Test
+	public void testRead() {
+		Map<String, Map<String, DividerGroup>> records = new HashMap<>();
+		records.put("type", new HashMap<String, DividerGroup>());
+
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
+
+		records.get("type").put("id:0001",
+				DividerGroup.withDataDividerAndDataGroup(dataDivider, dataGroup));
+
+		RecordStorageInMemory recordsInMemoryWithData = new RecordStorageInMemory(records);
+
+		// DataGroup dataGroup = createDataGroupWithRecordInfo();
+		// recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		// dataDivider);
+
+		DataRecordGroup dataRecordGroupOut = recordsInMemoryWithData.read("type", "id:0001");
+
+		// assertEquals(dataRecordGroupOut.getNameInData(), dataGroup.getNameInData());
+		dataFactorySpy.MCR.assertReturn("factorRecordGroupFromDataGroup", 0, dataRecordGroupOut);
+		dataFactorySpy.MCR.assertParameter("factorRecordGroupFromDataGroup", 0, "dataGroup",
+				dataGroup);
+	}
+	// TO HERE
+
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testReadMissingRecordId() {
 		RecordStorageInMemory recordsInMemoryWithTestData = TestDataRecordInMemoryStorage
@@ -257,7 +300,6 @@ public class RecordStorageInMemoryTest {
 
 	@Test
 	public void testCreateRead() {
-
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
@@ -275,11 +317,14 @@ public class RecordStorageInMemoryTest {
 		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
 				dataDivider);
 
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 3);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 3);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 3);
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 4);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 4);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 4);
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 5);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 5);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 5);
 
 		assertNotSame(dataGroupOut, dataGroupOut2);
 	}
@@ -291,11 +336,14 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 49);
 		DataGroup image = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 50);
 		DataGroup image2 = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
+		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 51);
 
 		assertNotSame(image, image2);
 	}
@@ -326,8 +374,7 @@ public class RecordStorageInMemoryTest {
 
 		dataGroup.getChildren().clear();
 
-		DataCopierSpy copier = (DataCopierSpy) dataCopierFactory.factoredCopier;
-		assertSame(copier.originalDataElement, dataGroup);
+		dataCopierFactory.MCR.assertParameters("factorForDataElement", 2, dataGroup);
 	}
 
 	@Test(expectedExceptions = RecordConflictException.class)
@@ -593,8 +640,7 @@ public class RecordStorageInMemoryTest {
 
 		dataGroup.getChildren().clear();
 
-		DataCopierSpy copier = (DataCopierSpy) dataCopierFactory.factoredCopier;
-		assertSame(copier.originalDataElement, dataGroup);
+		dataCopierFactory.MCR.assertParameters("factorForDataElement", 3, dataGroup);
 	}
 
 	@Test
