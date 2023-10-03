@@ -136,6 +136,10 @@ public class RecordStorageInMemory implements RecordStorage {
 	public StorageReadResult readList(List<String> types, Filter filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
+		return createStorageReadResult(aggregatedRecordList);
+	}
+
+	private StorageReadResult createStorageReadResult(List<DataGroup> aggregatedRecordList) {
 		StorageReadResult readResult = new StorageReadResult();
 		readResult.listOfDataGroups = aggregatedRecordList;
 		readResult.totalNumberOfMatches = aggregatedRecordList.size();

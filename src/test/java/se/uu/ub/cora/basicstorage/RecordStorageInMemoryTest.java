@@ -256,7 +256,6 @@ public class RecordStorageInMemoryTest {
 		recordStorage.read(List.of("nonExistingType"), "someId");
 	}
 
-	// HERE
 	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
 			+ "No record exists with recordId: nonExistingRecordId")
 	public void testCallReadMissingRecordId() throws Exception {
@@ -293,7 +292,6 @@ public class RecordStorageInMemoryTest {
 		dataFactorySpy.MCR.assertParameter("factorRecordGroupFromDataGroup", 0, "dataGroup",
 				copiedDataGroup);
 	}
-	// TO HERE
 
 	@Test(expectedExceptions = RecordNotFoundException.class)
 	public void testReadMissingRecordId() {
@@ -327,12 +325,9 @@ public class RecordStorageInMemoryTest {
 				dataDivider);
 
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 3);
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 3);
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 4);
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 4);
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 5);
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 5);
 
 		assertNotSame(dataGroupOut, dataGroupOut2);

@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,6 @@ import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataProvider;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
-import se.uu.ub.cora.data.copier.DataCopierFactory;
 import se.uu.ub.cora.data.copier.DataCopierProvider;
 import se.uu.ub.cora.data.spies.DataFactorySpy;
 import se.uu.ub.cora.storage.Condition;
@@ -61,7 +59,7 @@ public class RecordStorageInMemoryListTest {
 	Filter emptyFilter = new Filter();
 	private Set<StorageTerm> storageTerms = Collections.emptySet();
 	private String dataDivider = "cora";
-	private DataCopierFactory dataCopierFactory;
+	private DataCopierFactorySpy dataCopierFactory;
 	private DataFactory dataFactorySpy;
 
 	@BeforeMethod
@@ -171,12 +169,21 @@ public class RecordStorageInMemoryListTest {
 
 		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
-		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
-				filter).listOfDataGroups;
-		assertEquals(readList.size(), 1);
-		DataGroup first = readList.iterator().next();
-		assertEquals(first.getFirstGroupWithNameInData("recordInfo")
-				.getFirstAtomicValueWithNameInData("id"), "place:0001");
+		StorageReadResult readList = recordStorage.readList(List.of("place"), filter);
+
+		assertEquals(readList.start, 0);
+		assertEquals(readList.totalNumberOfMatches, 1);
+		assertEquals(readList.listOfDataGroups.size(), 1);
+		DataGroup first = readList.listOfDataGroups.iterator().next();
+
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 4);
+
+		DataCopierSpy dcs3 = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", 3);
+
+		dcs3.MCR.assertNumberOfCallsToMethod("copy", 1);
+
+		dcs3.MCR.assertReturn("copy", 0, first);
 	}
 
 	@Test
@@ -248,16 +255,23 @@ public class RecordStorageInMemoryListTest {
 
 		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
-		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
-				filter).listOfDataGroups;
-		assertEquals(readList.size(), 2);
-		Iterator<DataGroup> listIterator = readList.iterator();
-		DataGroup first = listIterator.next();
-		assertEquals(first.getFirstGroupWithNameInData("recordInfo")
-				.getFirstAtomicValueWithNameInData("id"), "place:0001");
-		DataGroup second = listIterator.next();
-		assertEquals(second.getFirstGroupWithNameInData("recordInfo")
-				.getFirstAtomicValueWithNameInData("id"), "place:0003");
+		StorageReadResult readList = recordStorage.readList(List.of("place"), filter);
+
+		assertEquals(readList.start, 0);
+		assertEquals(readList.totalNumberOfMatches, 2);
+		assertEquals(readList.listOfDataGroups.size(), 2);
+
+		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 6);
+
+		DataCopierSpy dcs4 = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", 4);
+		DataCopierSpy dcs5 = (DataCopierSpy) dataCopierFactory.MCR
+				.getReturnValue("factorForDataElement", 5);
+
+		List<DataGroup> listOfDataGroups = readList.listOfDataGroups;
+		dcs4.MCR.assertReturn("copy", 0, listOfDataGroups.get(0));
+		dcs5.MCR.assertReturn("copy", 0, listOfDataGroups.get(1));
+
 	}
 
 	@Test
@@ -355,11 +369,14 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
-	public void testReadRecordList() {
+	public void testReadRecordListEmptyFilter() {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
-		Collection<DataGroup> recordList = recordStorage.readList(List.of("place"),
-				emptyFilter).listOfDataGroups;
-		assertEquals(recordList.iterator().next().getNameInData(), "authority");
+
+		StorageReadResult readList = recordStorage.readList(List.of("place"), emptyFilter);
+
+		assertEquals(readList.start, 0);
+		assertEquals(readList.totalNumberOfMatches, 2);
+		assertEquals(readList.listOfDataGroups.size(), 2);
 	}
 
 	// @Test
