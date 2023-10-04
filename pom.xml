@@ -37,7 +37,8 @@
 		<initialize.version>1.4.0</initialize.version>
 		<logger.version>2.9.0</logger.version>
 		<loggerspies.version>1.4.0</loggerspies.version>
-		<coradata.version>7.7.0</coradata.version>
+		<coradata.version>8.0-SNAPSHOT</coradata.version>
+		<coradata-spies.version>1.6-SNAPSHOT</coradata-spies.version>
 		<storage.version>9.0-SNAPSHOT</storage.version>
 		<storagespies.version>1.5.0</storagespies.version>
 		<json.version>3.8.0</json.version>
@@ -74,6 +75,12 @@
 			<artifactId>coradata</artifactId>
 			<version>${coradata.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>coradata-spies</artifactId>
+			<version>${coradata-spies.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>

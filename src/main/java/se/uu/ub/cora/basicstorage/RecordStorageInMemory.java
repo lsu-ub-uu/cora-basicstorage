@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020, 2021 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021, 2023 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -30,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.data.DataProvider;
+import se.uu.ub.cora.data.DataRecordGroup;
 import se.uu.ub.cora.data.collected.Link;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.data.copier.DataCopier;
@@ -43,6 +45,7 @@ import se.uu.ub.cora.storage.StorageReadResult;
 public class RecordStorageInMemory implements RecordStorage {
 	private static final String RECORD_TYPE = "recordType";
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
+	private static final String NO_RECORD_EXISTS_MESSAGE = "No record exists with recordType: ";
 
 	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
 	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
@@ -129,21 +132,44 @@ public class RecordStorageInMemory implements RecordStorage {
 		}
 	}
 
+	@Override
+	public StorageReadResult readList(List<String> types, Filter filter) {
+		List<DataGroup> aggregatedRecordList = new ArrayList<>();
+		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
+		return createStorageReadResult(aggregatedRecordList);
+	}
+
+	private StorageReadResult createStorageReadResult(List<DataGroup> aggregatedRecordList) {
+		StorageReadResult readResult = new StorageReadResult();
+		readResult.listOfDataGroups = aggregatedRecordList;
+		readResult.totalNumberOfMatches = aggregatedRecordList.size();
+		return readResult;
+	}
+
+	private void addRecordsToAggregatedRecordList(List<DataGroup> aggregatedRecordList,
+			List<String> implementingChildRecordTypes, Filter filter) {
+		for (String implementingRecordType : implementingChildRecordTypes) {
+			try {
+				readRecordsForTypeAndFilterAndAddToList(implementingRecordType, filter,
+						aggregatedRecordList);
+			} catch (RecordNotFoundException e) {
+				// Do nothing, another implementing child might have records
+			}
+		}
+	}
+
+	private void readRecordsForTypeAndFilterAndAddToList(String implementingRecordType,
+			Filter filter, List<DataGroup> aggregatedRecordList) {
+		Collection<DataGroup> readList = readListImplementing(implementingRecordType,
+				filter).listOfDataGroups;
+		aggregatedRecordList.addAll(readList);
+	}
+
 	public StorageReadResult readListImplementing(String type, Filter filter) {
 		Map<String, DividerGroup> typeDividerRecords = records.get(type);
 		throwErrorIfNoRecordOfType(type, typeDividerRecords);
 
 		return getStorageReadResult(type, filter, typeDividerRecords);
-	}
-
-	@Override
-	public StorageReadResult readList(List<String> types, Filter filter) {
-		List<DataGroup> aggregatedRecordList = new ArrayList<>();
-		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
-		StorageReadResult readResult = new StorageReadResult();
-		readResult.listOfDataGroups = aggregatedRecordList;
-		readResult.totalNumberOfMatches = aggregatedRecordList.size();
-		return readResult;
 	}
 
 	private StorageReadResult getStorageReadResult(String type, Filter filter,
@@ -230,26 +256,26 @@ public class RecordStorageInMemory implements RecordStorage {
 		return typeRecords;
 	}
 
-	public StorageReadResult readAbstractList(String type, Filter filter) {
-		List<DataGroup> aggregatedRecordList = new ArrayList<>();
-		List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(type);
+	// public StorageReadResult readAbstractList(String type, Filter filter) {
+	// List<DataGroup> aggregatedRecordList = new ArrayList<>();
+	// List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(type);
+	//
+	// addRecordsToAggregatedRecordList(aggregatedRecordList, implementingChildRecordTypes,
+	// filter);
+	// addRecordsForParentIfParentIsNotAbstract(type, filter, aggregatedRecordList);
+	// throwErrorIfEmptyAggregatedList(type, aggregatedRecordList);
+	// StorageReadResult readResult = new StorageReadResult();
+	// readResult.listOfDataGroups = aggregatedRecordList;
+	// readResult.totalNumberOfMatches = aggregatedRecordList.size();
+	// return readResult;
+	// }
 
-		addRecordsToAggregatedRecordList(aggregatedRecordList, implementingChildRecordTypes,
-				filter);
-		addRecordsForParentIfParentIsNotAbstract(type, filter, aggregatedRecordList);
-		throwErrorIfEmptyAggregatedList(type, aggregatedRecordList);
-		StorageReadResult readResult = new StorageReadResult();
-		readResult.listOfDataGroups = aggregatedRecordList;
-		readResult.totalNumberOfMatches = aggregatedRecordList.size();
-		return readResult;
-	}
-
-	private List<String> findImplementingChildRecordTypes(String type) {
-		Map<String, DividerGroup> allRecordTypes = records.get(RECORD_TYPE);
-		List<String> implementingRecordTypes = new ArrayList<>();
-		return findImplementingChildRecordTypesUsingTypeAndRecordTypeList(type, allRecordTypes,
-				implementingRecordTypes);
-	}
+	// private List<String> findImplementingChildRecordTypes(String type) {
+	// Map<String, DividerGroup> allRecordTypes = records.get(RECORD_TYPE);
+	// List<String> implementingRecordTypes = new ArrayList<>();
+	// return findImplementingChildRecordTypesUsingTypeAndRecordTypeList(type, allRecordTypes,
+	// implementingRecordTypes);
+	// }
 
 	private List<String> findImplementingChildRecordTypesUsingTypeAndRecordTypeList(String type,
 			Map<String, DividerGroup> allRecordTypes, List<String> implementingRecordTypes) {
@@ -291,43 +317,24 @@ public class RecordStorageInMemory implements RecordStorage {
 		return parent.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
-	private void addRecordsToAggregatedRecordList(List<DataGroup> aggregatedRecordList,
-			List<String> implementingChildRecordTypes, Filter filter) {
-		for (String implementingRecordType : implementingChildRecordTypes) {
-			try {
-				readRecordsForTypeAndFilterAndAddToList(implementingRecordType, filter,
-						aggregatedRecordList);
-			} catch (RecordNotFoundException e) {
-				// Do nothing, another implementing child might have records
-			}
-		}
-	}
+	// private boolean parentRecordTypeIsNotAbstract(DataGroup recordTypeDataGroup) {
+	// return !recordTypeIsAbstract(recordTypeDataGroup);
+	// }
 
-	private void readRecordsForTypeAndFilterAndAddToList(String implementingRecordType,
-			Filter filter, List<DataGroup> aggregatedRecordList) {
-		Collection<DataGroup> readList = readListImplementing(implementingRecordType,
-				filter).listOfDataGroups;
-		aggregatedRecordList.addAll(readList);
-	}
-
-	private boolean parentRecordTypeIsNotAbstract(DataGroup recordTypeDataGroup) {
-		return !recordTypeIsAbstract(recordTypeDataGroup);
-	}
-
-	private void addRecordsForParentIfParentIsNotAbstract(String type, Filter filter,
-			List<DataGroup> aggregatedRecordList) {
-		DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
-		if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
-			readRecordsForTypeAndFilterAndAddToList(type, filter, aggregatedRecordList);
-		}
-	}
-
-	private void throwErrorIfEmptyAggregatedList(String type,
-			List<DataGroup> aggregatedRecordList) {
-		if (aggregatedRecordList.isEmpty()) {
-			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + type);
-		}
-	}
+	// private void addRecordsForParentIfParentIsNotAbstract(String type, Filter filter,
+	// List<DataGroup> aggregatedRecordList) {
+	// DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
+	// if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
+	// readRecordsForTypeAndFilterAndAddToList(type, filter, aggregatedRecordList);
+	// }
+	// }
+	//
+	// private void throwErrorIfEmptyAggregatedList(String type,
+	// List<DataGroup> aggregatedRecordList) {
+	// if (aggregatedRecordList.isEmpty()) {
+	// throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + type);
+	// }
+	// }
 
 	@Override
 	public boolean recordExists(List<String> recordTypes, String recordId) {
@@ -349,13 +356,20 @@ public class RecordStorageInMemory implements RecordStorage {
 		return records.get(recordType).containsKey(recordId);
 	}
 
-	private boolean recordTypeIsAbstract(DataGroup recordTypeDataGroup) {
-		String abstractValue = recordTypeDataGroup.getFirstAtomicValueWithNameInData("abstract");
-		return valueIsAbstract(abstractValue);
-	}
+	// private boolean recordTypeIsAbstract(DataGroup recordTypeDataGroup) {
+	// String abstractValue = recordTypeDataGroup.getFirstAtomicValueWithNameInData("abstract");
+	// return valueIsAbstract(abstractValue);
+	// }
 
-	private boolean valueIsAbstract(String typeIsAbstract) {
-		return "true".equals(typeIsAbstract);
+	// private boolean valueIsAbstract(String typeIsAbstract) {
+	// return "true".equals(typeIsAbstract);
+	// }
+
+	@Override
+	public DataRecordGroup read(String type, String id) {
+		DataGroup dataGroup = returnRecordIfExisting(type, id);
+		DataGroup independentCopy = createIndependentCopy(dataGroup);
+		return DataProvider.createRecordGroupFromDataGroup(independentCopy);
 	}
 
 	@Override
@@ -366,7 +380,8 @@ public class RecordStorageInMemory implements RecordStorage {
 	private DataGroup readRecordFromImplementingRecordTypes(List<String> types, String recordId) {
 		DataGroup readRecord = tryToReadRecordFromImplementingRecordTypes(types, recordId);
 		if (readRecord == null) {
-			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException
+					.withMessage("No record exists with recordId: " + recordId);
 		}
 		return readRecord;
 	}
@@ -391,10 +406,11 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private void checkRecordExists(String recordType, String recordId) {
 		if (holderForRecordTypeDoesNotExistInStorage(recordType)) {
-			throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + recordType);
+			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + recordType);
 		}
 		if (null == records.get(recordType).get(recordId)) {
-			throw RecordNotFoundException.withMessage("No record exists with recordId: " + recordId);
+			throw RecordNotFoundException
+					.withMessage("No record exists with recordId: " + recordId);
 		}
 	}
 

@@ -21,17 +21,31 @@ package se.uu.ub.cora.basicstorage;
 import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.copier.DataCopier;
 import se.uu.ub.cora.data.copier.DataCopierFactory;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class DataCopierFactorySpy implements DataCopierFactory {
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
+	public DataChild originalDataElement;
 
-	public DataCopier factoredCopier;
-	public int numberOfFactoredCopiers = 0;
+	public DataCopierFactorySpy() {
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("factorForDataElement", () -> new DataCopierSpy());
+	}
+
+	// public DataCopier factoredCopier;
+	// public int numberOfFactoredCopiers = 0;
 
 	@Override
 	public DataCopier factorForDataElement(DataChild dataElement) {
-		numberOfFactoredCopiers++;
-		factoredCopier = new DataCopierSpy(dataElement);
-		return factoredCopier;
+		return (DataCopier) MCR.addCallAndReturnFromMRV("dataElement", dataElement);
 	}
+	// @Override
+	// public DataCopier factorForDataElement(DataChild dataElement) {
+	// numberOfFactoredCopiers++;
+	// factoredCopier = new DataCopierSpy(dataElement);
+	// return factoredCopier;
+	// }
 
 }
