@@ -4,6 +4,7 @@ module se.uu.ub.cora.basicstorage {
 	requires se.uu.ub.cora.initialize;
 
 	exports se.uu.ub.cora.basicstorage;
+	exports se.uu.ub.cora.basicstorage.path;
 
 	provides se.uu.ub.cora.storage.StreamStorageProvider
 			with se.uu.ub.cora.basicstorage.StreamStorageOnDiskProvider;
