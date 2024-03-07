@@ -34,14 +34,14 @@
 	<name>Basic storage</name>
 
 	<properties>
-		<initialize.version>1.5.0</initialize.version>
+		<initialize.version>1.6.0</initialize.version>
 		<logger.version>2.10.0</logger.version>
 		<loggerspies.version>1.5.0</loggerspies.version>
-		<coradata.version>8.0.0</coradata.version>
-		<coradata-spies.version>1.6.0</coradata-spies.version>
-		<storage.version>9.1-SNAPSHOT</storage.version>
-		<storagespies.version>1.7-SNAPSHOT</storagespies.version>
-		<json.version>3.9.0</json.version>
+		<coradata.version>9.0.0</coradata.version>
+		<coradata-spies.version>1.7.0</coradata-spies.version>
+		<storage.version>9.1.0</storage.version>
+		<storagespies.version>1.7.0</storagespies.version>
+		<json.version>3.10.0</json.version>
 	</properties>
 
 	<scm>
