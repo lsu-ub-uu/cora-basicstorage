@@ -27,11 +27,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import se.uu.ub.cora.storage.ResourceNotFoundException;
+import se.uu.ub.cora.storage.StorageException;
 import se.uu.ub.cora.storage.StreamStorage;
 
 public final class StreamStorageOnDisk implements StreamStorage {
 
-	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "can not write files to disk: ";
+	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "Can not write files to disk: ";
 	private static final int BUFFER_LENGTH = 1024;
 	private String basePath;
 
@@ -67,7 +69,7 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		try {
 			return storeStream(stream, path);
 		} catch (IOException e) {
-			throw DataStorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
+			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
 		}
 	}
 
@@ -93,12 +95,12 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	}
 
 	private void ensureStorageDirectoryExists(Path pathByDataDivider) {
-		if (storageDirectoryDoesNotExist(pathByDataDivider)) {
+		if (storagePathDoesNotExist(pathByDataDivider)) {
 			tryToCreateStorageDirectory(pathByDataDivider);
 		}
 	}
 
-	private boolean storageDirectoryDoesNotExist(Path pathByDataDivider) {
+	private boolean storagePathDoesNotExist(Path pathByDataDivider) {
 		return !Files.exists(pathByDataDivider);
 	}
 
@@ -106,21 +108,22 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		try {
 			Files.createDirectory(pathByDataDivider);
 		} catch (IOException e) {
-			throw DataStorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
+			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
 		}
 	}
 
 	@Override
 	public InputStream retrieve(String streamId, String dataDivider) {
 		Path pathByDataDivider = Paths.get(basePath, dataDivider);
-		if (storageDirectoryDoesNotExist(pathByDataDivider)) {
-			throw DataStorageException.withMessage("can not read stream from disk, no such folder");
+		if (storagePathDoesNotExist(pathByDataDivider)) {
+			throw ResourceNotFoundException
+					.withMessage("Can not read stream from disk, no such folder: " + dataDivider);
 		}
 
 		Path path = Paths.get(basePath, dataDivider, streamId);
-		if (storageDirectoryDoesNotExist(path)) {
-			throw DataStorageException
-					.withMessage("can not read stream from disk, no such " + "stream");
+		if (storagePathDoesNotExist(path)) {
+			throw ResourceNotFoundException
+					.withMessage("Can not read stream from disk, no such streamId: " + streamId);
 		}
 		return tryToReadStream(path);
 	}
@@ -129,7 +132,7 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		try {
 			return readStream(path);
 		} catch (IOException e) {
-			throw DataStorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
+			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
 		}
 	}
 

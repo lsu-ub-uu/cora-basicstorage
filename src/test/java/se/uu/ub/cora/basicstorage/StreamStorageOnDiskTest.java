@@ -23,6 +23,7 @@ package se.uu.ub.cora.basicstorage;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,6 +42,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.storage.ResourceNotFoundException;
+import se.uu.ub.cora.storage.StorageException;
 import se.uu.ub.cora.storage.StreamStorage;
 
 public class StreamStorageOnDiskTest {
@@ -94,24 +97,18 @@ public class StreamStorageOnDiskTest {
 		}
 	}
 
-	@Test(expectedExceptions = DataStorageException.class)
-	public void testInitNoPermissionOnPath() throws IOException {
-		removeTempFiles();
-		StreamStorageOnDisk.usingBasePath("/root/streamsDOESNOTEXIST");
-	}
-
 	@Test
 	public void testInitNoPermissionOnPathSentAlongException() throws IOException {
-		Exception caughtException = null;
 		try {
 			removeTempFiles();
 			StreamStorageOnDisk.usingBasePath("/root/streamsDOESNOTEXIST");
+			fail("Should have thrown an exception");
 		} catch (Exception e) {
-			caughtException = e;
+			assertTrue(e instanceof StorageException);
+			assertTrue(e.getCause() instanceof AccessDeniedException);
+			assertEquals(e.getMessage(), "Can not write files to disk: "
+					+ "java.nio.file.AccessDeniedException: /root/streamsDOESNOTEXIST");
 		}
-		assertTrue(caughtException.getCause() instanceof AccessDeniedException);
-		assertEquals(caughtException.getMessage(), "can not write files to disk: "
-				+ "java.nio.file.AccessDeniedException: /root/streamsDOESNOTEXIST");
 	}
 
 	@Test
@@ -128,7 +125,7 @@ public class StreamStorageOnDiskTest {
 
 	@Test
 	public void testUploadCreatePathForNewDataDivider() {
-		streamStorage.store("someStreamId", "someDataDivider", streamToStore);
+		createFolderForStream();
 		assertTrue(Files.exists(Paths.get(basePath, "someDataDivider")));
 	}
 
@@ -137,34 +134,29 @@ public class StreamStorageOnDiskTest {
 		return stream;
 	}
 
-	@Test(expectedExceptions = DataStorageException.class)
-	public void testUploadCreateFileForStreamPathIsEmpty() throws IOException {
-		((StreamStorageOnDisk) streamStorage).tryToStoreStream(streamToStore, Paths.get(""));
-	}
-
 	@Test
 	public void testUploadCreateFileForStreamPathIsEmptySentAlongException() throws IOException {
-		Exception caughtException = null;
 		try {
 			((StreamStorageOnDisk) streamStorage).tryToStoreStream(streamToStore, Paths.get(""));
+			fail("Should have thrown an exception");
 		} catch (Exception e) {
-			caughtException = e;
+			assertTrue(e instanceof StorageException);
+			assertTrue(e.getCause() instanceof FileSystemException);
+			assertEquals(e.getMessage(),
+					"Can not write files to disk: java.nio.file.FileSystemException: : Is a directory");
 		}
-		assertTrue(caughtException.getCause() instanceof FileSystemException);
-		assertEquals(caughtException.getMessage(),
-				"can not write files to disk: java.nio.file.FileSystemException: : Is a directory");
 	}
 
 	@Test
 	public void testUploadCreateFileForStream() {
-		long size = streamStorage.store("someStreamId", "someDataDivider", streamToStore);
+		long size = createFolderForStream();
 		assertTrue(Files.exists(Paths.get(basePath, "someDataDivider", "someStreamId")));
 		assertEquals(String.valueOf(size), "8");
 	}
 
 	@Test
 	public void testUploadCreateFileForStreamDirectoriesAlreadyExist() {
-		long size = streamStorage.store("someStreamId", "someDataDivider", streamToStore);
+		long size = createFolderForStream();
 		assertTrue(Files.exists(Paths.get(basePath, "someDataDivider", "someStreamId")));
 		assertEquals(String.valueOf(size), "8");
 
@@ -176,7 +168,7 @@ public class StreamStorageOnDiskTest {
 
 	@Test
 	public void testDownload() throws IOException {
-		streamStorage.store("someStreamId", "someDataDivider", streamToStore);
+		createFolderForStream();
 
 		InputStream stream = streamStorage.retrieve("someStreamId", "someDataDivider");
 		assertNotNull(stream);
@@ -192,32 +184,45 @@ public class StreamStorageOnDiskTest {
 		assertEquals(stringFromStream, "a string");
 	}
 
-	@Test(expectedExceptions = DataStorageException.class)
+	@Test()
 	public void testDownloadFolderForDataDividerIsMissing() {
-		streamStorage.retrieve("someStreamId", "someDataDivider");
+		try {
+			streamStorage.retrieve("someStreamId", "someDataDivider");
+			fail("Should have thrown an exception");
+		} catch (Exception e) {
+			assertTrue(e instanceof ResourceNotFoundException);
+			assertEquals(e.getMessage(),
+					"Can not read stream from disk, no such folder: someDataDivider");
+		}
 	}
 
-	@Test(expectedExceptions = DataStorageException.class)
+	@Test()
 	public void testDownloadStreamIsMissing() {
-		streamStorage.store("someStreamId", "someDataDivider", streamToStore);
-		streamStorage.retrieve("someStreamIdDOESNOTEXIST", "someDataDivider");
+		createFolderForStream();
+		try {
+			streamStorage.retrieve("someStreamIdDOESNOTEXIST", "someDataDivider");
+			fail("Should have thrown an exception");
+		} catch (Exception e) {
+			assertTrue(e instanceof ResourceNotFoundException);
+			assertEquals(e.getMessage(),
+					"Can not read stream from disk, no such streamId: someStreamIdDOESNOTEXIST");
+		}
 	}
 
-	@Test(expectedExceptions = DataStorageException.class)
-	public void testDownloadPathForStreamIsBroken() throws IOException {
-		((StreamStorageOnDisk) streamStorage).tryToReadStream(Paths.get("/broken/path"));
+	private long createFolderForStream() {
+		return streamStorage.store("someStreamId", "someDataDivider", streamToStore);
 	}
 
 	@Test
 	public void testDownloadPathForStreamIsBrokenSentAlongException() throws IOException {
-		Exception caughtException = null;
 		try {
 			((StreamStorageOnDisk) streamStorage).tryToReadStream(Paths.get("/broken/path"));
+			fail("Should have thrown an exception");
 		} catch (Exception e) {
-			caughtException = e;
+			assertTrue(e instanceof StorageException);
+			assertTrue(e.getCause() instanceof FileSystemException);
+			assertEquals(e.getMessage(),
+					"Can not write files to disk: java.nio.file.NoSuchFileException: /broken/path");
 		}
-		assertTrue(caughtException.getCause() instanceof FileSystemException);
-		assertEquals(caughtException.getMessage(),
-				"can not write files to disk: java.nio.file.NoSuchFileException: /broken/path");
 	}
 }
