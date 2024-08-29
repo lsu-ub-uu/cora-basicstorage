@@ -3,7 +3,7 @@
 
 package se.uu.ub.cora.basicstorage.testdata;
 
-import se.uu.ub.cora.basicstorage.DataAtomicSpy;import se.uu.ub.cora.basicstorage.DataGroupSpy;import se.uu.ub.cora.data.DataAtomic;import se.uu.ub.cora.data.DataGroup;
+import se.uu.ub.cora.basicstorage.DataAtomicSpy;import se.uu.ub.cora.basicstorage.DataGroupOldSpy;import se.uu.ub.cora.data.DataAtomic;import se.uu.ub.cora.data.DataGroup;
 
 public final class DataCreator {
 	private static final String SELF_PRESENTATION_VIEW_ID = "selfPresentationViewId";
@@ -28,7 +28,7 @@ public final class DataCreator {
 			String id, String userSuppliedId, String abstractValue, String parentId) {
 		String idWithCapitalFirst = id.substring(0, 1).toUpperCase() + id.substring(1);
 
-		DataGroup dataGroup = new DataGroupSpy(RECORD_TYPE);
+		DataGroup dataGroup = new DataGroupOldSpy(RECORD_TYPE);
 		dataGroup.addChild(createRecordInfoWithRecordTypeAndRecordId(RECORD_TYPE, id));
 
 		dataGroup.addChild(
@@ -63,7 +63,7 @@ public final class DataCreator {
 
 	private static DataGroup createChildWithNamInDataLinkedTypeLinkedId(String nameInData,
 			String linkedRecordType, String id) {
-		DataGroup metadataId = new DataGroupSpy(nameInData);
+		DataGroup metadataId = new DataGroupOldSpy(nameInData);
 		metadataId.addChild(new DataAtomicSpy("linkedRecordType", linkedRecordType));
 		metadataId.addChild(new DataAtomicSpy("linkedRecordId", id));
 		return metadataId;
@@ -77,11 +77,11 @@ public final class DataCreator {
 
 	public static DataGroup createRecordInfoWithRecordTypeAndRecordId(String recordType,
 			String recordId) {
-		DataGroup recordInfo = new DataGroupSpy("recordInfo");
+		DataGroup recordInfo = new DataGroupOldSpy("recordInfo");
 		recordInfo.addChild(new DataAtomicSpy("type", recordType));
 		recordInfo.addChild(new DataAtomicSpy("id", recordId));
 
-		DataGroup dataDivider = new DataGroupSpy("dataDivider");
+		DataGroup dataDivider = new DataGroupOldSpy("dataDivider");
 		dataDivider.addChild(new DataAtomicSpy("linkedRecordType", "system"));
 		dataDivider.addChild(new DataAtomicSpy("linkedRecordId", "cora"));
 		recordInfo.addChild(dataDivider);
@@ -90,16 +90,16 @@ public final class DataCreator {
 
 	public static DataGroup createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
 			String nameInData, String recordType, String recordId) {
-		DataGroup dataGroup = new DataGroupSpy(nameInData);
+		DataGroup dataGroup = new DataGroupOldSpy(nameInData);
 		dataGroup.addChild(createRecordInfoWithRecordTypeAndRecordId(recordType, recordId));
 		return dataGroup;
 	}
 
 	public static DataGroup createRecordToRecordLink(String fromRecordType, String fromRecordId,
 			String toRecordType, String toRecordId) {
-		DataGroup recordToRecordLink = new DataGroupSpy("recordToRecordLink");
+		DataGroup recordToRecordLink = new DataGroupOldSpy("recordToRecordLink");
 
-		DataGroup from = new DataGroupSpy("from");
+		DataGroup from = new DataGroupOldSpy("from");
 		recordToRecordLink.addChild(from);
 
 		DataAtomic fromLinkedRecordType = new DataAtomicSpy("linkedRecordType", fromRecordType);
@@ -108,7 +108,7 @@ public final class DataCreator {
 		DataAtomic fromLinkedRecordId = new DataAtomicSpy("linkedRecordId", fromRecordId);
 		from.addChild(fromLinkedRecordId);
 
-		DataGroup to = new DataGroupSpy("to");
+		DataGroup to = new DataGroupOldSpy("to");
 		recordToRecordLink.addChild(to);
 
 		DataAtomic toLinkedRecordType = new DataAtomicSpy("linkedRecordType", toRecordType);
@@ -121,11 +121,11 @@ public final class DataCreator {
 	}
 
 	public static DataGroup createEmptyCollectedData() {
-		return new DataGroupSpy("collectedData");
+		return new DataGroupOldSpy("collectedData");
 	}
 
 	public static DataGroup createCollectedDataWithTypeAndId(String type, String id) {
-		DataGroup collectedData = new DataGroupSpy("collectedData");
+		DataGroup collectedData = new DataGroupOldSpy("collectedData");
 		collectedData.addChild(new DataAtomicSpy("type", type));
 		collectedData.addChild(new DataAtomicSpy("id", id));
 		return collectedData;
@@ -133,7 +133,7 @@ public final class DataCreator {
 
 	public static DataGroup createStorageTermWithRepeatIdAndTermIdAndTermValueAndStorageKey(
 			String repeatId, String termId, String termValue, String storageKey) {
-		DataGroup collectedDataTerm = new DataGroupSpy("collectedDataTerm");
+		DataGroup collectedDataTerm = new DataGroupOldSpy("collectedDataTerm");
 		collectedDataTerm.addAttributeByIdWithValue("type", "storage");
 		collectedDataTerm.setRepeatId(repeatId);
 
@@ -142,7 +142,7 @@ public final class DataCreator {
 
 		DataAtomic collectedDataTermValue = new DataAtomicSpy("collectTermValue", termValue);
 		collectedDataTerm.addChild(collectedDataTermValue);
-		DataGroup extraData = new DataGroupSpy("extraData");
+		DataGroup extraData = new DataGroupOldSpy("extraData");
 		collectedDataTerm.addChild(extraData);
 		extraData.addChild(new DataAtomicSpy("storageKey", storageKey));
 		return collectedDataTerm;

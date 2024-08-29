@@ -31,14 +31,14 @@ import se.uu.ub.cora.data.DataChild;
 import se.uu.ub.cora.data.DataChildFilter;
 import se.uu.ub.cora.data.DataGroup;
 
-public class DataGroupSpy implements DataGroup {
+public class DataGroupOldSpy implements DataGroup {
 
 	public String nameInData;
 	public List<DataChild> children = new ArrayList<>();
 	public String repeatId;
 	public Set<DataAttribute> attributes = new HashSet<>();
 
-	public DataGroupSpy(String nameInData) {
+	public DataGroupOldSpy(String nameInData) {
 		this.nameInData = nameInData;
 	}
 

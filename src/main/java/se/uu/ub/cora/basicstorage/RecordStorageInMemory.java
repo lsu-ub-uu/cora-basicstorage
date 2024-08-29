@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020, 2021, 2023 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021, 2023, 2024 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -133,6 +133,20 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
+	public StorageReadResult readList(String type, Filter filter) {
+		StorageReadResult readResult = readList(List.of(type), filter);
+
+		List<DataRecordGroup> listOfDataRecordGroups = readResult.listOfDataRecordGroups;
+		for (DataGroup dataGroup : readResult.listOfDataGroups) {
+			DataRecordGroup dataRecordGroup = DataProvider
+					.createRecordGroupFromDataGroup(dataGroup);
+			listOfDataRecordGroups.add(dataRecordGroup);
+		}
+		readResult.listOfDataGroups = Collections.emptyList();
+		return readResult;
+	}
+
+	@Override
 	public StorageReadResult readList(List<String> types, Filter filter) {
 		List<DataGroup> aggregatedRecordList = new ArrayList<>();
 		addRecordsToAggregatedRecordList(aggregatedRecordList, types, filter);
@@ -256,27 +270,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		return typeRecords;
 	}
 
-	// public StorageReadResult readAbstractList(String type, Filter filter) {
-	// List<DataGroup> aggregatedRecordList = new ArrayList<>();
-	// List<String> implementingChildRecordTypes = findImplementingChildRecordTypes(type);
-	//
-	// addRecordsToAggregatedRecordList(aggregatedRecordList, implementingChildRecordTypes,
-	// filter);
-	// addRecordsForParentIfParentIsNotAbstract(type, filter, aggregatedRecordList);
-	// throwErrorIfEmptyAggregatedList(type, aggregatedRecordList);
-	// StorageReadResult readResult = new StorageReadResult();
-	// readResult.listOfDataGroups = aggregatedRecordList;
-	// readResult.totalNumberOfMatches = aggregatedRecordList.size();
-	// return readResult;
-	// }
-
-	// private List<String> findImplementingChildRecordTypes(String type) {
-	// Map<String, DividerGroup> allRecordTypes = records.get(RECORD_TYPE);
-	// List<String> implementingRecordTypes = new ArrayList<>();
-	// return findImplementingChildRecordTypesUsingTypeAndRecordTypeList(type, allRecordTypes,
-	// implementingRecordTypes);
-	// }
-
 	private List<String> findImplementingChildRecordTypesUsingTypeAndRecordTypeList(String type,
 			Map<String, DividerGroup> allRecordTypes, List<String> implementingRecordTypes) {
 		for (Entry<String, DividerGroup> entry : allRecordTypes.entrySet()) {
@@ -317,25 +310,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		return parent.getFirstAtomicValueWithNameInData("linkedRecordId");
 	}
 
-	// private boolean parentRecordTypeIsNotAbstract(DataGroup recordTypeDataGroup) {
-	// return !recordTypeIsAbstract(recordTypeDataGroup);
-	// }
-
-	// private void addRecordsForParentIfParentIsNotAbstract(String type, Filter filter,
-	// List<DataGroup> aggregatedRecordList) {
-	// DataGroup recordTypeDataGroup = returnRecordIfExisting(RECORD_TYPE, type);
-	// if (parentRecordTypeIsNotAbstract(recordTypeDataGroup)) {
-	// readRecordsForTypeAndFilterAndAddToList(type, filter, aggregatedRecordList);
-	// }
-	// }
-	//
-	// private void throwErrorIfEmptyAggregatedList(String type,
-	// List<DataGroup> aggregatedRecordList) {
-	// if (aggregatedRecordList.isEmpty()) {
-	// throw RecordNotFoundException.withMessage(NO_RECORDS_EXISTS_MESSAGE + type);
-	// }
-	// }
-
 	@Override
 	public boolean recordExists(List<String> recordTypes, String recordId) {
 
@@ -355,15 +329,6 @@ public class RecordStorageInMemory implements RecordStorage {
 	private boolean recordIdExistsForRecordType(String recordType, String recordId) {
 		return records.get(recordType).containsKey(recordId);
 	}
-
-	// private boolean recordTypeIsAbstract(DataGroup recordTypeDataGroup) {
-	// String abstractValue = recordTypeDataGroup.getFirstAtomicValueWithNameInData("abstract");
-	// return valueIsAbstract(abstractValue);
-	// }
-
-	// private boolean valueIsAbstract(String typeIsAbstract) {
-	// return "true".equals(typeIsAbstract);
-	// }
 
 	@Override
 	public DataRecordGroup read(String type, String id) {
@@ -519,5 +484,4 @@ public class RecordStorageInMemory implements RecordStorage {
 		}
 		return 0;
 	}
-
 }

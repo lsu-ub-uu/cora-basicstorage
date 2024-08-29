@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import se.uu.ub.cora.basicstorage.DataAtomicSpy;
-import se.uu.ub.cora.basicstorage.DataGroupSpy;
+import se.uu.ub.cora.basicstorage.DataGroupOldSpy;
 import se.uu.ub.cora.basicstorage.RecordStorageInMemory;
 import se.uu.ub.cora.data.DataAtomic;
 import se.uu.ub.cora.data.DataGroup;
@@ -70,7 +70,7 @@ public class TestDataRecordInMemoryStorage {
 		addRecordTypeCollectIndexTerm(recordsInMemory);
 		addRecordTypeCollectPermissionTerm(recordsInMemory);
 
-		DataGroup dummy = new DataGroupSpy("dummy");
+		DataGroup dummy = new DataGroupOldSpy("dummy");
 		recordsInMemory.create("metadataCollectionVariable", "dummy1", dummy, storageTerms,
 				createEmptyCollectedLinks(), "cora");
 		// recordsInMemory.create("metadataCollectionVariableChild", "dummy1", dummy, storageTerms,
@@ -101,7 +101,7 @@ public class TestDataRecordInMemoryStorage {
 	private static void addPlace(RecordStorageInMemory recordsInMemory) {
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId("place",
 				"place:0001");
-		DataGroup dataGroup = new DataGroupSpy("authority");
+		DataGroup dataGroup = new DataGroupOldSpy("authority");
 		dataGroup.addChild(recordInfo);
 
 		recordsInMemory.create("place", "place:0001", dataGroup, storageTerms,
@@ -112,10 +112,10 @@ public class TestDataRecordInMemoryStorage {
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId("place",
 				"place:0002");
 
-		DataGroup dataGroup = new DataGroupSpy("authority");
+		DataGroup dataGroup = new DataGroupOldSpy("authority");
 		dataGroup.addChild(recordInfo);
 
-		DataGroup dataRecordLink = new DataGroupSpy("link");
+		DataGroup dataRecordLink = new DataGroupOldSpy("link");
 		dataGroup.addChild(dataRecordLink);
 		addLinkedRecordTypeAndLinkedRecordIdToRecordLink("place", "place:0001", dataRecordLink);
 
@@ -140,7 +140,7 @@ public class TestDataRecordInMemoryStorage {
 
 	private static void addMetadata(RecordStorageInMemory recordsInMemory) {
 		String metadata = "metadataGroup";
-		DataGroup dataGroup = new DataGroupSpy("metadata");
+		DataGroup dataGroup = new DataGroupOldSpy("metadata");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(metadata,
 				"place");
@@ -167,7 +167,7 @@ public class TestDataRecordInMemoryStorage {
 
 	private static void addPresentation(RecordStorageInMemory recordsInMemory) {
 		String presentation = "presentationx";
-		DataGroup dataGroup = new DataGroupSpy(presentation);
+		DataGroup dataGroup = new DataGroupOldSpy(presentation);
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(presentation,
 				"placeView");
@@ -195,7 +195,7 @@ public class TestDataRecordInMemoryStorage {
 
 	private static void addText(RecordStorageInMemory recordsInMemory) {
 		String text = "textx";
-		DataGroup dataGroup = new DataGroupSpy("text");
+		DataGroup dataGroup = new DataGroupOldSpy("text");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(text,
 				"placeText");
@@ -206,7 +206,7 @@ public class TestDataRecordInMemoryStorage {
 
 	private static void addRecordType(RecordStorageInMemory recordsInMemory) {
 		String recordType = "recordType";
-		DataGroup dataGroup = new DataGroupSpy(recordType);
+		DataGroup dataGroup = new DataGroupOldSpy(recordType);
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(recordType,
 				"metadata");
@@ -269,7 +269,7 @@ public class TestDataRecordInMemoryStorage {
 
 	private static void addGenericCollectionItem(RecordStorageInMemory recordsInMemory) {
 		String recordType = "genericCollectionItem";
-		DataGroup dataGroup = new DataGroupSpy("genericCollectionItem");
+		DataGroup dataGroup = new DataGroupOldSpy("genericCollectionItem");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(recordType,
 				"someItem");
@@ -331,7 +331,7 @@ public class TestDataRecordInMemoryStorage {
 	}
 
 	private static void addSearchTerm(RecordStorageInMemory recordsInMemory) {
-		DataGroup dataGroup = new DataGroupSpy("searchTerm");
+		DataGroup dataGroup = new DataGroupOldSpy("searchTerm");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId("searchTerm",
 				"titleSearchTerm");
@@ -389,7 +389,7 @@ public class TestDataRecordInMemoryStorage {
 	}
 
 	private static void addCollectIndexTerm(RecordStorageInMemory recordsInMemory) {
-		DataGroup dataGroup = new DataGroupSpy("collectTerm");
+		DataGroup dataGroup = new DataGroupOldSpy("collectTerm");
 
 		DataGroup recordInfo = DataCreator.createRecordInfoWithRecordTypeAndRecordId(
 				"collectIndexTerm", "collectIndexTermId");

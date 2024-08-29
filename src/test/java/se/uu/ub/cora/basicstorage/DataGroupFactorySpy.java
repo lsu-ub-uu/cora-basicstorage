@@ -23,11 +23,11 @@ import se.uu.ub.cora.data.DataGroupFactory;
 
 public class DataGroupFactorySpy implements DataGroupFactory {
 
-	public DataGroupSpy dataGroupSpy;
+	public DataGroupOldSpy dataGroupSpy;
 
 	@Override
 	public DataGroup factorUsingNameInData(String nameInData) {
-		dataGroupSpy = new DataGroupSpy(nameInData);
+		dataGroupSpy = new DataGroupOldSpy(nameInData);
 		return dataGroupSpy;
 	}
 

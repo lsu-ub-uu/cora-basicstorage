@@ -58,7 +58,7 @@ public class RecordStorageInMemoryTest {
 	private RecordStorage recordStorage;
 	private Set<Link> emptyLinkList = Collections.emptySet();
 	private Set<StorageTerm> storageTerms = Collections.emptySet();
-	DataGroup emptyFilter = new DataGroupSpy("filter");
+	DataGroup emptyFilter = new DataGroupOldSpy("filter");
 	private String dataDivider = "cora";
 	private DataCopierFactorySpy dataCopierFactory;
 	private DataFactorySpy dataFactorySpy;
@@ -340,13 +340,10 @@ public class RecordStorageInMemoryTest {
 		createImageRecords();
 		createGenericBinaryRecord();
 
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 49);
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 49);
 		DataGroup image = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 50);
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 50);
 		DataGroup image2 = recordStorage.read(List.of("genericBinary", "image"), "image:0001");
-		// assertEquals(dataCopierFactory.numberOfFactoredCopiers, 51);
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 51);
 
 		assertNotSame(image, image2);

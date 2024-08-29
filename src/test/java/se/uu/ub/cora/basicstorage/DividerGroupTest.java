@@ -29,7 +29,7 @@ public class DividerGroupTest {
 	@Test
 	public void testInit() {
 		String dataDivider = "cora";
-		DataGroup dataGroup = new DataGroupSpy("someGroup");
+		DataGroup dataGroup = new DataGroupOldSpy("someGroup");
 		DividerGroup dividerGroup = DividerGroup.withDataDividerAndDataGroup(dataDivider,
 				dataGroup);
 		assertEquals(dividerGroup.dataDivider, "cora");
