@@ -29,6 +29,7 @@ import java.util.Set;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Condition;
 import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.storage.Part;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
@@ -135,9 +136,17 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 
 	@Override
 	public List<String> findRecordIdsForFilter(String type, Filter filter) {
-		Condition condition = filter.include.get(0).conditions.get(0);
-		if (terms.containsKey(type)) {
-			return findRecordIdsMatchingFilterPart(type, condition);
+		Part firstPart = filter.include.get(0);
+		List<Condition> firstConditions = firstPart.conditions;
+		// Condition condition = firstConditions.get(0);
+		// if (terms.containsKey(type)) {
+		// return findRecordIdsMatchingFilterPart(type, condition);
+		// }
+		for (Condition condition : firstConditions) {
+
+			if (terms.containsKey(type)) {
+				return findRecordIdsMatchingFilterPart(type, condition);
+			}
 		}
 		return Collections.emptyList();
 	}
