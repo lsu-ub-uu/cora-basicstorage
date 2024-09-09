@@ -205,11 +205,10 @@ public class RecordStorageInMemoryListTest {
 		assertNotSame(first, secondRead);
 	}
 
-	// TODO:
 	@Test
-	public void testIndependentDataListWithCollectedStorageTermReadWithMatchingUppsalaOckelboFilter() {
+	public void testCollectedStorageTermReadWithMatchingUppsalaOckelboFilter() {
 		createPlaceInStorageWithUppsalaAndOckelboStorageTerm("someNameInData");
-		createPlaceInStorageWithUppsalaStorageTerm("createNewWhenCopyingThisTopLevelGroup");
+		createPlaceInStorageWithUppsalaStorageTerm("whatEver");
 
 		Filter filter = createFilterWithConditions(new ConditionValues("placeName", "Uppsala"),
 				new ConditionValues("placeName2", "Ockelbo"));
