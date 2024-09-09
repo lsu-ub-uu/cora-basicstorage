@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2021 Uppsala University Library
+ * Copyright 2017, 2021, 2024 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,6 +21,7 @@ package se.uu.ub.cora.basicstorage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +30,7 @@ import java.util.Set;
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Condition;
 import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.storage.Part;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
@@ -113,7 +115,7 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	}
 
 	private void ensureStorageMapExistsForRecordType(String recordType) {
-		if (!terms.containsKey(recordType)) {
+		if (storageTermExistsForRecordType(recordType)) {
 			terms.put(recordType, new HashMap<>());
 		}
 	}
@@ -135,14 +137,48 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 
 	@Override
 	public List<String> findRecordIdsForFilter(String type, Filter filter) {
-		Condition condition = filter.include.get(0).conditions.get(0);
-		if (terms.containsKey(type)) {
-			return findRecordIdsMatchingFilterPart(type, condition);
+		if (storageTermExistsForRecordType(type)) {
+			return Collections.emptyList();
 		}
-		return Collections.emptyList();
+		return getRecordIdsForTypeAndFilter(type, filter);
 	}
 
-	private List<String> findRecordIdsMatchingFilterPart(String type, Condition condition) {
+	private List<String> getRecordIdsForTypeAndFilter(String type, Filter filter) {
+		Part firstPart = filter.include.get(0);
+		List<Condition> conditionsInPart = firstPart.conditions;
+
+		return getRecordIdsForConditionsInPart(type, conditionsInPart);
+	}
+
+	private List<String> getRecordIdsForConditionsInPart(String type,
+			List<Condition> conditionsInPart) {
+		Set<String> foundRecordIds = new HashSet<>();
+
+		for (Condition condition : conditionsInPart) {
+			List<String> foundForThisContidition = findRecordIdsMatchingFilterCondition(type,
+					condition);
+			if (isFirstCondition(condition, conditionsInPart)) {
+				foundRecordIds.addAll(foundForThisContidition);
+			} else {
+				foundRecordIds.retainAll(foundForThisContidition);
+			}
+		}
+		return convertSetToList(foundRecordIds);
+	}
+
+	private ArrayList<String> convertSetToList(Set<String> foundRecordIds) {
+		return new ArrayList<>(foundRecordIds);
+	}
+
+	private boolean isFirstCondition(Condition condition, List<Condition> conditionsInPart) {
+		return condition == conditionsInPart.get(0);
+	}
+
+	private boolean storageTermExistsForRecordType(String type) {
+		return !terms.containsKey(type);
+	}
+
+	private List<String> findRecordIdsMatchingFilterCondition(String type, Condition condition) {
 		String key = condition.key();
 		String value = condition.value();
 		Map<String, Map<String, List<StorageTermData>>> storageTermsForRecordType = terms.get(type);

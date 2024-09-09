@@ -206,6 +206,57 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	@Test
+	public void testCollectedStorageTermReadWithMatchingUppsalaOckelboFilter() {
+		createPlaceInStorageWithUppsalaAndOckelboStorageTerm("someNameInData");
+		createPlaceInStorageWithUppsalaStorageTerm("whatEver");
+
+		Filter filter = createFilterWithConditions(new ConditionValues("placeName", "Uppsala"),
+				new ConditionValues("placeName2", "Ockelbo"));
+
+		Collection<DataGroup> readList = recordStorage.readList(List.of("place"),
+				filter).listOfDataGroups;
+
+		assertEquals(readList.size(), 1);
+	}
+
+	private void createPlaceInStorageWithUppsalaAndOckelboStorageTerm(String nameInData) {
+		Set<StorageTerm> storageTerms = createCollectedDataWithUppsalaAndOckelboStorageTerm();
+		createPlaceInStorageWithIdAndCollectedData("place:xyz", storageTerms, nameInData);
+	}
+
+	private void createPlaceInStorageWithIdAndCollectedData(String id,
+			Set<StorageTerm> storageTerms2, String nameInData) {
+		DataGroup dataGroup = DataCreator
+				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(nameInData,
+						"place", id);
+		recordStorage.create("place", id, dataGroup, storageTerms2, emptyLinkList, dataDivider);
+	}
+
+	private Set<StorageTerm> createCollectedDataWithUppsalaAndOckelboStorageTerm() {
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
+		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName2", "Ockelbo");
+		Set<StorageTerm> storageTerms = Set.of(storageTerm1, storageTerm2);
+		return storageTerms;
+	}
+
+	private Filter createFilterWithConditions(ConditionValues... conditionValues) {
+		Part part = new Part();
+		for (ConditionValues partValue : conditionValues) {
+			Condition condition = new Condition(partValue.key, RelationalOperator.EQUAL_TO,
+					partValue.value);
+			part.conditions.add(condition);
+		}
+
+		Filter filter = new Filter();
+		filter.include.add(part);
+
+		return filter;
+	}
+
+	record ConditionValues(String key, String value) {
+	}
+
+	@Test
 	public void testListAfterUpdateWithNoCollectedStorageTermReadWithFilter() {
 		createPlaceInStorageWithUppsalaStorageTerm("nameInData");
 		updateUppsalaPlaceInStorageWithCollectedData(storageTerms);
@@ -219,7 +270,6 @@ public class RecordStorageInMemoryListTest {
 
 	@Test
 	public void testListAfterUpdateWithCollectedStorageTermReadWithMatchingUppsalaFilter() {
-
 		Filter filter = createFilterWithAPart("placeName", "Uppsala");
 
 		createPlaceInStorageWithCollectedData(storageTerms, "nameInData");
@@ -274,7 +324,6 @@ public class RecordStorageInMemoryListTest {
 		List<DataGroup> listOfDataGroups = readList.listOfDataGroups;
 		dcs4.MCR.assertReturn("copy", 0, listOfDataGroups.get(0));
 		dcs5.MCR.assertReturn("copy", 0, listOfDataGroups.get(1));
-
 	}
 
 	@Test
@@ -517,7 +566,6 @@ public class RecordStorageInMemoryListTest {
 
 		int assertNumberReturned = 0;
 		assertCorrectReturnedNumberOfRecords(termsHolder, filter, assertNumberReturned);
-
 	}
 
 	private void assertCorrectReturnedNumberOfRecords(CollectedTermsHolderSpy termsHolder,
@@ -532,7 +580,6 @@ public class RecordStorageInMemoryListTest {
 
 	private void setUpRecordsToReturnFromTermsHolder(CollectedTermsHolderSpy termsHolder,
 			String type, int numOfRecordsToReturn) {
-
 		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < numOfRecordsToReturn; i++) {
 			ids.add(type + ":00" + i);
@@ -733,7 +780,6 @@ public class RecordStorageInMemoryListTest {
 		long totalNumberOfAbstractRecords = recordStorage
 				.getTotalNumberOfRecordsForTypes(implementingTypes, filter);
 		assertEquals(totalNumberOfAbstractRecords, 0);
-
 	}
 
 	@Test
