@@ -33,7 +33,7 @@ import se.uu.ub.cora.storage.StreamStorage;
 
 public final class StreamStorageOnDisk implements StreamStorage {
 
-	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "Can not write files to disk: ";
+	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "Could not write files to disk: ";
 	private static final int BUFFER_LENGTH = 1024;
 	private String basePath;
 
@@ -117,13 +117,13 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		Path pathByDataDivider = Paths.get(basePath, dataDivider);
 		if (storagePathDoesNotExist(pathByDataDivider)) {
 			throw ResourceNotFoundException
-					.withMessage("Can not read stream from disk, no such folder: " + dataDivider);
+					.withMessage("Could not read stream from disk, no such folder: " + dataDivider);
 		}
 
 		Path path = Paths.get(basePath, dataDivider, streamId);
 		if (storagePathDoesNotExist(path)) {
 			throw ResourceNotFoundException
-					.withMessage("Can not read stream from disk, no such streamId: " + streamId);
+					.withMessage("Could not read stream from disk, no such streamId: " + streamId);
 		}
 		return tryToReadStream(path);
 	}
@@ -132,7 +132,8 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		try {
 			return readStream(path);
 		} catch (IOException e) {
-			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
+			throw StorageException.withMessageAndException("Could not read stream from disk: " + e,
+					e);
 		}
 	}
 
@@ -144,5 +145,41 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	public String getBasePath() {
 		// needed for test
 		return basePath;
+	}
+
+	@Override
+	public void delete(String streamId, String dataDivider) {
+		Path pathByDataDivider = Paths.get(basePath, dataDivider);
+		if (storagePathDoesNotExist(pathByDataDivider)) {
+			throw ResourceNotFoundException.withMessage(
+					"Could not delete stream from disk, no such folder: " + dataDivider);
+		}
+		Path path = Paths.get(basePath, dataDivider, streamId);
+		if (storagePathDoesNotExist(path)) {
+			throw ResourceNotFoundException.withMessage(
+					"Could not delete stream from disk, no such streamId: " + streamId);
+		}
+		tryToDeleteStream(path);
+		deleteFolderIfEmpty(pathByDataDivider);
+	}
+
+	void deleteFolderIfEmpty(Path pathByDataDivider) {
+		try {
+			if (!Files.list(pathByDataDivider).iterator().hasNext()) {
+				Files.delete(pathByDataDivider);
+			}
+		} catch (Exception e) {
+			throw StorageException
+					.withMessageAndException("Could not delete folder from disk: " + e, e);
+		}
+	}
+
+	void tryToDeleteStream(Path path) {
+		try {
+			Files.delete(path);
+		} catch (Exception e) {
+			throw StorageException
+					.withMessageAndException("Could not delete stream from disk: " + e, e);
+		}
 	}
 }
