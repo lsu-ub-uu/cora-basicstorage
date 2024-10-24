@@ -155,7 +155,7 @@ public class StreamPathBuilderTest {
 		assertTruePermissions(path, PosixFilePermission.GROUP_WRITE);
 		assertTruePermissions(path, PosixFilePermission.GROUP_EXECUTE);
 		assertTruePermissions(path, PosixFilePermission.OTHERS_READ);
-		assertFalsePermissions(path, PosixFilePermission.OTHERS_WRITE);
+		assertTruePermissions(path, PosixFilePermission.OTHERS_WRITE);
 		assertTruePermissions(path, PosixFilePermission.OTHERS_EXECUTE);
 	}
 
