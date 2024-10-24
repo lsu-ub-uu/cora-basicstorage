@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 
 import se.uu.ub.cora.storage.StorageException;
 import se.uu.ub.cora.storage.StreamPathBuilder;
@@ -30,7 +33,6 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 
 	private static final String STREAMS_DIR = "streams";
 	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "can not write files to disk: ";
-	private String archiveBasePath;
 	private String fileSystemBasePath;
 
 	public StreamPathBuilderImp(String fileSystemBasePath) {
@@ -40,7 +42,6 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 	@Override
 	public String buildPathToAFileAndEnsureFolderExists(String dataDivider, String type,
 			String id) {
-
 		Path pathByDataDivider = Paths.get(fileSystemBasePath, STREAMS_DIR, dataDivider);
 		ensureStorageDirectoryExists(pathByDataDivider);
 		return buildFileStoragePathToAFile(pathByDataDivider, type, id);
@@ -58,10 +59,18 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 
 	private void tryToCreateStorageDirectory(Path pathByDataDivider) {
 		try {
+			String permissions = "rwxrwxrwx";
 			Files.createDirectories(pathByDataDivider);
+			Files.setPosixFilePermissions(pathByDataDivider, createFilePermissions(permissions));
+			Files.setPosixFilePermissions(Paths.get(fileSystemBasePath, STREAMS_DIR),
+					createFilePermissions(permissions));
 		} catch (IOException e) {
 			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
 		}
+	}
+
+	private Set<PosixFilePermission> createFilePermissions(String permissions) {
+		return PosixFilePermissions.fromString(permissions);
 	}
 
 	private String buildFileStoragePathToAFile(Path path, String type, String id) {

@@ -19,6 +19,7 @@
 package se.uu.ub.cora.basicstorage.path;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -27,6 +28,8 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.testng.annotations.AfterMethod;
@@ -37,7 +40,6 @@ import se.uu.ub.cora.storage.StreamPathBuilder;
 
 public class StreamPathBuilderTest {
 
-	private static final String SOME_ARCHIVE_PATH = "someArchivePath";
 	private static final String SOME_DATA_DIVIDER = "someDataDivider";
 	private static final String SOME_TYPE = "someType";
 	private static final String SOME_ID = "someId";
@@ -135,6 +137,38 @@ public class StreamPathBuilderTest {
 
 		assertEquals(pathToAFileInFileSystem, SOME_FILE_SYSTEM_BASE_PATH + "streams/"
 				+ SOME_DATA_DIVIDER + "/" + SOME_TYPE + ":" + SOME_ID);
+	}
+
+	@Test
+	public void testPermissions() throws Exception {
+		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
+
+		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams"));
+		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", "someDataDivider"));
+	}
+
+	private void assertAllPermissions(Path path) throws IOException {
+		assertTruePermissions(path, PosixFilePermission.OWNER_READ);
+		assertTruePermissions(path, PosixFilePermission.OWNER_WRITE);
+		assertTruePermissions(path, PosixFilePermission.OWNER_EXECUTE);
+		assertTruePermissions(path, PosixFilePermission.GROUP_WRITE);
+		assertTruePermissions(path, PosixFilePermission.GROUP_WRITE);
+		assertTruePermissions(path, PosixFilePermission.GROUP_EXECUTE);
+		assertTruePermissions(path, PosixFilePermission.OTHERS_READ);
+		assertFalsePermissions(path, PosixFilePermission.OTHERS_WRITE);
+		assertTruePermissions(path, PosixFilePermission.OTHERS_EXECUTE);
+	}
+
+	private void assertTruePermissions(Path path, PosixFilePermission permission)
+			throws IOException {
+		Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
+		assertTrue(permissions.contains(permission));
+	}
+
+	private void assertFalsePermissions(Path path, PosixFilePermission permission)
+			throws IOException {
+		Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
+		assertFalse(permissions.contains(permission));
 	}
 
 }
