@@ -22,12 +22,12 @@ package se.uu.ub.cora.basicstorage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import se.uu.ub.cora.data.DataGroup;
 import se.uu.ub.cora.data.DataProvider;
@@ -47,11 +47,11 @@ public class RecordStorageInMemory implements RecordStorage {
 	private static final String NO_RECORDS_EXISTS_MESSAGE = "No records exists with recordType: ";
 	private static final String NO_RECORD_EXISTS_MESSAGE = "No record exists with recordType: ";
 
-	protected Map<String, Map<String, DividerGroup>> records = new HashMap<>();
+	protected Map<String, Map<String, DividerGroup>> records = new ConcurrentHashMap<>();
 	protected CollectedTermsHolder collectedTermsHolder = new CollectedTermsInMemoryStorage();
 
-	protected Map<Link, Set<Link>> outgoingLinks = new HashMap<>();
-	protected Map<Link, Set<Link>> incommingLinks = new HashMap<>();
+	protected Map<Link, Set<Link>> outgoingLinks = new ConcurrentHashMap<>();
+	protected Map<Link, Set<Link>> incommingLinks = new ConcurrentHashMap<>();
 
 	public RecordStorageInMemory() {
 		// Make it possible to use default empty record storage
@@ -90,7 +90,7 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	private final void createHolderForRecordTypeInStorage(String recordType) {
-		records.put(recordType, new HashMap<>());
+		records.put(recordType, new ConcurrentHashMap<>());
 	}
 
 	private void checkNoConflictOnRecordId(String recordType, String recordId) {
@@ -262,7 +262,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private Map<String, DataGroup> addDataGroupToRecordTypeList(
 			Map<String, DividerGroup> typeDividerRecords) {
-		Map<String, DataGroup> typeRecords = new HashMap<>(typeDividerRecords.size());
+		Map<String, DataGroup> typeRecords = new ConcurrentHashMap<>(typeDividerRecords.size());
 		for (Entry<String, DividerGroup> entry : typeDividerRecords.entrySet()) {
 			DataGroup copyOfRecord = createIndependentCopy(entry.getValue().dataGroup);
 			typeRecords.put(entry.getKey(), copyOfRecord);

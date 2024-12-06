@@ -20,12 +20,12 @@ package se.uu.ub.cora.basicstorage;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Condition;
@@ -33,7 +33,7 @@ import se.uu.ub.cora.storage.Filter;
 import se.uu.ub.cora.storage.Part;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
-	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new HashMap<>();
+	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new ConcurrentHashMap<>();
 
 	@Override
 	public void removePreviousCollectedStorageTerms(String recordType, String recordId) {
@@ -116,14 +116,14 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 
 	private void ensureStorageMapExistsForRecordType(String recordType) {
 		if (storageTermExistsForRecordType(recordType)) {
-			terms.put(recordType, new HashMap<>());
+			terms.put(recordType, new ConcurrentHashMap<>());
 		}
 	}
 
 	private void ensureStorageListExistsForTermKey(String storageKey,
 			Map<String, Map<String, List<StorageTermData>>> storageKeysForType) {
 		if (!storageKeysForType.containsKey(storageKey)) {
-			HashMap<String, List<StorageTermData>> mapOfIds = new HashMap<>();
+			ConcurrentHashMap<String, List<StorageTermData>> mapOfIds = new ConcurrentHashMap<>();
 			storageKeysForType.put(storageKey, mapOfIds);
 		}
 	}
