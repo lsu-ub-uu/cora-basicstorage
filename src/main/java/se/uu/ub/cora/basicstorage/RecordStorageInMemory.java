@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020, 2021, 2023, 2024 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021, 2023, 2024, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -483,5 +483,17 @@ public class RecordStorageInMemory implements RecordStorage {
 			return getNumberOfRecords(type, filter);
 		}
 		return 0;
+	}
+
+	@Override
+	public Set<Link> getLinksFromRecord(String type, String id) {
+		Link typeAndId = new Link(type, id);
+		return outgoingLinks.getOrDefault(typeAndId, Collections.emptySet());
+	}
+
+	@Override
+	public Set<StorageTerm> getStorageTermsForRecord(String type, String id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

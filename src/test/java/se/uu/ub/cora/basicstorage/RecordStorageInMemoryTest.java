@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2020 Uppsala University Library
+ * Copyright 2015, 2017, 2020, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,6 +24,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -781,6 +782,11 @@ public class RecordStorageInMemoryTest {
 				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
 
 		recordStorage.read(List.of("otherImplementingRecordType"), "someType:0001");
+	}
+
+	@Test
+	public void testGetLinksFromRecord() throws Exception {
+		fail();
 	}
 
 }
