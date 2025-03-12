@@ -34,6 +34,7 @@ import se.uu.ub.cora.storage.Part;
 
 class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private Map<String, Map<String, Map<String, List<StorageTermData>>>> terms = new ConcurrentHashMap<>();
+	private Map<TypeAndId, Set<StorageTerm>> originalStoredStorageTerms = new ConcurrentHashMap<>();
 
 	@Override
 	public void removePreviousCollectedStorageTerms(String recordType, String recordId) {
@@ -42,6 +43,12 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 					.get(recordType);
 			removePreviousCollectedStorageTermsForRecordType(recordId, termsForRecordType);
 		}
+		removeOriginalStoredStorageTerms(recordType, recordId);
+	}
+
+	private void removeOriginalStoredStorageTerms(String recordType, String recordId) {
+		TypeAndId typeAndId = new TypeAndId(recordType, recordId);
+		originalStoredStorageTerms.remove(typeAndId);
 	}
 
 	private boolean termsExistForRecordType(String recordType) {
@@ -91,6 +98,16 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 		removePreviousCollectedStorageTerms(recordType, recordId);
 		for (StorageTerm storageTerm : storageTerms) {
 			storeCollectedStorageTerm(recordType, recordId, dataDivider, storageTerm);
+		}
+		storeOriginalStorageTerms(recordType, recordId, storageTerms);
+	}
+
+	private void storeOriginalStorageTerms(String recordType, String recordId,
+			Set<StorageTerm> storageTerms) {
+		TypeAndId typeAndId = new TypeAndId(recordType, recordId);
+		originalStoredStorageTerms.remove(typeAndId);
+		if (!storageTerms.isEmpty()) {
+			originalStoredStorageTerms.put(typeAndId, storageTerms);
 		}
 	}
 
@@ -212,4 +229,18 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 			}
 		}
 	}
+
+	@Override
+	public Set<StorageTerm> getCollectTerms(String recordType, String recordId) {
+		TypeAndId typeAndId = new TypeAndId(recordType, recordId);
+		return originalStoredStorageTerms.getOrDefault(typeAndId, Collections.emptySet());
+	}
+
+	public Map<TypeAndId, Set<StorageTerm>> onlyForTestGetOriginalStoredStorageTerms() {
+		return originalStoredStorageTerms;
+	}
+
+}
+
+record TypeAndId(String type, String id) {
 }

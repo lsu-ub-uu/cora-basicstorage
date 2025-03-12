@@ -128,7 +128,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	private void storeLinksInIncomingLinks(Link from, Set<Link> toLinks) {
 		for (Link toLink : toLinks) {
-			incommingLinks.computeIfAbsent(toLink, k -> new LinkedHashSet<Link>()).add(from);
+			incommingLinks.computeIfAbsent(toLink, _ -> new LinkedHashSet<Link>()).add(from);
 		}
 	}
 
@@ -493,7 +493,6 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	@Override
 	public Set<StorageTerm> getStorageTermsForRecord(String type, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		return collectedTermsHolder.getCollectTerms(type, id);
 	}
 }

@@ -24,7 +24,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -57,8 +56,8 @@ public class RecordStorageInMemoryTest {
 	private static final String TO_RECORD_TYPE = "toRecordType";
 	private static final int NO_OF_DATACOPIER_DONE_BY_BEFORE_METHOD = 2;
 	private RecordStorage recordStorage;
-	private Set<Link> emptyLinkList = Collections.emptySet();
-	private Set<StorageTerm> storageTerms = Collections.emptySet();
+	private final Set<Link> emptyLinkList = Collections.emptySet();
+	private final Set<StorageTerm> emptyStorageTerms = Collections.emptySet();
 	DataGroup emptyFilter = new DataGroupOldSpy("filter");
 	private String dataDivider = "cora";
 	private DataCopierFactorySpy dataCopierFactory;
@@ -76,12 +75,12 @@ public class RecordStorageInMemoryTest {
 
 		DataGroup typeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("type", "true", "false");
-		recordStorage.create("recordType", "type", typeRecordType, storageTerms, emptyLinkList,
+		recordStorage.create("recordType", "type", typeRecordType, emptyStorageTerms, emptyLinkList,
 				"cora");
 
 		DataGroup recordTypeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
-		recordStorage.create("recordType", "recordType", recordTypeRecordType, storageTerms,
+		recordStorage.create("recordType", "recordType", recordTypeRecordType, emptyStorageTerms,
 				emptyLinkList, "cora");
 
 	}
@@ -99,7 +98,7 @@ public class RecordStorageInMemoryTest {
 		RecordStorageInMemory recordsInMemoryWithData = new RecordStorageInMemory(records);
 		DataGroup placeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("place", "true", "false");
-		recordsInMemoryWithData.create("recordType", "place", placeRecordType, storageTerms,
+		recordsInMemoryWithData.create("recordType", "place", placeRecordType, emptyStorageTerms,
 				emptyLinkList, "cora");
 		DataGroup read = recordsInMemoryWithData.read(List.of("place"), "place:0001");
 
@@ -132,12 +131,12 @@ public class RecordStorageInMemoryTest {
 	private void createTwoLinksPointingToSameRecordFromDifferentRecords() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 
 		Set<Link> linkList2 = createLinkListWithTwoLinks();
-		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList2,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, emptyStorageTerms,
+				linkList2, dataDivider);
 	}
 
 	private void assertCorrectTwoLinksPointingToSameRecordFromDifferentRecords(
@@ -155,8 +154,8 @@ public class RecordStorageInMemoryTest {
 	private void createTwoLinksPointingToSameRecordFromSameRecord() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinksToSameRecord();
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 	}
 
 	private Set<Link> createLinkListWithTwoLinksToSameRecord() {
@@ -184,9 +183,9 @@ public class RecordStorageInMemoryTest {
 	public void testCreateAndDeleteTwoWithoutLink() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
 				emptyLinkList, dataDivider);
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID + "2", dataGroup, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID + "2", dataGroup, emptyStorageTerms,
 				emptyLinkList, dataDivider);
 
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
@@ -199,14 +198,14 @@ public class RecordStorageInMemoryTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"recordType", "recordId");
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
 				emptyLinkList, dataDivider);
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
 
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData2",
 						"recordType", "recordId");
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup2, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup2, emptyStorageTerms,
 				emptyLinkList, dataDivider);
 	}
 
@@ -220,14 +219,14 @@ public class RecordStorageInMemoryTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
 						"createNewWhenCopyingThisTopLevelGroup", "image", "image:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("image", "image:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("image", "image:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroup2 = DataCreator
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId("nameInData",
 						"image", "image:0002");
 		dataGroup2.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("image", "image:0002", dataGroup2, storageTerms, emptyLinkList,
+		recordStorage.create("image", "image:0002", dataGroup2, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 	}
 
@@ -237,7 +236,7 @@ public class RecordStorageInMemoryTest {
 						"createNewWhenCopyingThisTopLevelGroup", "genericBinary",
 						"genericBinary:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup, storageTerms,
+		recordStorage.create("genericBinary", "genericBinary:0001", dataGroup, emptyStorageTerms,
 				emptyLinkList, dataDivider);
 	}
 
@@ -305,7 +304,7 @@ public class RecordStorageInMemoryTest {
 	public void testCreateRead() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
 
@@ -322,7 +321,7 @@ public class RecordStorageInMemoryTest {
 				.createDataGroupWithNameInDataAndRecordInfoWithRecordTypeAndRecordId(
 						"createNewWhenCopyingThisTopLevelGroup", "place", "place:0001");
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		dataCopierFactory.MCR.assertNumberOfCallsToMethod("factorForDataElement", 3);
@@ -355,9 +354,9 @@ public class RecordStorageInMemoryTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
-		recordStorage.create("type", "place:0002", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0002", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroupOut = recordStorage.read(List.of("type"), "place:0001");
@@ -379,7 +378,7 @@ public class RecordStorageInMemoryTest {
 	public void testCreateDataInStorageShouldBeIndependent() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		dataGroup.getChildren().clear();
@@ -390,15 +389,17 @@ public class RecordStorageInMemoryTest {
 	@Test(expectedExceptions = RecordConflictException.class)
 	public void testCreateConflict() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		recordStorage.create("type", "place1", dataGroup, storageTerms, emptyLinkList, dataDivider);
-		recordStorage.create("type", "place1", dataGroup, storageTerms, emptyLinkList, dataDivider);
+		recordStorage.create("type", "place1", dataGroup, emptyStorageTerms, emptyLinkList,
+				dataDivider);
+		recordStorage.create("type", "place1", dataGroup, emptyStorageTerms, emptyLinkList,
+				dataDivider);
 	}
 
 	@Test
 	public void testDelete() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		recordStorage.deleteByTypeAndId("type", "place:0001");
@@ -444,7 +445,7 @@ public class RecordStorageInMemoryTest {
 		Link link1 = new Link(TO_RECORD_TYPE, "toOtherRecordId");
 		Set<Link> linkList = Set.of(link1);
 
-		recordStorage.create(FROM_RECORD_TYPE, "fromOtherRecordId", dataGroup, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, "fromOtherRecordId", dataGroup, emptyStorageTerms,
 				linkList, dataDivider);
 	}
 
@@ -453,8 +454,8 @@ public class RecordStorageInMemoryTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 
 		assertFalse(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).isEmpty());
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
@@ -467,10 +468,10 @@ public class RecordStorageInMemoryTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
 				createLinkListWithTwoLinksToSameRecord(), dataDivider);
-		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, "fromRecordId2", dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 
 		assertEquals(recordStorage.getLinksToRecord(TO_RECORD_TYPE, TO_RECORD_ID).size(), 2);
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
@@ -490,8 +491,8 @@ public class RecordStorageInMemoryTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 		// delete
 		recordStorage.deleteByTypeAndId(FROM_RECORD_TYPE, FROM_RECORD_ID);
@@ -505,7 +506,7 @@ public class RecordStorageInMemoryTest {
 	public void testDeleteNotFound() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		recordStorage.deleteByTypeAndId("type", "place:0001_NOT_FOUND");
@@ -515,12 +516,12 @@ public class RecordStorageInMemoryTest {
 	public void testUpdate() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 		dataGroup2.addChild(new DataAtomicSpy("childId2", "childValue2"));
-		recordStorage.update("type", "place:0001", dataGroup2, storageTerms, emptyLinkList,
+		recordStorage.update("type", "place:0001", dataGroup2, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
@@ -538,12 +539,12 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateWithoutLink() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("place", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("place", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		DataGroup dataGroup2 = createDataGroupWithRecordInfo();
 
-		recordStorage.update("place", "place:0001", dataGroup2, storageTerms, emptyLinkList,
+		recordStorage.update("place", "place:0001", dataGroup2, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 	}
 
@@ -551,13 +552,13 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateAndReadLinkList() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 
 		// update
 		Set<Link> linkListOne = createLinkListWithOneLink(FROM_RECORD_ID);
-		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkListOne,
-				dataDivider);
+		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkListOne, dataDivider);
 	}
 
 	private Set<Link> createLinkListWithOneLink(String fromRecordId) {
@@ -569,17 +570,17 @@ public class RecordStorageInMemoryTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithTwoLinks();
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 		// update
-		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
+		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
 				emptyLinkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 0);
 
 		// update
-		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 	}
 
@@ -588,13 +589,13 @@ public class RecordStorageInMemoryTest {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		Set<Link> linkList = createLinkListWithThreeLinksTwoOfThemFromSameRecord(FROM_RECORD_ID);
 
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 		// update
 		linkList = createLinkListWithTwoLinksFromDifferentRecords(FROM_RECORD_ID);
-		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms, linkList,
-				dataDivider);
+		recordStorage.update(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				linkList, dataDivider);
 		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
 	}
 
@@ -622,7 +623,7 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateNotFoundType() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.update("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.update("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 	}
 
@@ -630,9 +631,9 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateNotFoundId() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
-		recordStorage.update("type", "place:0002", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.update("type", "place:0002", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 	}
 
@@ -640,9 +641,9 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateDataInStorageShouldBeIndependent() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
-		recordStorage.update("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.update("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		dataGroup.getChildren().clear();
@@ -654,7 +655,7 @@ public class RecordStorageInMemoryTest {
 	public void testRecordExistForRecordTypeAndRecordId() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		assertTrue(recordStorage.recordExists(List.of("type"), "place:0001"));
@@ -665,7 +666,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage = TestDataRecordInMemoryStorage.createRecordStorageInMemoryWithTestData();
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("place", "place:0004", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("place", "place:0004", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("place"), "NOTplace:0001"));
@@ -676,12 +677,12 @@ public class RecordStorageInMemoryTest {
 		recordStorage = new RecordStorageInMemory();
 		DataGroup recordTypeRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("recordType", "true", "false");
-		recordStorage.create("recordType", "recordType", recordTypeRecordType, storageTerms,
+		recordStorage.create("recordType", "recordType", recordTypeRecordType, emptyStorageTerms,
 				emptyLinkList, "cora");
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("type", "place:0001", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("NOTtype"), "place:0002"));
@@ -692,25 +693,25 @@ public class RecordStorageInMemoryTest {
 		DataGroup abstractRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("abstractRecordType", "true",
 						"true");
-		recordStorage.create("recordType", "abstractRecordType", abstractRecordType, storageTerms,
-				emptyLinkList, dataDivider);
+		recordStorage.create("recordType", "abstractRecordType", abstractRecordType,
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		DataGroup implementingRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("implementingRecordType",
 						"true", "abstractRecordType");
 		recordStorage.create("recordType", "implementingRecordType", implementingRecordType,
-				storageTerms, emptyLinkList, dataDivider);
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		DataGroup otherImplementingRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("otherImplementingRecordType",
 						"true", "abstractRecordType");
 		recordStorage.create("recordType", "otherImplementingRecordType",
-				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
+				otherImplementingRecordType, emptyStorageTerms, emptyLinkList, dataDivider);
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("implementingRecordType", "someType:0001", dataGroup, storageTerms,
-				emptyLinkList, dataDivider);
+		recordStorage.create("implementingRecordType", "someType:0001", dataGroup,
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		assertTrue(recordStorage.recordExists(
 				List.of("abstractRecordType", "implementingRecordType"), "someType:0001"));
@@ -721,14 +722,14 @@ public class RecordStorageInMemoryTest {
 		DataGroup abstractRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("abstractRecordType", "true",
 						"true");
-		recordStorage.create("recordType", "abstractRecordType", abstractRecordType, storageTerms,
-				emptyLinkList, dataDivider);
+		recordStorage.create("recordType", "abstractRecordType", abstractRecordType,
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		DataGroup otherImplementingRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("otherImplementingRecordType",
 						"true", "abstractRecordType");
 		recordStorage.create("recordType", "otherImplementingRecordType",
-				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
+				otherImplementingRecordType, emptyStorageTerms, emptyLinkList, dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("abstractRecordType"), "someType:0001"));
 	}
@@ -739,7 +740,7 @@ public class RecordStorageInMemoryTest {
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("notAbstractRecordType", "true",
 						"false");
 		recordStorage.create("recordType", "notAbstractRecordType", abstractRecordType,
-				storageTerms, emptyLinkList, dataDivider);
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("notAbstractRecordType"), "someType:0001"));
 	}
@@ -750,7 +751,7 @@ public class RecordStorageInMemoryTest {
 
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("image", "image:0004", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("binary"), "NOTimage:0004"));
@@ -761,7 +762,7 @@ public class RecordStorageInMemoryTest {
 		recordStorage = new RecordStorageInMemory();
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.create("image", "image:0004", dataGroup, storageTerms, emptyLinkList,
+		recordStorage.create("image", "image:0004", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
 
 		assertFalse(recordStorage.recordExists(List.of("binary"), "NOTimage:0004"));
@@ -772,21 +773,72 @@ public class RecordStorageInMemoryTest {
 		DataGroup abstractRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndAbstract("abstractRecordType", "true",
 						"true");
-		recordStorage.create("recordType", "abstractRecordType", abstractRecordType, storageTerms,
-				emptyLinkList, dataDivider);
+		recordStorage.create("recordType", "abstractRecordType", abstractRecordType,
+				emptyStorageTerms, emptyLinkList, dataDivider);
 
 		DataGroup otherImplementingRecordType = DataCreator
 				.createRecordTypeWithIdAndUserSuppliedIdAndParentId("otherImplementingRecordType",
 						"true", "abstractRecordType");
 		recordStorage.create("recordType", "otherImplementingRecordType",
-				otherImplementingRecordType, storageTerms, emptyLinkList, dataDivider);
+				otherImplementingRecordType, emptyStorageTerms, emptyLinkList, dataDivider);
 
 		recordStorage.read(List.of("otherImplementingRecordType"), "someType:0001");
 	}
 
 	@Test
-	public void testGetLinksFromRecord() throws Exception {
-		fail();
+	public void testGetLinksFromRecord_noLinks() {
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				emptyLinkList, dataDivider);
+
+		Set<Link> linksFromRecord = recordStorage.getLinksFromRecord(FROM_RECORD_TYPE,
+				FROM_RECORD_ID);
+
+		assertEquals(linksFromRecord, Collections.emptyList());
+	}
+
+	@Test
+	public void testGetLinksFromRecord_twoOutgoingLinks() {
+		Set<Link> links = createLinkListWithTwoLinks();
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms, links,
+				dataDivider);
+
+		Set<Link> linksFromRecord = recordStorage.getLinksFromRecord(FROM_RECORD_TYPE,
+				FROM_RECORD_ID);
+
+		assertEquals(linksFromRecord, links);
+	}
+
+	@Test
+	public void testGetStorageTermsForRecord_noStorageTerms() {
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
+				emptyLinkList, dataDivider);
+
+		Set<StorageTerm> storageTermsFromRecord = recordStorage
+				.getStorageTermsForRecord(FROM_RECORD_TYPE, FROM_RECORD_ID);
+
+		assertEquals(storageTermsFromRecord, Collections.emptyList());
+	}
+
+	@Test
+	public void testGetStorageTermsForRecord_twoStorageTerms() {
+		Set<StorageTerm> storageTerms = createCollectedDataWithUppsalaAndOckelboStorageTerm();
+		DataGroup dataGroup = createDataGroupWithRecordInfo();
+		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, storageTerms,
+				emptyLinkList, dataDivider);
+
+		Set<StorageTerm> storageTermsFromRecord = recordStorage
+				.getStorageTermsForRecord(FROM_RECORD_TYPE, FROM_RECORD_ID);
+
+		assertEquals(storageTermsFromRecord, storageTerms);
+	}
+
+	private Set<StorageTerm> createCollectedDataWithUppsalaAndOckelboStorageTerm() {
+		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
+		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName2", "Ockelbo");
+		return Set.of(storageTerm1, storageTerm2);
 	}
 
 }
