@@ -235,8 +235,7 @@ public class RecordStorageInMemoryListTest {
 	private Set<StorageTerm> createCollectedDataWithUppsalaAndOckelboStorageTerm() {
 		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
 		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName2", "Ockelbo");
-		Set<StorageTerm> storageTerms = Set.of(storageTerm1, storageTerm2);
-		return storageTerms;
+		return Set.of(storageTerm1, storageTerm2);
 	}
 
 	private Filter createFilterWithConditions(ConditionValues... conditionValues) {
@@ -357,9 +356,8 @@ public class RecordStorageInMemoryListTest {
 	}
 
 	private Set<StorageTerm> createCollectedDataWithUppsalaStorageTerm() {
-		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
-		Set<StorageTerm> storageTerms = Set.of(storageTerm1);
-		return storageTerms;
+		StorageTerm storageTerm = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
+		return Set.of(storageTerm);
 	}
 
 	private void createPlaceInStorageWithCollectedData(Set<StorageTerm> storageTerms2,

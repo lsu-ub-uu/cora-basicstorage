@@ -26,8 +26,19 @@ import java.util.Set;
 
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class CollectedTermsHolderSpy implements CollectedTermsHolder {
+
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
+
+	public CollectedTermsHolderSpy() {
+		MCR.useMRV(MRV);
+		// MRV.setDefaultReturnValuesSupplier("findRecordIdsForFilter", () ->
+		// Collections.EMPTY_LIST);
+	}
 
 	public String type;
 	public Filter filter;
@@ -38,12 +49,13 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 	@Override
 	public void storeCollectedTerms(String recordType, String recordId,
 			Set<StorageTerm> storageTerms, String dataDivider) {
-		// TODO Auto-generated method stub
-
+		MCR.addCall("recordType", recordType, "recordId", recordId, "storageTerms", storageTerms,
+				"dataDivider", dataDivider);
 	}
 
 	@Override
 	public List<String> findRecordIdsForFilter(String type, Filter filter) {
+		MCR.addCall("type", type, "filter", filter);
 		findRecordsForFilterWasCalled = true;
 		this.type = type;
 		this.filter = filter;
@@ -51,11 +63,18 @@ public class CollectedTermsHolderSpy implements CollectedTermsHolder {
 		if (returnIdsForTypes.isEmpty() || returnIdsForTypes.containsKey(type)) {
 			returnedIds.addAll(returnIdsForTypes.get(type));
 		}
+		MCR.addReturned(returnedIds);
 		return returnedIds;
 	}
 
 	@Override
 	public void removePreviousCollectedStorageTerms(String recordType, String recordId) {
+		MCR.addCall("recordType", recordType, "recordId", recordId);
+	}
+
+	@Override
+	public Set<StorageTerm> getCollectTerms(String recordType, String recordId) {
 		// TODO Auto-generated method stub
+		return null;
 	}
 }
