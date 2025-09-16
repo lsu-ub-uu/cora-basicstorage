@@ -21,10 +21,10 @@ package se.uu.ub.cora.basicstorage.path;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +36,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.storage.StorageException;
 import se.uu.ub.cora.storage.StreamPathBuilder;
+import se.uu.ub.cora.storage.spies.hash.CoraDigestUtilsSpy;
 
 public class StreamPathBuilderTest {
 
@@ -44,13 +46,24 @@ public class StreamPathBuilderTest {
 	private static final String SOME_TYPE = "someType";
 	private static final String SOME_ID = "someId";
 	private static final String SOME_FILE_SYSTEM_BASE_PATH = "/tmp/streamStorageOnDiskTempStream/";
+	private static final String SOME_REPRESENTATION = "someRepresentation";
 
 	private StreamPathBuilderImp pathBuilder;
+	private CoraDigestUtilsSpy digestor;
 
 	@BeforeMethod
 	private void beforeMethod() throws Exception {
 		makeSureBasePathExistsAndIsEmpty();
-		pathBuilder = new StreamPathBuilderImp(SOME_FILE_SYSTEM_BASE_PATH);
+		setDigestorSpy();
+		pathBuilder = StreamPathBuilderImp
+				.usingBasePathAndCoraDigestUtils(SOME_FILE_SYSTEM_BASE_PATH, digestor);
+	}
+
+	private void setDigestorSpy() {
+		digestor = new CoraDigestUtilsSpy();
+		digestor.MRV.setDefaultReturnValuesSupplier("sha256Hex", () -> "00000000000000000");
+		digestor.MRV.setSpecificReturnValuesSupplier("sha256Hex", () -> "0123456789asdfghjkl",
+				SOME_TYPE + ":" + SOME_ID);
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -93,58 +106,127 @@ public class StreamPathBuilderTest {
 	}
 
 	@Test
-	public void testPathBuilderImpImplementsPathBuilder() throws Exception {
+	public void testPathBuilderImpImplementsPathBuilder() {
 		assertTrue(pathBuilder instanceof StreamPathBuilder);
 	}
 
 	@Test
 	public void testCallBuildPathToFileSystemAndEnsureExistsCHANGE() throws IOException {
-		Exception caughtException = null;
 		try {
 			removeTempFiles();
-			pathBuilder = new StreamPathBuilderImp("/root/streamsDOESNOTEXIST");
+			pathBuilder = StreamPathBuilderImp
+					.usingBasePathAndCoraDigestUtils("/root/streamsDOESNOTEXIST", digestor);
 
-			pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE,
-					SOME_ID);
+			pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID,
+					SOME_REPRESENTATION);
+			fail("It should throw an exception");
 		} catch (Exception e) {
-			caughtException = e;
+			assertTrue(e instanceof StorageException);
+			assertEquals(e.getMessage(),
+					"File base path /root/streamsDOESNOTEXIST does not exists.");
 		}
-		assertTrue(caughtException.getCause() instanceof AccessDeniedException);
-		assertEquals(caughtException.getMessage(), "can not write files to disk: "
-				+ "java.nio.file.AccessDeniedException: /root/streamsDOESNOTEXIST/streams");
 	}
 
 	@Test
-	public void testInitMissingPath() throws IOException {
-		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
+	public void testCreatePathToFile() {
+		String pathAsString = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, SOME_REPRESENTATION);
 
-		assertTrue(
-				Files.exists(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", "someDataDivider")));
+		assertEquals(pathAsString, "/tmp/streamStorageOnDiskTempStream/streams/someDataDivider"
+				+ "/012/345/678/0123456789asdfghjkl/someType:someId-someRepresentation");
+		assertDirectoryExists();
+	}
+
+	private void assertDirectoryExists() {
+		Path path = Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER, "012",
+				"345", "678", "0123456789asdfghjkl");
+		assertTrue(Files.exists(path));
 	}
 
 	@Test
-	public void testInitPathMoreThanOnce() throws IOException {
-		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
-		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
-		assertTrue(
-				Files.exists(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", "someDataDivider")));
+	public void testFilesWithSameDataDividerAndTypeAndId_storedInSameFolder() {
+		String pathAsString0 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, "rep0");
+		String pathAsString1 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, "rep1");
+
+		assertDirectoryExists();
+		String sharedFolder = "/tmp/streamStorageOnDiskTempStream/streams/someDataDivider"
+				+ "/012/345/678/0123456789asdfghjkl/";
+		assertTrue(pathAsString0.startsWith(sharedFolder));
+		assertTrue(pathAsString1.startsWith(sharedFolder));
+
+		assertTrue(pathAsString0.endsWith("someType:someId-rep0"));
+		assertTrue(pathAsString1.endsWith("someType:someId-rep1"));
 	}
 
 	@Test
-	public void testCallBuildPathToFileSystemAndEnsureExists() throws Exception {
-		String pathToAFileInFileSystem = pathBuilder
-				.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
+	public void testDifferentDataDivider_differentFolderButSameFileName() {
+		String pathAsString0 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, "rep0");
+		String pathAsString1 = pathBuilder.buildPathToAFileAndEnsureFolderExists(
+				"someOtherDataDivider", SOME_TYPE, SOME_ID, "rep1");
 
-		assertEquals(pathToAFileInFileSystem, SOME_FILE_SYSTEM_BASE_PATH + "streams/"
-				+ SOME_DATA_DIVIDER + "/" + SOME_TYPE + ":" + SOME_ID);
+		assertDirectoryExists();
+		String sharedFolder = "/tmp/streamStorageOnDiskTempStream/streams/someDataDivider"
+				+ "/012/345/678/0123456789asdfghjkl/";
+		assertTrue(pathAsString0.startsWith(sharedFolder));
+		assertFalse(pathAsString1.startsWith(sharedFolder));
+
+		assertTrue(pathAsString0.endsWith("someType:someId-rep0"));
+		assertTrue(pathAsString1.endsWith("someType:someId-rep1"));
+	}
+
+	@Test
+	public void testDifferentType_differentFolderAndDifferentFileName() {
+		String pathAsString0 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, "rep0");
+		String pathAsString1 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				"someOther", SOME_ID, "rep1");
+
+		assertDirectoryExists();
+		String sharedFolder = "/tmp/streamStorageOnDiskTempStream/streams/someDataDivider"
+				+ "/012/345/678/0123456789asdfghjkl/";
+		assertTrue(pathAsString0.startsWith(sharedFolder));
+		assertFalse(pathAsString1.startsWith(sharedFolder));
+
+		assertTrue(pathAsString0.endsWith("someType:someId-rep0"));
+		assertFalse(pathAsString1.endsWith("someType:someId-rep1"));
+	}
+
+	@Test
+	public void testDifferentId_differentFolderAndDifferentFileName() {
+		String pathAsString0 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, SOME_ID, "rep0");
+		String pathAsString1 = pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER,
+				SOME_TYPE, "someOtherId", "rep1");
+
+		assertDirectoryExists();
+		String sharedFolder = "/tmp/streamStorageOnDiskTempStream/streams/someDataDivider"
+				+ "/012/345/678/0123456789asdfghjkl/";
+		assertTrue(pathAsString0.startsWith(sharedFolder));
+		assertFalse(pathAsString1.startsWith(sharedFolder));
+
+		assertTrue(pathAsString0.endsWith("someType:someId-rep0"));
+		assertFalse(pathAsString1.endsWith("someType:someId-rep1"));
 	}
 
 	@Test
 	public void testPermissions() throws Exception {
-		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID);
+		pathBuilder.buildPathToAFileAndEnsureFolderExists(SOME_DATA_DIVIDER, SOME_TYPE, SOME_ID,
+				SOME_REPRESENTATION);
 
 		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams"));
-		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", "someDataDivider"));
+		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER));
+		assertAllPermissions(
+				Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER, "012"));
+		assertAllPermissions(
+				Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER, "012", "345"));
+		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER,
+				"012", "345", "678"));
+		assertAllPermissions(Paths.get(SOME_FILE_SYSTEM_BASE_PATH, "streams", SOME_DATA_DIVIDER,
+				"012", "345", "678", "0123456789asdfghjkl"));
+
 	}
 
 	private void assertAllPermissions(Path path) throws IOException {
@@ -165,10 +247,9 @@ public class StreamPathBuilderTest {
 		assertTrue(permissions.contains(permission));
 	}
 
-	private void assertFalsePermissions(Path path, PosixFilePermission permission)
-			throws IOException {
-		Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
-		assertFalse(permissions.contains(permission));
+	@Test
+	public void testOnlyForTests() {
+		assertEquals(pathBuilder.onlyForTestGetFileSystemBasePath(), SOME_FILE_SYSTEM_BASE_PATH);
+		assertEquals(pathBuilder.onlyForTestGetCoraDigestorUtils(), digestor);
 	}
-
 }
