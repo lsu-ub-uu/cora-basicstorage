@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Uppsala University Library
+ * Copyright 2023, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,44 +29,41 @@ import java.util.Set;
 
 import se.uu.ub.cora.storage.StorageException;
 import se.uu.ub.cora.storage.StreamPathBuilder;
-import se.uu.ub.cora.storage.hash.CoraDigestUtils;
+import se.uu.ub.cora.storage.hash.CoraDigestor;
 
 public class StreamPathBuilderImp implements StreamPathBuilder {
-
 	private static final String STREAMS_DIR = "streams";
-	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "Can not write files to disk: ";
 
-	public static StreamPathBuilderImp usingBasePathAndCoraDigestUtils(String fileSystemBasePath,
-			CoraDigestUtils digestor) {
+	public static StreamPathBuilderImp usingBasePathAndCoraDigestor(String fileSystemBasePath,
+			CoraDigestor digestor) {
 		return new StreamPathBuilderImp(fileSystemBasePath, digestor);
 	}
 
 	private String fileSystemBasePath;
-	private String type;
-	private String id;
-	private String representation;
-	private CoraDigestUtils digestor;
-	private String dataDivider;
+	private CoraDigestor digestor;
 
-	private StreamPathBuilderImp(String fileSystemBasePath, CoraDigestUtils digestor) {
+	private StreamPathBuilderImp(String fileSystemBasePath, CoraDigestor digestor) {
 		this.fileSystemBasePath = fileSystemBasePath;
 		this.digestor = digestor;
 	}
 
 	@Override
-	public String buildPathToAFileAndEnsureFolderExists(String dataDivider, String type, String id,
+	public String buildPathToAFile(String dataDivider, String type, String id,
 			String representation) {
-		this.dataDivider = dataDivider;
-		this.type = type;
-		this.id = id;
-		this.representation = representation;
-		ensureBasePathExistsOtherwiseThrowException();
-		Path pathToFolder = createFolders();
-		return buildFileStoragePathToAFileAndRepresentation(pathToFolder);
+		Path pathToFolder = createPathToFolder(dataDivider, type, id);
+		return buildFileStoragePathToAFileAndRepresentation(pathToFolder, type, id, representation);
 	}
 
-	private Path createFolders() {
-		Path pathToFolder = createPathToFolder();
+	@Override
+	public String buildPathToAFileAndEnsureFolderExists(String dataDivider, String type, String id,
+			String representation) {
+		ensureBasePathExistsOtherwiseThrowException();
+		Path pathToFolder = createFoldersAndEnsureTheyExists(dataDivider, type, id);
+		return buildFileStoragePathToAFileAndRepresentation(pathToFolder, type, id, representation);
+	}
+
+	private Path createFoldersAndEnsureTheyExists(String dataDivider, String type, String id) {
+		Path pathToFolder = createPathToFolder(dataDivider, type, id);
 		ensureStorageDirectoryExists(pathToFolder);
 		return pathToFolder;
 	}
@@ -79,12 +76,12 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		}
 	}
 
-	private Path createPathToFolder() {
-		String typeAndIdAsSha256 = digestor.sha256Hex(type + ":" + id);
-		return buildPathToFolderUsingSha256Path(typeAndIdAsSha256);
+	private Path createPathToFolder(String dataDivider, String type, String id) {
+		String typeAndIdAsSha256 = digestor.stringToSha256Hex(type + ":" + id);
+		return buildPathToFolderUsingSha256Path(typeAndIdAsSha256, dataDivider);
 	}
 
-	private Path buildPathToFolderUsingSha256Path(String sha256hex) {
+	private Path buildPathToFolderUsingSha256Path(String sha256hex, String dataDivider) {
 		String sha256HexLowerCase = sha256hex.toLowerCase();
 		String folder1 = sha256HexLowerCase.substring(0, 3);
 		String folder2 = sha256HexLowerCase.substring(3, 6);
@@ -109,8 +106,10 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		try {
 			Path basePath = Paths.get(fileSystemBasePath);
 			createPublicFolders(basePath, pathToFolder, "rwxrwxrwx");
-		} catch (IOException e) {
-			throw StorageException.withMessageAndException(CAN_NOT_WRITE_FILES_TO_DISK + e, e);
+		} catch (Exception e) {
+			String pathPattern = "Failed to create folder {0}, in filesystem";
+			String message = MessageFormat.format(pathPattern, pathToFolder);
+			throw StorageException.withMessageAndException(message, e);
 		}
 	}
 
@@ -128,15 +127,16 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 			throws IOException {
 		if (Files.notExists(current)) {
 			Files.createDirectory(current);
-			Files.setPosixFilePermissions(current, perms);
 		}
+		Files.setPosixFilePermissions(current, perms);
 	}
 
 	private Set<PosixFilePermission> createFilePermissions(String permissions) {
 		return PosixFilePermissions.fromString(permissions);
 	}
 
-	private String buildFileStoragePathToAFileAndRepresentation(Path path) {
+	private String buildFileStoragePathToAFileAndRepresentation(Path path, String type, String id,
+			String representation) {
 		String pathPattern = "{0}/{1}:{2}-{3}";
 		return MessageFormat.format(pathPattern, path.toString(), type, id, representation);
 	}
@@ -145,7 +145,8 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		return fileSystemBasePath;
 	}
 
-	public CoraDigestUtils onlyForTestGetCoraDigestorUtils() {
+	public CoraDigestor onlyForTestGetCoraDigestor() {
 		return digestor;
 	}
+
 }

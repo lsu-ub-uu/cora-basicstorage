@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Uppsala University Library
+ * Copyright 2016, 2025 Uppsala University Library
  * Copyright 2016 Olov McKie
  *
  * This file is part of Cora.
@@ -23,12 +23,15 @@ package se.uu.ub.cora.basicstorage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 import se.uu.ub.cora.storage.ResourceNotFoundException;
 import se.uu.ub.cora.storage.StorageException;
+import se.uu.ub.cora.storage.StreamPathBuilder;
 import se.uu.ub.cora.storage.StreamStorage;
 
 public final class StreamStorageOnDisk implements StreamStorage {
@@ -36,16 +39,19 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	private static final String CAN_NOT_WRITE_FILES_TO_DISK = "Could not write files to disk: ";
 	private static final int BUFFER_LENGTH = 1024;
 	private String basePath;
+	private StreamPathBuilder streamPathBuilder;
 
-	private StreamStorageOnDisk(String basePath) {
+	private StreamStorageOnDisk(String basePath, StreamPathBuilder streamPathBuilder) {
 		this.basePath = basePath;
+		this.streamPathBuilder = streamPathBuilder;
 		if (basePathDoesNotExist(basePath)) {
 			createBaseDirectory(basePath);
 		}
 	}
 
-	public static StreamStorageOnDisk usingBasePath(String basePath) {
-		return new StreamStorageOnDisk(basePath);
+	public static StreamStorageOnDisk usingBasePathAndStreamPathBuilder(String basePath,
+			StreamPathBuilder streamPathBuilder) {
+		return new StreamStorageOnDisk(basePath, streamPathBuilder);
 	}
 
 	private boolean basePathDoesNotExist(String basePath) {
@@ -57,12 +63,12 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	}
 
 	@Override
-	public long store(String streamId, String dataDivider, InputStream stream) {
-		Path pathByDataDivider = Paths.get(basePath, dataDivider);
-		ensureStorageDirectoryExists(pathByDataDivider);
+	public long store(String dataDivider, String type, String id, String representation,
+			InputStream stream) {
+		String pathToFile = streamPathBuilder.buildPathToAFileAndEnsureFolderExists(dataDivider,
+				type, id, representation);
 
-		Path path = Paths.get(basePath, dataDivider, streamId);
-		return tryToStoreStream(stream, path);
+		return tryToStoreStream(stream, Paths.get(pathToFile));
 	}
 
 	long tryToStoreStream(InputStream stream, Path path) {
@@ -94,12 +100,6 @@ public final class StreamStorageOnDisk implements StreamStorage {
 		return size;
 	}
 
-	private void ensureStorageDirectoryExists(Path pathByDataDivider) {
-		if (storagePathDoesNotExist(pathByDataDivider)) {
-			tryToCreateStorageDirectory(pathByDataDivider);
-		}
-	}
-
 	private boolean storagePathDoesNotExist(Path pathByDataDivider) {
 		return !Files.exists(pathByDataDivider);
 	}
@@ -113,19 +113,22 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	}
 
 	@Override
-	public InputStream retrieve(String streamId, String dataDivider) {
-		Path pathByDataDivider = Paths.get(basePath, dataDivider);
-		if (storagePathDoesNotExist(pathByDataDivider)) {
-			throw ResourceNotFoundException
-					.withMessage("Could not read stream from disk, no such folder: " + dataDivider);
-		}
-
-		Path path = Paths.get(basePath, dataDivider, streamId);
+	public InputStream retrieve(String dataDivider, String type, String id, String representation) {
+		String pathToFile = streamPathBuilder.buildPathToAFile(dataDivider, type, id,
+				representation);
+		Path path = Paths.get(pathToFile);
 		if (storagePathDoesNotExist(path)) {
+			String streamName = getStreamName(type, id, representation);
 			throw ResourceNotFoundException
-					.withMessage("Could not read stream from disk, no such streamId: " + streamId);
+					.withMessage("Could not read stream from disk, no such stream: " + streamName);
 		}
 		return tryToReadStream(path);
+	}
+
+	private String getStreamName(String type, String id, String representation) {
+		String fileFormat = "{0}:{1}-{2}";
+		MessageFormat.format(fileFormat, type, id);
+		return MessageFormat.format(fileFormat, type, id, representation);
 	}
 
 	InputStream tryToReadStream(Path path) {
@@ -142,30 +145,22 @@ public final class StreamStorageOnDisk implements StreamStorage {
 
 	}
 
-	public String getBasePath() {
-		// needed for test
-		return basePath;
-	}
-
 	@Override
-	public void delete(String streamId, String dataDivider) {
-		Path pathByDataDivider = Paths.get(basePath, dataDivider);
-		if (storagePathDoesNotExist(pathByDataDivider)) {
-			throw ResourceNotFoundException.withMessage(
-					"Could not delete stream from disk, no such folder: " + dataDivider);
-		}
-		Path path = Paths.get(basePath, dataDivider, streamId);
+	public void delete(String dataDivider, String type, String id, String representation) {
+		String pathToFile = streamPathBuilder.buildPathToAFile(dataDivider, type, id,
+				representation);
+		Path path = Paths.get(pathToFile);
 		if (storagePathDoesNotExist(path)) {
-			throw ResourceNotFoundException.withMessage(
-					"Could not delete stream from disk, no such streamId: " + streamId);
+			throw ResourceNotFoundException
+					.withMessage("Could not delete stream from disk, no such stream: "
+							+ getStreamName(type, id, representation));
 		}
 		tryToDeleteStream(path);
-		deleteFolderIfEmpty(pathByDataDivider);
 	}
 
 	void deleteFolderIfEmpty(Path pathByDataDivider) {
-		try {
-			if (!Files.list(pathByDataDivider).iterator().hasNext()) {
+		try (DirectoryStream<Path> entries = Files.newDirectoryStream(pathByDataDivider)) {
+			if (!entries.iterator().hasNext()) {
 				Files.delete(pathByDataDivider);
 			}
 		} catch (Exception e) {
@@ -177,9 +172,45 @@ public final class StreamStorageOnDisk implements StreamStorage {
 	void tryToDeleteStream(Path path) {
 		try {
 			Files.delete(path);
+			removeEmptyFoldersToBase(path.getParent(), Paths.get(basePath));
 		} catch (Exception e) {
 			throw StorageException
 					.withMessageAndException("Could not delete stream from disk: " + e, e);
 		}
 	}
+
+	private void removeEmptyFoldersToBase(Path startPath, Path basePath) throws IOException {
+		Path current = startPath;
+		while (stillBelowBasePathAndEmptyDirectory(basePath, current)) {
+			Files.delete(current);
+			current = current.getParent();
+		}
+	}
+
+	private boolean stillBelowBasePathAndEmptyDirectory(Path basePath, Path current)
+			throws IOException {
+		return stillBelowBasePath(basePath, current) && directoryIsEmpty(current);
+	}
+
+	private boolean stillBelowBasePath(Path basePath, Path current) {
+		return !current.equals(basePath);
+	}
+
+	private boolean directoryIsEmpty(Path current) throws IOException {
+		try (DirectoryStream<Path> entries = Files.newDirectoryStream(current)) {
+			if (entries.iterator().hasNext()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public String onlyForTestGetBasePath() {
+		return basePath;
+	}
+
+	public StreamPathBuilder onlyForTestGetStreamPathBuilder() {
+		return streamPathBuilder;
+	}
+
 }
