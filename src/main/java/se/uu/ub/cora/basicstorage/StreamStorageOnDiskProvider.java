@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Uppsala University Library
+ * Copyright 2019, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -20,10 +20,12 @@ package se.uu.ub.cora.basicstorage;
 
 import java.util.Map;
 
+import se.uu.ub.cora.basicstorage.path.StreamPathBuilderImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.storage.StreamStorage;
 import se.uu.ub.cora.storage.StreamStorageProvider;
+import se.uu.ub.cora.storage.hash.imp.CoraDigestorImp;
 
 public class StreamStorageOnDiskProvider implements StreamStorageProvider {
 	private Logger log = LoggerProvider.getLoggerForClass(StreamStorageOnDiskProvider.class);
@@ -45,7 +47,10 @@ public class StreamStorageOnDiskProvider implements StreamStorageProvider {
 
 	private void startStreamStorage() {
 		String basePath = tryToGetInitParameter("storageOnDiskBasePath");
-		streamStorage = StreamStorageOnDisk.usingBasePath(basePath + "streams/");
+		var streamPathBuilder = StreamPathBuilderImp.usingBasePathAndCoraDigestor(basePath,
+				new CoraDigestorImp());
+		streamStorage = StreamStorageOnDisk.usingBasePathAndStreamPathBuilder(basePath,
+				streamPathBuilder);
 	}
 
 	private String tryToGetInitParameter(String parameterName) {

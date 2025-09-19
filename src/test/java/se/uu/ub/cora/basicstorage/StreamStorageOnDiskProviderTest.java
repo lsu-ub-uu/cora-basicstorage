@@ -34,11 +34,13 @@ import java.util.stream.Stream;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.basicstorage.path.StreamPathBuilderImp;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.logger.spies.LoggerFactorySpy;
 import se.uu.ub.cora.logger.spies.LoggerSpy;
 import se.uu.ub.cora.storage.StreamStorage;
 import se.uu.ub.cora.storage.StreamStorageProvider;
+import se.uu.ub.cora.storage.hash.imp.CoraDigestorImp;
 
 public class StreamStorageOnDiskProviderTest {
 	private Map<String, String> initInfo = new HashMap<>();
@@ -99,8 +101,15 @@ public class StreamStorageOnDiskProviderTest {
 		streamStorageOnDiskProvider.startUsingInitInfo(initInfo);
 		StreamStorageOnDisk streamStorage = (StreamStorageOnDisk) streamStorageOnDiskProvider
 				.getStreamStorage();
-		assertEquals(streamStorage.getBasePath(),
-				initInfo.get("storageOnDiskBasePath") + "streams/");
+		String basePathStreams = initInfo.get("storageOnDiskBasePath");
+		assertEquals(streamStorage.onlyForTestGetBasePath(), basePathStreams);
+
+		StreamPathBuilderImp streamPathBuilder = (StreamPathBuilderImp) streamStorage
+				.onlyForTestGetStreamPathBuilder();
+		assertEquals(streamPathBuilder.onlyForTestGetFileSystemBasePath(), basePathStreams);
+
+		assertTrue(streamPathBuilder.onlyForTestGetCoraDigestor() instanceof CoraDigestorImp);
+
 	}
 
 	@Test

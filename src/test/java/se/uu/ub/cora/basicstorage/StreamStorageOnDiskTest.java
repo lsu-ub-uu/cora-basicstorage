@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Uppsala University Library
+ * Copyright 2016, 2025 Uppsala University Library
  * Copyright 2016 Olov McKie
  *
  * This file is part of Cora.
@@ -23,6 +23,7 @@ package se.uu.ub.cora.basicstorage;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -43,22 +44,38 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.basicstorage.path.StreamPathBuilderImp;
 import se.uu.ub.cora.storage.ResourceNotFoundException;
 import se.uu.ub.cora.storage.StorageException;
+import se.uu.ub.cora.storage.StreamPathBuilder;
 import se.uu.ub.cora.storage.StreamStorage;
+import se.uu.ub.cora.storage.spies.hash.CoraDigestorSpy;
 
 public class StreamStorageOnDiskTest {
 	private static final String DATA_DIVIDER = "someDataDivider";
-	private static final String STREAM_ID = "someStreamId";
+	private static final String TYPE = "someType";
+	private static final String ID = "someId";
+	private static final String REPRESENTATION = "someRepresentation";
 	private String basePath = "/tmp/streamStorageOnDiskTempStream/";
 	private StreamStorage streamStorage;
 	private InputStream streamToStore;
+	private StreamPathBuilder streamPathBuilder;
+	private CoraDigestorSpy digestor;
 
 	@BeforeMethod
 	public void setUpForTests() throws IOException {
 		makeSureBasePathExistsAndIsEmpty();
-		streamStorage = StreamStorageOnDisk.usingBasePath(basePath);
-		streamToStore = createTestInputStreamToStore();
+
+		setUpStreamPathBuilder();
+		streamStorage = StreamStorageOnDisk.usingBasePathAndStreamPathBuilder(basePath,
+				streamPathBuilder);
+		streamToStore = createTestInputStreamToStore("a string");
+	}
+
+	private void setUpStreamPathBuilder() {
+		digestor = new CoraDigestorSpy();
+		digestor.MRV.setDefaultReturnValuesSupplier("stringToSha256Hex", () -> "123456789abcdef");
+		streamPathBuilder = StreamPathBuilderImp.usingBasePathAndCoraDigestor(basePath, digestor);
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {
@@ -104,7 +121,8 @@ public class StreamStorageOnDiskTest {
 	public void testInitNoPermissionOnPathSentAlongException() throws IOException {
 		try {
 			removeTempFiles();
-			StreamStorageOnDisk.usingBasePath("/root/streamsDOESNOTEXIST");
+			StreamStorageOnDisk.usingBasePathAndStreamPathBuilder("/root/streamsDOESNOTEXIST",
+					streamPathBuilder);
 			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			assertTrue(e instanceof StorageException);
@@ -117,30 +135,26 @@ public class StreamStorageOnDiskTest {
 	@Test
 	public void testInitMissingPath() throws IOException {
 		removeTempFiles();
-		StreamStorageOnDisk.usingBasePath(basePath);
-	}
-
-	@Test
-	public void testGetBasePath() throws IOException {
-		StreamStorageOnDisk streamStorageOnDisk = (StreamStorageOnDisk) streamStorage;
-		assertEquals(streamStorageOnDisk.getBasePath(), basePath);
+		StreamStorageOnDisk.usingBasePathAndStreamPathBuilder(basePath, streamPathBuilder);
 	}
 
 	@Test
 	public void storeCreatePathForNewDataDivider() {
-		streamStorage.store(STREAM_ID, DATA_DIVIDER, streamToStore);
+		long streamSize = streamStorage.store(DATA_DIVIDER, TYPE, ID, REPRESENTATION,
+				streamToStore);
 
-		Path pathDataDivider = Paths.get(basePath, DATA_DIVIDER);
+		Path pathDataDivider = Paths.get(basePath, "streams", DATA_DIVIDER, "123", "456", "789",
+				"123456789abcdef", TYPE + ":" + ID + "-" + REPRESENTATION);
 		assertTrue(Files.exists(pathDataDivider));
+		assertEquals(String.valueOf(streamSize), "8");
 	}
 
-	private InputStream createTestInputStreamToStore() {
-		InputStream stream = new ByteArrayInputStream("a string".getBytes(StandardCharsets.UTF_8));
-		return stream;
+	private InputStream createTestInputStreamToStore(String value) {
+		return new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Test
-	public void storeFileForStreamPathIsEmptySentAlongException() throws IOException {
+	public void storeFileForStreamPathIsEmptySentAlongException() {
 		try {
 			((StreamStorageOnDisk) streamStorage).tryToStoreStream(streamToStore, Paths.get(""));
 			fail("Should have thrown an exception");
@@ -153,33 +167,27 @@ public class StreamStorageOnDiskTest {
 	}
 
 	@Test
-	public void storeFileForStream() {
-		long size = streamStorage.store(STREAM_ID, DATA_DIVIDER, streamToStore);
+	public void storeFileForStreamDirectoriesAlreadyExist_streamReplaced() {
+		long streamSize = streamStorage.store(DATA_DIVIDER, TYPE, ID, REPRESENTATION,
+				streamToStore);
 
-		assertTrue(Files.exists(Paths.get(basePath, DATA_DIVIDER, STREAM_ID)));
-		assertEquals(String.valueOf(size), "8");
-	}
+		assertEquals(String.valueOf(streamSize), "8");
 
-	@Test
-	public void storeFileForStreamDirectoriesAlreadyExist() {
-		long size = streamStorage.store(STREAM_ID, DATA_DIVIDER, streamToStore);
+		InputStream stream2 = createTestInputStreamToStore("another string");
+		long streamSize2 = streamStorage.store(DATA_DIVIDER, TYPE, ID, REPRESENTATION, stream2);
 
-		assertTrue(Files.exists(Paths.get(basePath, DATA_DIVIDER, STREAM_ID)));
-		assertEquals(String.valueOf(size), "8");
+		assertEquals(String.valueOf(streamSize2), "14");
 
-		InputStream stream2 = createTestInputStreamToStore();
-
-		long size2 = streamStorage.store("someStreamId2", DATA_DIVIDER, stream2);
-
-		assertTrue(Files.exists(Paths.get(basePath, DATA_DIVIDER, "someStreamId2")));
-		assertEquals(String.valueOf(size2), "8");
+		Path pathToFile = Paths.get(basePath, "streams", DATA_DIVIDER, "123", "456", "789",
+				"123456789abcdef", TYPE + ":" + ID + "-" + REPRESENTATION);
+		assertTrue(Files.exists(pathToFile));
 	}
 
 	@Test
 	public void retreive() throws IOException {
 		storeStream();
 
-		InputStream stream = streamStorage.retrieve(STREAM_ID, DATA_DIVIDER);
+		InputStream stream = streamStorage.retrieve(DATA_DIVIDER, TYPE, ID, REPRESENTATION);
 		assertNotNull(stream);
 
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
@@ -194,38 +202,33 @@ public class StreamStorageOnDiskTest {
 	}
 
 	@Test()
-	public void retreiveFolderForDataDividerIsMissing() {
+	public void retreiveStreamIsMissing() {
 		try {
-			streamStorage.retrieve(STREAM_ID, DATA_DIVIDER);
+			streamStorage.retrieve(DATA_DIVIDER, TYPE, "someStreamIdDOESNOTEXIST", REPRESENTATION);
 			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			assertTrue(e instanceof ResourceNotFoundException);
-			assertEquals(e.getMessage(),
-					"Could not read stream from disk, no such folder: someDataDivider");
+			assertEquals(e.getMessage(), "Could not read stream from disk, no such stream: " + TYPE
+					+ ":someStreamIdDOESNOTEXIST-" + REPRESENTATION);
+
+			assertBilPathToFileCalled();
 		}
 	}
 
-	@Test()
-	public void retreiveStreamIsMissing() {
-		storeStream();
-		try {
-			streamStorage.retrieve("someStreamIdDOESNOTEXIST", DATA_DIVIDER);
-			fail("Should have thrown an exception");
-		} catch (Exception e) {
-			assertTrue(e instanceof ResourceNotFoundException);
-			assertEquals(e.getMessage(),
-					"Could not read stream from disk, no such streamId: someStreamIdDOESNOTEXIST");
-		}
+	private void assertBilPathToFileCalled() {
+		assertFalse(Files.exists(Paths.get(basePath, "streams", DATA_DIVIDER, "123", "456", "789",
+				"123456789abcdef")));
 	}
 
 	private long storeStream() {
 		StreamStorageOnDisk creatingStuffOnDiskStreamStorage = StreamStorageOnDisk
-				.usingBasePath(basePath);
-		return creatingStuffOnDiskStreamStorage.store(STREAM_ID, DATA_DIVIDER, streamToStore);
+				.usingBasePathAndStreamPathBuilder(basePath, streamPathBuilder);
+		return creatingStuffOnDiskStreamStorage.store(DATA_DIVIDER, TYPE, ID, REPRESENTATION,
+				streamToStore);
 	}
 
 	@Test
-	public void retreivePathForStreamIsBrokenSentAlongException() throws IOException {
+	public void retreivePathForStreamIsBrokenSentAlongException() {
 		try {
 			((StreamStorageOnDisk) streamStorage).tryToReadStream(Paths.get("/broken/path"));
 			fail("Should have thrown an exception");
@@ -238,51 +241,56 @@ public class StreamStorageOnDiskTest {
 	}
 
 	@Test
-	public void delete() throws Exception {
+	public void delete() {
 		storeStream();
 
-		streamStorage.delete(STREAM_ID, DATA_DIVIDER);
+		streamStorage.delete(DATA_DIVIDER, TYPE, ID, REPRESENTATION);
 
 		assertNotFound();
-
 	}
 
 	@Test
-	public void delete_RemoveFolderIfEmpty() throws Exception {
+	public void delete_RemoveFolderIfEmpty() {
 		storeStream();
 
-		streamStorage.delete(STREAM_ID, DATA_DIVIDER);
+		streamStorage.delete(DATA_DIVIDER, TYPE, ID, REPRESENTATION);
 
-		assertFalse(Files.exists(Paths.get(basePath, DATA_DIVIDER)));
+		assertFalse(Files.exists(Paths.get(basePath, "streams")));
+		assertTrue(Files.exists(Paths.get(basePath)));
 	}
 
 	@Test
-	public void deleteStream_FolderMissing() throws Exception {
-		try {
-			streamStorage.delete(STREAM_ID, DATA_DIVIDER);
-			fail("Should have thrown an exception");
-		} catch (Exception e) {
-			assertTrue(e instanceof ResourceNotFoundException);
-			assertEquals(e.getMessage(),
-					"Could not delete stream from disk, no such folder: someDataDivider");
-		}
+	public void delete_LeaveFolderNotEmpty() {
+		storeStream();
+		StreamStorageOnDisk creatingStuffOnDiskStreamStorage = StreamStorageOnDisk
+				.usingBasePathAndStreamPathBuilder(basePath, streamPathBuilder);
+		creatingStuffOnDiskStreamStorage.store(DATA_DIVIDER, TYPE, ID, "otherRepresentation",
+				streamToStore);
+
+		streamStorage.delete(DATA_DIVIDER, TYPE, ID, REPRESENTATION);
+
+		assertFalse(Files.exists(Paths.get(basePath, "streams", DATA_DIVIDER, "123", "456", "789",
+				"123456789abcdef", TYPE + ":" + ID + "-" + REPRESENTATION)));
+		assertTrue(Files.exists(Paths.get(basePath, "streams", DATA_DIVIDER, "123", "456", "789",
+				"123456789abcdef", TYPE + ":" + ID + "-" + "otherRepresentation")));
+		assertTrue(Files.exists(Paths.get(basePath, "streams")));
+		assertTrue(Files.exists(Paths.get(basePath)));
 	}
 
 	@Test()
 	public void deleteStream_StreamMissing() {
-		storeStream();
 		try {
-			streamStorage.delete("someStreamIdDOESNOTEXIST", DATA_DIVIDER);
+			streamStorage.delete(DATA_DIVIDER, TYPE, "someStreamIdDOESNOTEXIST", REPRESENTATION);
 			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			assertTrue(e instanceof ResourceNotFoundException);
-			assertEquals(e.getMessage(),
-					"Could not delete stream from disk, no such streamId: someStreamIdDOESNOTEXIST");
+			assertEquals(e.getMessage(), "Could not delete stream from disk, no such stream: "
+					+ TYPE + ":someStreamIdDOESNOTEXIST-" + REPRESENTATION);
 		}
 	}
 
 	@Test
-	public void deleteStream_ExceptionStreamFromDisk() throws Exception {
+	public void deleteStream_ExceptionStreamFromDisk() {
 		try {
 			((StreamStorageOnDisk) streamStorage).tryToDeleteStream(Paths.get("/somePath"));
 			fail("Should have thrown an exception");
@@ -295,7 +303,7 @@ public class StreamStorageOnDiskTest {
 	}
 
 	@Test
-	public void deleteStream_ExceptionFolderFromDisk() throws Exception {
+	public void deleteStream_ExceptionFolderFromDisk() {
 		try {
 			((StreamStorageOnDisk) streamStorage).deleteFolderIfEmpty(Paths.get("/somePath"));
 			fail("Should have thrown an exception");
@@ -309,10 +317,23 @@ public class StreamStorageOnDiskTest {
 
 	private void assertNotFound() {
 		try {
-			streamStorage.retrieve(STREAM_ID, DATA_DIVIDER);
+			streamStorage.retrieve(DATA_DIVIDER, TYPE, ID, REPRESENTATION);
 			fail("It should throw exception");
 		} catch (Exception e) {
 			assertTrue(e instanceof ResourceNotFoundException);
 		}
+	}
+
+	@Test
+	public void testOnlyForTestGetBasePath() {
+		StreamStorageOnDisk streamStorageOnDisk = (StreamStorageOnDisk) streamStorage;
+		assertEquals(streamStorageOnDisk.onlyForTestGetBasePath(), basePath);
+	}
+
+	@Test
+	public void testOnlyForTestGetStreamPathBuilder() {
+		StreamPathBuilder strem = ((StreamStorageOnDisk) streamStorage)
+				.onlyForTestGetStreamPathBuilder();
+		assertSame(strem, streamPathBuilder);
 	}
 }
