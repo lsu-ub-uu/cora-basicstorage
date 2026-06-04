@@ -47,6 +47,10 @@ public class CollectedTermsInMemoryStorageTest {
 	private static final String RECORD_TYPE = "recordType";
 	private static final String RECORD_ID = "recordId";
 	private static final String DATA_DIVIDER = "someDataDivider";
+	private static final int CONCURRENT_THREAD_COUNT = 2;
+	private static final int STORAGE_TERMS_COUNT = 5000;
+	private static final int STORE_OPERATIONS_COUNT = 25;
+	private static final int READ_OPERATIONS_COUNT = 500;
 	private CollectedTermsHolder storage;
 
 	@BeforeMethod
@@ -174,25 +178,26 @@ public class CollectedTermsInMemoryStorageTest {
 	}
 
 	@Test
-	public void testFindRecordIdsForFilter_concurrentStoreAndRead_noConcurrentModificationException()
+	public void testConcurrentStoreAndFilterRead_completesWithoutException()
 			throws InterruptedException, ExecutionException {
 		CollectedTermsInMemoryStorage concurrentStorage = new CollectedTermsInMemoryStorage();
-		Set<StorageTerm> collectedData = createCollectedDataWithManyStorageTermsForSameKey(5000);
+		Set<StorageTerm> collectedData = createCollectedDataWithManyStorageTermsForSameKey(
+				STORAGE_TERMS_COUNT);
 		Filter filter = createFilterWithAPart("placeName", "value2500");
 
-		ExecutorService executorService = Executors.newFixedThreadPool(2);
+		ExecutorService executorService = Executors.newFixedThreadPool(CONCURRENT_THREAD_COUNT);
 		CountDownLatch startLatch = new CountDownLatch(1);
 		try {
 			Future<?> storeFuture = executorService.submit(() -> {
 				waitForStart(startLatch);
-				for (int index = 0; index < 25; index++) {
+				for (int index = 0; index < STORE_OPERATIONS_COUNT; index++) {
 					concurrentStorage.storeCollectedTerms(RECORD_TYPE, RECORD_ID, collectedData,
 							DATA_DIVIDER);
 				}
 			});
 			Future<?> readFuture = executorService.submit(() -> {
 				waitForStart(startLatch);
-				for (int index = 0; index < 500; index++) {
+				for (int index = 0; index < READ_OPERATIONS_COUNT; index++) {
 					List<String> foundRecordIds = concurrentStorage.findRecordIdsForFilter(RECORD_TYPE,
 							filter);
 					assertTrue(foundRecordIds.isEmpty() || foundRecordIds.contains(RECORD_ID));
@@ -204,7 +209,7 @@ public class CollectedTermsInMemoryStorageTest {
 			storeFuture.get();
 			readFuture.get();
 		} finally {
-			executorService.shutdownNow();
+			executorService.shutdown();
 			assertTrue(executorService.awaitTermination(10, TimeUnit.SECONDS));
 		}
 	}
