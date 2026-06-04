@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import se.uu.ub.cora.data.collected.StorageTerm;
 import se.uu.ub.cora.storage.Condition;
@@ -148,7 +149,7 @@ class CollectedTermsInMemoryStorage implements CollectedTermsHolder {
 	private void ensureStorageListExistsForId(String storageKey, String recordId,
 			Map<String, Map<String, List<StorageTermData>>> storageKeysForType) {
 		if (!storageKeysForType.get(storageKey).containsKey(recordId)) {
-			storageKeysForType.get(storageKey).put(recordId, new ArrayList<>());
+			storageKeysForType.get(storageKey).put(recordId, new CopyOnWriteArrayList<>());
 		}
 	}
 
