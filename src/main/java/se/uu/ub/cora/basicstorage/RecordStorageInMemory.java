@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017, 2018, 2020, 2021, 2023, 2024, 2025 Uppsala University Library
+ * Copyright 2015, 2017, 2018, 2020, 2021, 2023, 2024, 2025, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,7 +22,6 @@ package se.uu.ub.cora.basicstorage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,6 +52,8 @@ public class RecordStorageInMemory implements RecordStorage {
 	protected Map<Link, Set<Link>> outgoingLinks = new ConcurrentHashMap<>();
 	protected Map<Link, Set<Link>> incommingLinks = new ConcurrentHashMap<>();
 
+	private final Object linkLock = new Object();
+
 	public RecordStorageInMemory() {
 		// Make it possible to use default empty record storage
 	}
@@ -70,27 +71,22 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	@Override
-	public void create(String recordType, String recordId, DataGroup record,
+	public void create(String recordType, String recordId, DataGroup recordGroup,
 			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
 		ensureStorageExistsForRecordType(recordType);
-		checkNoConflictOnRecordId(recordType, recordId);
-		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
-		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
-		storeLinks(recordType, recordId, links);
-	}
-
-	protected final void ensureStorageExistsForRecordType(String recordType) {
-		if (holderForRecordTypeDoesNotExistInStorage(recordType)) {
-			createHolderForRecordTypeInStorage(recordType);
+		Map<String, DividerGroup> typeMap = records.get(recordType);
+		synchronized (typeMap) {
+			checkNoConflictOnRecordId(recordType, recordId);
+			storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, recordGroup,
+					dataDivider);
+			collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms,
+					dataDivider);
+			storeLinks(recordType, recordId, links);
 		}
 	}
 
-	private final boolean holderForRecordTypeDoesNotExistInStorage(String recordType) {
-		return !records.containsKey(recordType);
-	}
-
-	private final void createHolderForRecordTypeInStorage(String recordType) {
-		records.put(recordType, new ConcurrentHashMap<>());
+	protected final void ensureStorageExistsForRecordType(String recordType) {
+		records.computeIfAbsent(recordType, _ -> new ConcurrentHashMap<>());
 	}
 
 	private void checkNoConflictOnRecordId(String recordType, String recordId) {
@@ -101,14 +97,14 @@ public class RecordStorageInMemory implements RecordStorage {
 	}
 
 	private void storeIndependentRecordByRecordTypeAndRecordId(String recordType, String recordId,
-			DataGroup record, String dataDivider) {
-		DataGroup recordIndependentOfEnteredRecord = createIndependentCopy(record);
+			DataGroup recordGroup, String dataDivider) {
+		DataGroup recordIndependentOfEnteredRecord = createIndependentCopy(recordGroup);
 		storeRecordByRecordTypeAndRecordId(recordType, recordId, recordIndependentOfEnteredRecord,
 				dataDivider);
 	}
 
-	private DataGroup createIndependentCopy(DataGroup record) {
-		DataCopier dataCopier = DataCopierProvider.getDataCopierUsingDataElement(record);
+	private DataGroup createIndependentCopy(DataGroup recordGroup) {
+		DataCopier dataCopier = DataCopierProvider.getDataCopierUsingDataElement(recordGroup);
 		return (DataGroup) dataCopier.copy();
 	}
 
@@ -121,14 +117,17 @@ public class RecordStorageInMemory implements RecordStorage {
 	private void storeLinks(String recordType, String recordId, Set<Link> toLinks) {
 		Link from = new Link(recordType, recordId);
 		if (!toLinks.isEmpty()) {
-			outgoingLinks.put(from, toLinks);
-			storeLinksInIncomingLinks(from, toLinks);
+			Set<Link> defensiveCopy = Set.copyOf(toLinks);
+			synchronized (linkLock) {
+				outgoingLinks.put(from, defensiveCopy);
+				storeLinksInIncomingLinks(from, defensiveCopy);
+			}
 		}
 	}
 
 	private void storeLinksInIncomingLinks(Link from, Set<Link> toLinks) {
 		for (Link toLink : toLinks) {
-			incommingLinks.computeIfAbsent(toLink, _ -> new LinkedHashSet<Link>()).add(from);
+			incommingLinks.computeIfAbsent(toLink, _ -> ConcurrentHashMap.newKeySet()).add(from);
 		}
 	}
 
@@ -166,7 +165,7 @@ public class RecordStorageInMemory implements RecordStorage {
 			try {
 				readRecordsForTypeAndFilterAndAddToList(implementingRecordType, filter,
 						aggregatedRecordList);
-			} catch (RecordNotFoundException e) {
+			} catch (RecordNotFoundException _) {
 				// Do nothing, another implementing child might have records
 			}
 		}
@@ -357,7 +356,7 @@ public class RecordStorageInMemory implements RecordStorage {
 		for (String implementingType : types) {
 			try {
 				readRecord = returnRecordIfExisting(implementingType, recordId);
-			} catch (RecordNotFoundException e) {
+			} catch (RecordNotFoundException _) {
 				// Do nothing, another implementing child might have records
 			}
 		}
@@ -379,23 +378,35 @@ public class RecordStorageInMemory implements RecordStorage {
 		}
 	}
 
+	private boolean holderForRecordTypeDoesNotExistInStorage(String recordType) {
+		return !records.containsKey(recordType);
+	}
+
 	@Override
 	public void deleteByTypeAndId(String recordType, String recordId) {
-		checkRecordExists(recordType, recordId);
-		removeLinks(recordType, recordId);
-
-		collectedTermsHolder.removePreviousCollectedStorageTerms(recordType, recordId);
-		records.get(recordType).remove(recordId);
-		if (records.get(recordType).isEmpty()) {
-			records.remove(recordType);
+		Map<String, DividerGroup> typeMap = records.get(recordType);
+		if (typeMap == null) {
+			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + recordType);
 		}
+		synchronized (typeMap) {
+			if (null == typeMap.get(recordId)) {
+				throw RecordNotFoundException
+						.withMessage("No record exists with recordId: " + recordId);
+			}
+			removeLinks(recordType, recordId);
+			collectedTermsHolder.removePreviousCollectedStorageTerms(recordType, recordId);
+			typeMap.remove(recordId);
+		}
+		records.computeIfPresent(recordType, (_, v) -> v.isEmpty() ? null : v);
 	}
 
 	private void removeLinks(String recordType, String recordId) {
 		Link from = new Link(recordType, recordId);
-		if (outgoingLinks.containsKey(from)) {
-			removeIncommingLinks(from);
-			removeOutgoingLinks(from);
+		synchronized (linkLock) {
+			if (outgoingLinks.containsKey(from)) {
+				removeIncommingLinks(from);
+				removeOutgoingLinks(from);
+			}
 		}
 	}
 
@@ -406,17 +417,16 @@ public class RecordStorageInMemory implements RecordStorage {
 	private void removeIncommingLinks(Link from) {
 		for (Link to : outgoingLinks.get(from)) {
 			incommingLinks.get(to).remove(from);
-			if (incommingLinks.get(to).isEmpty()) {
-				incommingLinks.remove(to);
-			}
+			incommingLinks.computeIfPresent(to, (_, v) -> v.isEmpty() ? null : v);
 		}
 	}
 
 	@Override
 	public Set<Link> getLinksToRecord(String type, String id) {
 		Link to = new Link(type, id);
-		if (incommingLinks.containsKey(to)) {
-			return incommingLinks.get(to);
+		Set<Link> links = incommingLinks.get(to);
+		if (links != null) {
+			return Set.copyOf(links);
 		}
 		return Collections.emptySet();
 	}
@@ -424,18 +434,27 @@ public class RecordStorageInMemory implements RecordStorage {
 	@Override
 	public boolean linksExistForRecord(String type, String id) {
 		Link to = new Link(type, id);
-		return incommingLinks.containsKey(to);
+		Set<Link> links = incommingLinks.get(to);
+		return links != null && !links.isEmpty();
 	}
 
 	@Override
-	public void update(String recordType, String recordId, DataGroup record,
+	public void update(String recordType, String recordId, DataGroup recordGroup,
 			Set<StorageTerm> storageTerms, Set<Link> links, String dataDivider) {
-		checkRecordExists(recordType, recordId);
-		removeLinks(recordType, recordId);
-		storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, record, dataDivider);
-		ensureStorageExistsForRecordType(recordType);
-		collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms, dataDivider);
-		storeLinks(recordType, recordId, links);
+		Map<String, DividerGroup> typeMap = records.get(recordType);
+		if (typeMap == null) {
+			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + recordType);
+		}
+		synchronized (typeMap) {
+			checkRecordExists(recordType, recordId);
+			removeLinks(recordType, recordId);
+			storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, recordGroup,
+					dataDivider);
+			ensureStorageExistsForRecordType(recordType);
+			collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms,
+					dataDivider);
+			storeLinks(recordType, recordId, links);
+		}
 	}
 
 	@Override
@@ -488,7 +507,11 @@ public class RecordStorageInMemory implements RecordStorage {
 	@Override
 	public Set<Link> getLinksFromRecord(String type, String id) {
 		Link typeAndId = new Link(type, id);
-		return outgoingLinks.getOrDefault(typeAndId, Collections.emptySet());
+		Set<Link> links = outgoingLinks.get(typeAndId);
+		if (links != null) {
+			return Set.copyOf(links);
+		}
+		return Collections.emptySet();
 	}
 
 	@Override
