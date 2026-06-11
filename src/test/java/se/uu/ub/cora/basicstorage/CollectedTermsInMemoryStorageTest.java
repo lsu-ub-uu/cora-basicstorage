@@ -23,18 +23,34 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.data.collected.StorageTerm;
+import se.uu.ub.cora.storage.Condition;
+import se.uu.ub.cora.storage.Filter;
+import se.uu.ub.cora.storage.Part;
+import se.uu.ub.cora.storage.RelationalOperator;
 
 public class CollectedTermsInMemoryStorageTest {
 
 	private static final String RECORD_TYPE = "recordType";
 	private static final String RECORD_ID = "recordId";
 	private static final String DATA_DIVIDER = "someDataDivider";
+	private static final int CONCURRENT_THREAD_COUNT = 2;
+	private static final int STORAGE_TERMS_COUNT = 5000;
+	private static final int STORE_OPERATIONS_COUNT = 25;
+	private static final int READ_OPERATIONS_COUNT = 500;
 	private CollectedTermsHolder storage;
 
 	@BeforeMethod
@@ -161,6 +177,43 @@ public class CollectedTermsInMemoryStorageTest {
 		assertTrue(collectTerms.isEmpty());
 	}
 
+	@Test
+	public void testConcurrentStoreAndFilterRead_completesWithoutException()
+			throws InterruptedException, ExecutionException {
+		CollectedTermsInMemoryStorage concurrentStorage = new CollectedTermsInMemoryStorage();
+		Set<StorageTerm> collectedData = createCollectedDataWithManyStorageTermsForSameKey(
+				STORAGE_TERMS_COUNT);
+		Filter filter = createFilterWithAPart("placeName", "value2500");
+
+		ExecutorService executorService = Executors.newFixedThreadPool(CONCURRENT_THREAD_COUNT);
+		CountDownLatch startLatch = new CountDownLatch(1);
+		try {
+			Future<?> storeFuture = executorService.submit(() -> {
+				waitForStart(startLatch);
+				for (int index = 0; index < STORE_OPERATIONS_COUNT; index++) {
+					concurrentStorage.storeCollectedTerms(RECORD_TYPE, RECORD_ID, collectedData,
+							DATA_DIVIDER);
+				}
+			});
+			Future<?> readFuture = executorService.submit(() -> {
+				waitForStart(startLatch);
+				for (int index = 0; index < READ_OPERATIONS_COUNT; index++) {
+					List<String> foundRecordIds = concurrentStorage.findRecordIdsForFilter(RECORD_TYPE,
+							filter);
+					assertTrue(foundRecordIds.isEmpty() || foundRecordIds.contains(RECORD_ID));
+				}
+			});
+
+			startLatch.countDown();
+
+			storeFuture.get();
+			readFuture.get();
+		} finally {
+			executorService.shutdown();
+			assertTrue(executorService.awaitTermination(10, TimeUnit.SECONDS));
+		}
+	}
+
 	private Set<StorageTerm> createCollectedDataWithUppsalaAndOckelboStorageTerm() {
 		StorageTerm storageTerm1 = new StorageTerm("placeNameStorageTerm", "placeName", "Uppsala");
 		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName2", "Ockelbo");
@@ -172,6 +225,36 @@ public class CollectedTermsInMemoryStorageTest {
 				"Stockholm");
 		StorageTerm storageTerm2 = new StorageTerm("placeNameStorageTerm", "placeName2", "Malmö");
 		return Set.of(storageTerm1, storageTerm2);
+	}
+
+	private Set<StorageTerm> createCollectedDataWithManyStorageTermsForSameKey(int numberOfTerms) {
+		Set<StorageTerm> storageTerms = new LinkedHashSet<>();
+		for (int index = 0; index < numberOfTerms; index++) {
+			storageTerms.add(new StorageTerm("placeNameStorageTerm" + index, "placeName",
+					"value" + index));
+		}
+		return storageTerms;
+	}
+
+	private Filter createFilterWithAPart(String key, String value) {
+		Condition condition = new Condition(key, RelationalOperator.EQUAL_TO, value);
+
+		Part part = new Part();
+		part.conditions.add(condition);
+
+		Filter filter = new Filter();
+		filter.include.add(part);
+
+		return filter;
+	}
+
+	private void waitForStart(CountDownLatch startLatch) {
+		try {
+			startLatch.await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new AssertionError(e);
+		}
 	}
 
 }
