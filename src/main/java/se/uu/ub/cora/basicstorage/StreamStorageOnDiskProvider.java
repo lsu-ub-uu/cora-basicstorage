@@ -20,6 +20,8 @@ package se.uu.ub.cora.basicstorage;
 
 import java.util.Map;
 
+import se.uu.ub.cora.basicstorage.path.PathFileSystem;
+import se.uu.ub.cora.basicstorage.path.PathFileSystemImp;
 import se.uu.ub.cora.basicstorage.path.StreamPathBuilderImp;
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -47,8 +49,9 @@ public class StreamStorageOnDiskProvider implements StreamStorageProvider {
 
 	private void startStreamStorage() {
 		String basePath = tryToGetInitParameter("storageOnDiskBasePath");
-		var streamPathBuilder = StreamPathBuilderImp.usingBasePathAndCoraDigestor(basePath,
-				new CoraDigestorImp());
+		PathFileSystem pathFileSystem = PathFileSystemImp.usingRealFileSystem();
+		var streamPathBuilder = StreamPathBuilderImp.usingBasePathAndCoraDigestorAndPathFileSystem(
+				basePath, new CoraDigestorImp(), pathFileSystem);
 		streamStorage = StreamStorageOnDisk.usingBasePathAndStreamPathBuilder(basePath,
 				streamPathBuilder);
 	}

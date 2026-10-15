@@ -44,6 +44,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.basicstorage.path.PathFileSystem;
+import se.uu.ub.cora.basicstorage.path.PathFileSystemImp;
 import se.uu.ub.cora.basicstorage.path.StreamPathBuilderImp;
 import se.uu.ub.cora.storage.ResourceNotFoundException;
 import se.uu.ub.cora.storage.StorageException;
@@ -75,7 +77,9 @@ public class StreamStorageOnDiskTest {
 	private void setUpStreamPathBuilder() {
 		digestor = new CoraDigestorSpy();
 		digestor.MRV.setDefaultReturnValuesSupplier("stringToSha256Hex", () -> "123456789abcdef");
-		streamPathBuilder = StreamPathBuilderImp.usingBasePathAndCoraDigestor(basePath, digestor);
+		PathFileSystem pathFileSystem = PathFileSystemImp.usingRealFileSystem();
+		streamPathBuilder = StreamPathBuilderImp
+				.usingBasePathAndCoraDigestorAndPathFileSystem(basePath, digestor, pathFileSystem);
 	}
 
 	public void makeSureBasePathExistsAndIsEmpty() throws IOException {

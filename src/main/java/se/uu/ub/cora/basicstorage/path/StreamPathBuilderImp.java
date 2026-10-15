@@ -18,8 +18,6 @@
  */
 package se.uu.ub.cora.basicstorage.path;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
@@ -34,17 +32,20 @@ import se.uu.ub.cora.storage.hash.CoraDigestor;
 public class StreamPathBuilderImp implements StreamPathBuilder {
 	private static final String STREAMS_DIR = "streams";
 
-	public static StreamPathBuilderImp usingBasePathAndCoraDigestor(String fileSystemBasePath,
-			CoraDigestor digestor) {
-		return new StreamPathBuilderImp(fileSystemBasePath, digestor);
+	public static StreamPathBuilderImp usingBasePathAndCoraDigestorAndPathFileSystem(
+			String fileSystemBasePath, CoraDigestor digestor, PathFileSystem pathFileSystem) {
+		return new StreamPathBuilderImp(fileSystemBasePath, digestor, pathFileSystem);
 	}
 
 	private String fileSystemBasePath;
 	private CoraDigestor digestor;
+	private PathFileSystem pathFileSystem;
 
-	private StreamPathBuilderImp(String fileSystemBasePath, CoraDigestor digestor) {
+	private StreamPathBuilderImp(String fileSystemBasePath, CoraDigestor digestor,
+			PathFileSystem pathFileSystem) {
 		this.fileSystemBasePath = fileSystemBasePath;
 		this.digestor = digestor;
+		this.pathFileSystem = pathFileSystem;
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 	}
 
 	private boolean storageDirectoryDoesNotExist(Path pathByDataDivider) {
-		return !Files.exists(pathByDataDivider);
+		return pathFileSystem.notExists(pathByDataDivider);
 	}
 
 	private void tryToCreateStorageDirectory(Path pathToFolder) {
@@ -113,8 +114,7 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		}
 	}
 
-	private void createPublicFolders(Path basePath, Path pathToFolder, String permissions)
-			throws IOException {
+	private void createPublicFolders(Path basePath, Path pathToFolder, String permissions) {
 		Set<PosixFilePermission> perms = createFilePermissions(permissions);
 		Path currentPath = basePath;
 		for (Path folderNameAsPath : basePath.relativize(pathToFolder)) {
@@ -123,12 +123,11 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		}
 	}
 
-	private void createFolderIfNotExisting(Path current, Set<PosixFilePermission> perms)
-			throws IOException {
-		if (Files.notExists(current)) {
-			Files.createDirectory(current);
+	private void createFolderIfNotExisting(Path current, Set<PosixFilePermission> perms) {
+		if (pathFileSystem.notExists(current)) {
+			pathFileSystem.createDirectory(current);
 		}
-		Files.setPosixFilePermissions(current, perms);
+		pathFileSystem.setPosixFilePermissions(current, perms);
 	}
 
 	private Set<PosixFilePermission> createFilePermissions(String permissions) {
@@ -149,4 +148,7 @@ public class StreamPathBuilderImp implements StreamPathBuilder {
 		return digestor;
 	}
 
+	public PathFileSystem onlyForTestGetPathFileSystem() {
+		return pathFileSystem;
+	}
 }
