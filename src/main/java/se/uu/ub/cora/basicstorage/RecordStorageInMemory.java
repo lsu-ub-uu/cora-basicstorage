@@ -450,10 +450,25 @@ public class RecordStorageInMemory implements RecordStorage {
 			removeLinks(recordType, recordId);
 			storeIndependentRecordByRecordTypeAndRecordId(recordType, recordId, recordGroup,
 					dataDivider);
-			ensureStorageExistsForRecordType(recordType);
+			// ensureStorageExistsForRecordType(recordType);
 			collectedTermsHolder.storeCollectedTerms(recordType, recordId, storageTerms,
 					dataDivider);
 			storeLinks(recordType, recordId, links);
+		}
+	}
+
+	@Override
+	public void updateCollectedData(String type, String id, Set<StorageTerm> storageTerms,
+			Set<Link> links, String dataDivider) {
+		Map<String, DividerGroup> typeMap = records.get(type);
+		if (typeMap == null) {
+			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + type);
+		}
+		synchronized (typeMap) {
+			checkRecordExists(type, id);
+			removeLinks(type, id);
+			collectedTermsHolder.storeCollectedTerms(type, id, storageTerms, dataDivider);
+			storeLinks(type, id, links);
 		}
 	}
 
