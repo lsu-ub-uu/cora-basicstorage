@@ -466,7 +466,6 @@ public class RecordStorageInMemory implements RecordStorage {
 		}
 		synchronized (typeMap) {
 			checkRecordExists(type, id);
-			removeLinks(type, id);
 			collectedTermsHolder.storeCollectedTerms(type, id, storageTerms, dataDivider);
 		}
 	}
