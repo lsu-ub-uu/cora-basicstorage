@@ -459,7 +459,7 @@ public class RecordStorageInMemory implements RecordStorage {
 
 	@Override
 	public void updateCollectedData(String type, String id, Set<StorageTerm> storageTerms,
-			Set<Link> links, String dataDivider) {
+			String dataDivider) {
 		Map<String, DividerGroup> typeMap = records.get(type);
 		if (typeMap == null) {
 			throw RecordNotFoundException.withMessage(NO_RECORD_EXISTS_MESSAGE + type);
@@ -468,7 +468,6 @@ public class RecordStorageInMemory implements RecordStorage {
 			checkRecordExists(type, id);
 			removeLinks(type, id);
 			collectedTermsHolder.storeCollectedTerms(type, id, storageTerms, dataDivider);
-			storeLinks(type, id, links);
 		}
 	}
 

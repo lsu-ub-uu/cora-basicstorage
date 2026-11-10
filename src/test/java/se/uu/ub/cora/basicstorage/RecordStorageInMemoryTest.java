@@ -541,8 +541,7 @@ public class RecordStorageInMemoryTest {
 
 		recordStorage.update("type", "place:0001", dataGroup2, emptyStorageTerms, emptyLinkList,
 				dataDivider);
-		recordStorage.updateCollectedData("type", "place:0001", emptyStorageTerms, emptyLinkList,
-				dataDivider);
+		recordStorage.updateCollectedData("type", "place:0001", emptyStorageTerms, dataDivider);
 
 		DataGroup dataGroupOut2 = recordStorage.read(List.of("type"), "place:0001");
 
@@ -690,8 +689,7 @@ public class RecordStorageInMemoryTest {
 	public void testUpdateCollectedDataNotFoundType() {
 		DataGroup dataGroup = createDataGroupWithRecordInfo();
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
-		recordStorage.updateCollectedData("type", "place:0001", emptyStorageTerms, emptyLinkList,
-				dataDivider);
+		recordStorage.updateCollectedData("type", "place:0001", emptyStorageTerms, dataDivider);
 	}
 
 	@Test(expectedExceptions = RecordNotFoundException.class, expectedExceptionsMessageRegExp = ""
@@ -701,27 +699,7 @@ public class RecordStorageInMemoryTest {
 		dataGroup.addChild(new DataAtomicSpy("childId", "childValue"));
 		recordStorage.create("type", "place:0001", dataGroup, emptyStorageTerms, emptyLinkList,
 				dataDivider);
-		recordStorage.updateCollectedData("type", "place:0002", emptyStorageTerms, emptyLinkList,
-				dataDivider);
-	}
-
-	@Test
-	public void testUpdateCollectedDataGenerateLinksPointToRecordAreRemovedAndAdded() {
-		DataGroup dataGroup = createDataGroupWithRecordInfo();
-		Set<Link> linkList = createLinkListWithTwoLinks();
-
-		recordStorage.create(FROM_RECORD_TYPE, FROM_RECORD_ID, dataGroup, emptyStorageTerms,
-				linkList, dataDivider);
-		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
-		// update
-		recordStorage.updateCollectedData(FROM_RECORD_TYPE, FROM_RECORD_ID, emptyStorageTerms,
-				emptyLinkList, dataDivider);
-		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 0);
-
-		// update
-		recordStorage.updateCollectedData(FROM_RECORD_TYPE, FROM_RECORD_ID, emptyStorageTerms,
-				linkList, dataDivider);
-		assertNoOfLinksPointingToRecord(TO_RECORD_TYPE, TO_RECORD_ID, 1);
+		recordStorage.updateCollectedData("type", "place:0002", emptyStorageTerms, dataDivider);
 	}
 
 	@Test
@@ -737,7 +715,7 @@ public class RecordStorageInMemoryTest {
 		assertEquals(storageTermsFromRecord, emptyStorageTerms);
 
 		recordStorage.updateCollectedData(FROM_RECORD_TYPE, FROM_RECORD_ID, storageTerms,
-				emptyLinkList, dataDivider);
+				dataDivider);
 
 		Set<StorageTerm> storageTermsFromRecord2 = recordStorage
 				.getStorageTermsForRecord(FROM_RECORD_TYPE, FROM_RECORD_ID);
